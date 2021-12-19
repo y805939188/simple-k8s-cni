@@ -1,5 +1,9 @@
 package ipam
 
+/**
+ * ETCDCTL_API=3 etcdctl --endpoints https://192.168.98.143:2379 --cacert /etc/kubernetes/pki/etcd/ca.crt --cert /etc/kubernetes/pki/etcd/healthcheck-client.crt --key /etc/kubernetes/pki/etcd/healthcheck-client.key get / --prefix --keys-only
+ */
+
 import (
 	"errors"
 	"fmt"
@@ -36,6 +40,8 @@ type IpamService struct {
 	EtcdClient *etcd.EtcdClient
 	*operator
 }
+
+var lock sync.Mutex
 
 func getEtcdClient() *etcd.EtcdClient {
 	etcd.Init()
@@ -142,6 +148,7 @@ func isRetainIP(ip string) bool {
 }
 
 func (s *Set) IPs(ips ...string) error {
+	defer lock.Unlock()
 	// 先拿到当前主机对应的网段
 	currentNetwork, err := s.etcdClient.Get(getHostPath())
 	if err != nil {
@@ -264,7 +271,17 @@ func (g *Get) nextUnusedIP() (string, error) {
 	return nextIP, nil
 }
 
+func (g *Get) Gateway() (string, error) {
+	currentNetwork, err := g.etcdClient.Get(getHostPath())
+	if err != nil {
+		return "", err
+	}
+
+	return utils.InetInt2Ip((utils.InetIP2Int(currentNetwork) + 1)), nil
+}
+
 func (g *Get) AllUsedIPs() ([]string, error) {
+	defer lock.Unlock()
 	currentNetwork, err := g.etcdClient.Get(getHostPath())
 	if err != nil {
 		return nil, err
@@ -279,6 +296,7 @@ func (g *Get) AllUsedIPs() ([]string, error) {
 }
 
 func (g *Get) UnusedIP() (string, error) {
+	defer lock.Unlock()
 	for {
 		ip, err := g.nextUnusedIP()
 		if err != nil {
@@ -296,6 +314,7 @@ func (g *Get) UnusedIP() (string, error) {
 }
 
 func (r *Release) IPs(ips ...string) error {
+	defer lock.Unlock()
 	currentNetwork, err := r.etcdClient.Get(getHostPath())
 	if err != nil {
 		return err
@@ -343,16 +362,19 @@ func (r *Release) Pool() error {
 
 func (o *operator) Get() *Get {
 	// o.lock.Lock()
+	lock.Lock()
 	return getGet()
 }
 
 func (o *operator) Set() *Set {
 	// o.lock.Lock()
+	lock.Lock()
 	return getSet()
 }
 
 func (o *operator) Release() *Release {
 	// o.lock.Lock()
+	lock.Lock()
 	return getRelase()
 }
 
@@ -409,12 +431,6 @@ func _GetIpamService(subnet string, mask ...string) func() (*IpamService, error)
 				MaskIP: _maskIP,
 			}
 			_ipam.EtcdClient = getEtcdClient()
-			// // // // ipamClient.Release().Pool()
-			// // _ipam.EtcdClient.Del("//testcni/ipam/192.168.0.0/16/pool", "")
-			// _ipam.EtcdClient.Del("/testcni/ipam/192.168.0.0/16/ding-net-master")
-			// _ipam.EtcdClient.Del("/testcni/ipam/192.168.0.0/16/pool")
-			// // // // _ipam.EtcdClient/
-			// return nil, nil
 			// 初始化一个 ip 网段的 pool
 			// 如果已经初始化过就不再初始化
 			poolPath := getEtcdPathWithPrefix("/" + _ipam.Subnet + "/" + _ipam.Mask + "/" + "pool")
@@ -422,11 +438,7 @@ func _GetIpamService(subnet string, mask ...string) func() (*IpamService, error)
 			if err != nil {
 				return nil, err
 			}
-			// // 初始化一个 host 用来存放 network 的 key
-			// err = _ipam.etcdClient.Set(getHostPath(), "")
-			// if err != nil {
-			// 	return nil, err
-			// }
+
 			// 然后尝试去拿一个当前主机可用的网段
 			// 如果拿不到, 里面会尝试创建一个
 			hostname, err := os.Hostname()
