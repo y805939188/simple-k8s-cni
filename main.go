@@ -2,10 +2,13 @@ package main
 
 import (
 	"fmt"
+
+	"testcni/ipam"
+	// "testcni/etcd"
 	"testcni/utils"
 
 	// "github.com/containernetworking/cni/pkg/skel"
-	"testcni/etcd"
+	// "testcni/etcd"
 	"testcni/skel"
 
 	"github.com/containernetworking/cni/pkg/types"
@@ -77,36 +80,123 @@ func cmdCheck(args *skel.CmdArgs) error {
 }
 
 func main() {
+	// eee, _ := os.Hostname()
+	// fmt.Println("这里的主机名是: ", eee)
 	// PluginMain 里头会 case "ADD" "DEL" 等
 	// PluginMain 的第一步一定是先传过来 VERSION 命令
 	// 在 version.All 中预设了几个 versions
 	// var All = PluginSupports("0.1.0", "0.2.0", "0.3.0", "0.3.1", "0.4.0", "1.0.0")
 	// 在 /etc/cni/net.d 中的 cniVersion 必须要和其中的某一个保持一致
 	// 否则的话 kubelet(containerd) 会一直发 VERSION 指令过来
-	etcd.Init()
-	etcdClient, err := etcd.GetEtcdClient()
 
+	ipam.Init("192.168.0.0", "16")
+	ipamClient, err := ipam.GetIpamService()
 	if err != nil {
-		fmt.Println("etcd 初始化失败: ", err.Error())
+		fmt.Println("ipam 初始化失败: ", err.Error())
+		return
 	}
-
-	if etcdClient != nil {
-		fmt.Println("etcd 的版本是: ", etcdClient.Version)
-	}
-
-	val, err := etcdClient.Get("/ding-test1")
+	// // ipamClient.Release().Pool()
+	// ipamClient.EtcdClient.Set("/192.168.0.0/16", "")
+	// ipamClient.EtcdClient.Set("/192.168.0.0/16/ding-net-master", "")
+	// ipamClient.EtcdClient.Set("/192.168.0.0/16", "")
+	ips, err := ipamClient.Get().AllUsedIPs()
+	// fmt.Println("din1: ", ipamClient.Get)
+	// ip, err := ipamClient.Get().UnusedIP()
 	if err != nil {
-		fmt.Println("etcd 获取失败: ", err.Error())
-	} else {
-		fmt.Println("获取成功: ", val)
+		fmt.Println("获取 ip 失败: ", err.Error())
+		return
+	}
+	fmt.Println(111, ips)
+
+	ip, err := ipamClient.Get().UnusedIP()
+	if err != nil {
+		fmt.Println("获取 ip 失败: ", err.Error())
+		return
 	}
 
-	etcdClient.Set("/ding-test1", "test222222")
-	val, err = etcdClient.Get("/ding-test1")
+	fmt.Println("这里的 next ip 是: ", ip)
+	ipamClient.Set().IPs(ip)
+	ip, err = ipamClient.Get().UnusedIP()
 	if err != nil {
-		fmt.Println("etcd 获取失败2: ", err.Error())
-	} else {
-		fmt.Println("获取成功2: ", val)
+		fmt.Println("获取 ip 失败: ", err.Error())
+		return
 	}
+
+	fmt.Println("这里的 next ip 是: ", ip)
+
+	ips, err = ipamClient.Get().AllUsedIPs()
+	// fmt.Println("din1: ", ipamClient.Get)
+	// ip, err := ipamClient.Get().UnusedIP()
+	if err != nil {
+		fmt.Println("获取 ip 失败: ", err.Error())
+		return
+	}
+	fmt.Println(111, ips)
+
+	// ipamClient.Release().IPs(ips...)
+	// ips, err = ipamClient.Get().AllUsedIPs()
+	// // fmt.Println("din1: ", ipamClient.Get)
+	// // ip, err := ipamClient.Get().UnusedIP()
+	// if err != nil {
+	// 	fmt.Println("获取 ip 失败: ", err.Error())
+	// 	return
+	// }
+	// fmt.Println("这里所有的 ips 是: ", ips)
+
+	// fmt.Println("ip 是: ", ip)
+	// ipamClient.Set().IPs(ip)
+	// ip, err = ipamClient.Get().UnusedIP()
+	// if err != nil {
+	// 	fmt.Println("获取 ip 失败: ", err.Error())
+	// 	return
+	// }
+	// fmt.Println("ip 是: ", ip)
+	// ipamClient.Set().IPs(ip)
+	// ip, err = ipamClient.Get().UnusedIP()
+	// if err != nil {
+	// 	fmt.Println("获取 ip 失败: ", err.Error())
+	// 	return
+	// }
+	// fmt.Println("ip 是: ", ip)
+	// a := utils.InetIP2Int("192.168.99.77")
+	// fmt.Println(999, a)
+	// b := utils.InetInt2Ip(a)
+	// fmt.Println(111, b)
+	// c := utils.InetIP2Int("255.255.0.0")
+	// fmt.Println(666, c)
+	// fmt.Println(5555, utils.InetInt2Ip(a&c))
+
+	// etcd.Init()
+	// etcdClient, err := etcd.GetEtcdClient()
+
+	// if err != nil {
+	// 	fmt.Println("etcd 初始化失败: ", err.Error())
+	// }
+
+	// if etcdClient != nil {
+	// 	fmt.Println("etcd 的版本是: ", etcdClient.Version)
+	// }
+
+	// resp, err := etcdClient.Get("/registry/flowschemas/system-nodes")
+	// fmt.Println("获取到了: ", resp)
+
+	// etcdClient.Set("/ding-test2/1111", "1")
+	// etcdClient.Set("/ding-test2/2222", "1")
+	// etcdClient.Set("/ding-test2/3333", "1")
+
+	// val, err := etcdClient.Get("/ding-test2/2222")
+	// if err != nil {
+	// 	fmt.Println("etcd 获取失败: ", err.Error())
+	// } else {
+	// 	fmt.Println("获取成功: ", val)
+	// }
+
+	// etcdClient.Set("/ding-test1", "test222222")
+	// val, err = etcdClient.Get("/ding-test1")
+	// if err != nil {
+	// 	fmt.Println("etcd 获取失败2: ", err.Error())
+	// } else {
+	// 	fmt.Println("获取成功2: ", val)
+	// }
 	// skel.PluginMain(cmdAdd, cmdCheck, cmdDel, version.All, bv.BuildString("testcni"))
 }

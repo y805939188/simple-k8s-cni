@@ -1,0 +1,37 @@
+{
+  "version": "2.0.0",
+  "type": "shell",
+  "tasks": [
+    {
+      "label": "pre-debug",
+      "command": "dlv",
+      // "args": [
+      //   "--listen=:2345",
+      //   "--headless=true",
+      //   "--api-version=2",
+      //   "exec",
+      //   "/home/dingyubo/go/cni/cnitool/cnitool",
+      //   "add",
+      //   "ding-test",
+      //   "/var/run/netns/ding-test-ns"
+      // ],
+      // "problemMatcher": [
+      //   {
+      //     "pattern": [
+      //       {
+      //         "regexp": ".",
+      //         "file": 1,
+      //         "location": 2,
+      //         "message": 3
+      //       }
+      //     ],
+      //     "background": {
+      //       "activeOnStart": true,
+      //       "beginsPattern": ".*",
+      //       "endsPattern": ".*",
+      //     }
+      //   }
+      // ]
+    }
+  ]
+}
