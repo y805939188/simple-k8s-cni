@@ -1,14 +1,14 @@
 package main
 
 import (
+	"fmt"
 	"testcni/utils"
 
 	// "github.com/containernetworking/cni/pkg/skel"
+	"testcni/etcd"
 	"testcni/skel"
 
 	"github.com/containernetworking/cni/pkg/types"
-	"github.com/containernetworking/cni/pkg/version"
-	bv "github.com/containernetworking/plugins/pkg/utils/buildversion"
 	// "fmt"
 	// "io/ioutil" //io 工具包
 )
@@ -83,5 +83,30 @@ func main() {
 	// var All = PluginSupports("0.1.0", "0.2.0", "0.3.0", "0.3.1", "0.4.0", "1.0.0")
 	// 在 /etc/cni/net.d 中的 cniVersion 必须要和其中的某一个保持一致
 	// 否则的话 kubelet(containerd) 会一直发 VERSION 指令过来
-	skel.PluginMain(cmdAdd, cmdCheck, cmdDel, version.All, bv.BuildString("testcni"))
+	etcd.Init()
+	etcdClient, err := etcd.GetEtcdClient()
+
+	if err != nil {
+		fmt.Println("etcd 初始化失败: ", err.Error())
+	}
+
+	if etcdClient != nil {
+		fmt.Println("etcd 的版本是: ", etcdClient.Version)
+	}
+
+	val, err := etcdClient.Get("/ding-test1")
+	if err != nil {
+		fmt.Println("etcd 获取失败: ", err.Error())
+	} else {
+		fmt.Println("获取成功: ", val)
+	}
+
+	etcdClient.Set("/ding-test1", "test222222")
+	val, err = etcdClient.Get("/ding-test1")
+	if err != nil {
+		fmt.Println("etcd 获取失败2: ", err.Error())
+	} else {
+		fmt.Println("获取成功2: ", val)
+	}
+	// skel.PluginMain(cmdAdd, cmdCheck, cmdDel, version.All, bv.BuildString("testcni"))
 }
