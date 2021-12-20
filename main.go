@@ -10,6 +10,7 @@ import (
 
 	"github.com/containernetworking/cni/pkg/types"
 	"github.com/containernetworking/cni/pkg/version"
+	"github.com/containernetworking/plugins/pkg/ns"
 	bv "github.com/containernetworking/plugins/pkg/utils/buildversion"
 )
 
@@ -104,9 +105,9 @@ func cmdAdd(args *skel.CmdArgs) error {
 	// fmt.Println("创建出来的 bridge mac 是: ", br.Attrs().HardwareAddr.String())
 	utils.WriteLog("创建出来的 bridge 名字是: ", br.Attrs().Name)
 	utils.WriteLog("创建出来的 bridge mac 是: ", br.Attrs().HardwareAddr.String())
-	// // 2. 创建 veth pair
-	// podEthName := args.IfName // pod 内的网卡名字
-	// netns, err := ns.GetNS(args.Netns) // pod 的 net ns
+	// 2. 创建 veth pair
+	podEthName := args.IfName          // pod 内的网卡名字
+	netns, err := ns.GetNS(args.Netns) // pod 的 net ns
 	// if err != nil {
 	// 	return err
 	// }
