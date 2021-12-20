@@ -130,3 +130,6 @@
 进入到了 pluginMain 并且没有 err, cmd 是:  DEL 
 进入到 cmdDel 
 这里的 CmdArgs 是:  ContainerID:  42b9176baac4d61aa243d622f636d1f25a442d4d812bd3e987661f033d4c43cd Netns:  /proc/172599/ns/net IfName:  eth0 Args:  IgnoreUnknown=1;K8S_POD_NAMESPACE=kube-system;K8S_POD_NAME=coredns-64897985d-vq7q7;K8S_POD_INFRA_CONTAINER_ID=42b9176baac4d61aa243d622f636d1f25a442d4d812bd3e987661f033d4c43cd Path:  /opt/cni/bin StdinData:  {"bridge":"testcni0","capabilities":{"test1":true,"test2":false},"cniVersion":"0.3.0","name":"testcni","subnet":"10.244.0.0/16","type":"testcni"} 
+给 veth 添加 podIP 失败, podIP 是:  192.168.1.6/16  err:  no such device 
+启动 veth1 失败, err:  no such device 
+启动 veth1 失败, err:  no such device 

@@ -38,6 +38,7 @@ func WriteLog(log ...string) {
 		logRes += c
 		logRes += " "
 	}
+	fmt.Println(logRes)
 	_, err = write.WriteString(logRes + "\r\n")
 	if err != nil {
 		fmt.Println("失败: ", err.Error())

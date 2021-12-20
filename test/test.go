@@ -3,9 +3,6 @@ package main
 import (
 	"crypto/rand"
 	"fmt"
-	"os"
-
-	"github.com/vishvananda/netlink"
 )
 
 func RandomVethName() (string, error) {
@@ -20,16 +17,16 @@ func RandomVethName() (string, error) {
 	return fmt.Sprintf("veth%x", entropy), nil
 }
 
-func main() {
-	// val, err := RandomVethName()
-	// if err != nil {
-	// 	fmt.Println("错误是: ", err.Error())
-	// }
-	// fmt.Println("这里的值是: ", val)
-	l, err := netlink.LinkByName("ens33")
-	if err != nil && !os.IsExist(err) {
-		fmt.Println("获取 ens33 出错, err: ", err.Error())
-	} else {
-		fmt.Println(l)
-	}
-}
+// func main() {
+// 	// val, err := RandomVethName()
+// 	// if err != nil {
+// 	// 	fmt.Println("错误是: ", err.Error())
+// 	// }
+// 	// fmt.Println("这里的值是: ", val)
+// 	l, err := netlink.LinkByName("ens33")
+// 	if err != nil && !os.IsExist(err) {
+// 		fmt.Println("获取 ens33 出错, err: ", err.Error())
+// 	} else {
+// 		fmt.Println(l)
+// 	}
+// }
