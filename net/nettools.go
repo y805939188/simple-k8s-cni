@@ -9,6 +9,7 @@ import (
 	"testcni/utils"
 
 	"github.com/containernetworking/plugins/pkg/ns"
+	"github.com/coreos/go-iptables/iptables"
 	"github.com/vishvananda/netlink"
 )
 
@@ -190,8 +191,6 @@ func SetDefaultRouteToVeth(gwIP net.IP, veth netlink.Link) error {
 
 // forked from plugins/pkg/ip/route_linux.go
 func AddRoute(ipn *net.IPNet, gw net.IP, dev netlink.Link) error {
-	fmt.Println("这里传进来的 gw 是: ", gw)
-	fmt.Println("这里传进来的 ipn 是: ", ipn)
 	return netlink.RouteAdd(&netlink.Route{
 		LinkIndex: dev.Attrs().Index,
 		Scope:     netlink.SCOPE_UNIVERSE,
@@ -227,4 +226,18 @@ func RandomVethName() (string, error) {
 
 	// NetworkManager (recent versions) will ignore veth devices that start with "veth"
 	return fmt.Sprintf("veth%x", entropy), nil
+}
+
+func SetIptablesForBridgeToForwordAccept(br *netlink.Bridge) error {
+	ipt, err := iptables.NewWithProtocol(iptables.ProtocolIPv4)
+	if err != nil {
+		utils.WriteLog("这里 NewWithProtocol 失败, err: ", err.Error())
+		return err
+	}
+	err = ipt.Append("filter", "FORWARD", "-i", br.Attrs().Name, "-j", "ACCEPT")
+	if err != nil {
+		utils.WriteLog("这里 ipt.Append 失败, err: ", err.Error())
+		return err
+	}
+	return nil
 }

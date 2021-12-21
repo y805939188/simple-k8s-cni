@@ -5,7 +5,8 @@ package main
 import (
 	"fmt"
 	oriNet "net"
-	"testing"
+
+	// "testing"
 
 	"testcni/net"
 
@@ -13,28 +14,28 @@ import (
 	"github.com/vishvananda/netlink"
 )
 
-func TestNettools(t *testing.T) {
-	bridgeName := "testbr0"
-	cidr := "192.168.1.1/16"
-	mtu := 1500
+func TestNettools(brName, cidr, ifName, podIP string, mtu int, netns ns.NetNS) {
+	// brName := "testbr0"
+	// cidr := "192.168.1.1/16"
+	// mtu := 1500
 
 	// 先创建网桥
-	br, err := net.CreateBridge(bridgeName, cidr, mtu)
-	// br, err := CreateBridge(bridgeName, cidr, mtu)
+	br, err := net.CreateBridge(brName, cidr, mtu)
+	// br, err := CreateBridge(brName, cidr, mtu)
 	if err != nil {
 		fmt.Println("创建网卡失败, err: ", err.Error())
 		return
 	}
 
-	// 然后获取 pod 的命名空间
-	netns, err := ns.GetNS("/run/netns/test.net.1")
-	if err != nil {
-		fmt.Println("获取 ns 失败: ", err.Error())
-		return
-	}
+	// // 然后获取 pod 的命名空间
+	// netns, err := ns.GetNS("/run/netns/test.net.1")
+	// if err != nil {
+	// 	fmt.Println("获取 ns 失败: ", err.Error())
+	// 	return
+	// }
 	err = netns.Do(func(hostNs ns.NetNS) error {
-		ifName := "eth0"
-		mtu := 1500
+		// ifName := "eth0"
+		// mtu := 1500
 		// 创建一对儿 veth 设备
 		containerVeth, hostVeth, err := net.CreateVethPair(ifName, mtu)
 		if err != nil {
@@ -50,7 +51,7 @@ func TestNettools(t *testing.T) {
 		}
 
 		// 然后把要被放到 pod 中的塞上 podIP
-		podIP := "192.168.1.6/16"
+		// podIP := "192.168.1.6/16"
 		err = net.SetIpForVeth(containerVeth, podIP)
 		if err != nil {
 			fmt.Println("给 veth 设置 ip 失败, err: ", err.Error())
@@ -100,6 +101,14 @@ func TestNettools(t *testing.T) {
 				return err
 			}
 
+			// 都完事儿之后理论上同一台主机下的俩 netns(pod) 就能通信了
+			// 如果无法通信, 有可能是 iptables 被设置了 forward drop
+			// 需要用 iptables 允许网桥做转发
+			err = net.SetIptablesForBridgeToForwordAccept(br)
+			if err != nil {
+				fmt.Println("set iptables 失败", err.Error())
+			}
+
 			return nil
 		})
 
@@ -109,5 +118,28 @@ func TestNettools(t *testing.T) {
 
 // 写到这里方便使用 dlv 进行断点调试
 func main() {
-	TestNettools(nil)
+	brName := "testbr2"
+	cidr := "10.244.1.1/16"
+	ifName := "eth0"
+	podIP := "10.244.1.2/24"
+	mtu := 1500
+	netns, err := ns.GetNS("/run/netns/test.net.1")
+	if err != nil {
+		fmt.Println("获取 ns 失败: ", err.Error())
+		return
+	}
+
+	TestNettools(brName, cidr, ifName, podIP, mtu, netns)
+
+	brName = "testbr2"
+	cidr = "10.244.1.1/16"
+	ifName = "eth0"
+	podIP = "10.244.1.3/24"
+	mtu = 1500
+	netns, err = ns.GetNS("/run/netns/test.net.2")
+	if err != nil {
+		fmt.Println("获取 ns 失败: ", err.Error())
+		return
+	}
+	TestNettools(brName, cidr, ifName, podIP, mtu, netns)
 }
