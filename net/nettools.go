@@ -115,7 +115,6 @@ func CreateVethPair(ifName string, mtu int) (*netlink.Veth, *netlink.Veth, error
 
 	if err != nil {
 		utils.WriteLog("创建 veth 设备失败, err: ", err.Error())
-		// fmt.Println("创建 veth 设备失败, err: ", err.Error())
 		return nil, nil, err
 	}
 
@@ -126,7 +125,6 @@ func CreateVethPair(ifName string, mtu int) (*netlink.Veth, *netlink.Veth, error
 		// 如果获取失败就尝试删掉
 		netlink.LinkDel(veth1)
 		utils.WriteLog("创建完 veth 但是获取失败, err: ", err.Error())
-		// fmt.Println("创建完 veth 但是获取失败, err: ", err.Error())
 		return nil, nil, err
 	}
 
@@ -137,62 +135,10 @@ func CreateVethPair(ifName string, mtu int) (*netlink.Veth, *netlink.Veth, error
 		// 如果获取失败就尝试删掉
 		netlink.LinkDel(veth2)
 		utils.WriteLog("创建完 veth 但是获取失败, err: ", err.Error())
-		// fmt.Println("创建完 veth 但是获取失败, err: ", err.Error())
 		return nil, nil, err
 	}
 
-	// // 启动 veth 设备
-	// err = netlink.LinkSetUp(veth1)
-	// if err != nil {
-	// 	fmt.Println("启动 veth 1111 失败: ", err.Error())
-	// 	utils.WriteLog("启动 veth1 失败, err: ", err.Error())
-	// 	// fmt.Println("启动 veth1 失败, err: ", err.Error())
-	// 	return nil, nil, err
-	// }
-
-	// err = netlink.LinkSetUp(veth2)
-	// if err != nil {
-	// 	fmt.Println("启动 veth 2222 失败: ", err.Error())
-	// 	utils.WriteLog("启动 veth2 失败, err: ", err.Error())
-	// 	// fmt.Println("启动 veth2 失败, err: ", err.Error())
-	// 	return nil, nil, err
-	// }
-
 	return veth1.(*netlink.Veth), veth2.(*netlink.Veth), nil
-	// // 走到这儿说明创建的 veth 两个 pair 都没问题
-
-	// // 给 veth1 也就是 pod(net ns) 里的设备添加上 podIP
-	// ipaddr, ipnet, err := net.ParseCIDR(podIP)
-	// if err != nil {
-	// 	utils.WriteLog("转换 podIP 为 net 类型失败: ", podIP, " err: ", err.Error())
-	// 	return nil, nil, err
-	// }
-	// ipnet.IP = ipaddr
-	// err = netlink.AddrAdd(veth1, &netlink.Addr{IPNet: ipnet})
-	// if err != nil {
-	// 	utils.WriteLog("给 veth 添加 podIP 失败, podIP 是: ", podIP, " err: ", err.Error())
-	// 	return nil, nil, err
-	// }
-
-	// // 启动 veth 设备
-	// err = netlink.LinkSetUp(veth1)
-	// if err != nil {
-	// 	utils.WriteLog("启动 veth1 失败, err: ", err.Error())
-	// 	return nil, nil, err
-	// }
-
-	// err = netlink.LinkSetUp(veth2)
-	// if err != nil {
-	// 	utils.WriteLog("启动 veth2 失败, err: ", err.Error())
-	// 	return nil, nil, err
-	// }
-
-	// // 把 veth2 干到 br 上, veth1 不用, 因为在创建的时候已经被干到 ns 里头了
-	// if err := netlink.LinkSetMaster(veth2, br); err != nil {
-	// 	return nil, nil, fmt.Errorf("failed to connect %q to bridge %v: %v", hostVeth.Attrs().Name, br.Attrs().Name, err)
-	// }
-
-	// return veth1.(*netlink.Veth), veth2.(*netlink.Veth), nil
 }
 
 func SetIpForVeth(veth *netlink.Veth, podIP string) error {
@@ -236,6 +182,38 @@ func SetVethMaster(veth *netlink.Veth, br *netlink.Bridge) error {
 		return fmt.Errorf("把 veth %q 干到网桥上失败: %v", veth.Attrs().Name, err)
 	}
 	return nil
+}
+
+func SetDefaultRouteToVeth(gwIP net.IP, veth netlink.Link) error {
+	return AddDefaultRoute(gwIP, veth)
+}
+
+// forked from plugins/pkg/ip/route_linux.go
+func AddRoute(ipn *net.IPNet, gw net.IP, dev netlink.Link) error {
+	fmt.Println("这里传进来的 gw 是: ", gw)
+	fmt.Println("这里传进来的 ipn 是: ", ipn)
+	return netlink.RouteAdd(&netlink.Route{
+		LinkIndex: dev.Attrs().Index,
+		Scope:     netlink.SCOPE_UNIVERSE,
+		Dst:       ipn,
+		Gw:        gw,
+	})
+}
+
+// forked from plugins/pkg/ip/route_linux.go
+func AddHostRoute(ipn *net.IPNet, gw net.IP, dev netlink.Link) error {
+	return netlink.RouteAdd(&netlink.Route{
+		LinkIndex: dev.Attrs().Index,
+		Scope:     netlink.SCOPE_HOST,
+		Dst:       ipn,
+		Gw:        gw,
+	})
+}
+
+// forked from plugins/pkg/ip/route_linux.go
+func AddDefaultRoute(gw net.IP, dev netlink.Link) error {
+	_, defNet, _ := net.ParseCIDR("0.0.0.0/0")
+	return AddRoute(defNet, gw, dev)
 }
 
 // forked from /plugins/pkg/ip/link_linux.go

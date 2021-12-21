@@ -133,3 +133,8 @@
 给 veth 添加 podIP 失败, podIP 是:  192.168.1.6/16  err:  no such device 
 启动 veth1 失败, err:  no such device 
 启动 veth1 失败, err:  no such device 
+AddDefaultRoute 时出错, err:  network is unreachable 
+AddDefaultRoute 时出错, err:  network is unreachable 
+AddDefaultRoute 时出错, err:  network is unreachable 
+AddDefaultRoute 时出错, err:  network is unreachable 
+AddDefaultRoute 时出错, err:  network is unreachable 

@@ -4,6 +4,7 @@ package main
 
 import (
 	"fmt"
+	oriNet "net"
 	"testing"
 
 	"testcni/net"
@@ -13,7 +14,6 @@ import (
 )
 
 func TestNettools(t *testing.T) {
-
 	bridgeName := "testbr0"
 	cidr := "192.168.1.1/16"
 	mtu := 1500
@@ -64,6 +64,20 @@ func TestNettools(t *testing.T) {
 			return err
 		}
 
+		// 启动之后给这个 netns 设置默认路由 以便让其他网段的包也能从 veth 走到网桥
+		// TODO: 实测后发现还必须得写在这里, 如果写在下面 hostNs.Do 里头会报错目标 network 不可达(why?)
+		gwip := cidr
+		gwNetIP, _, err := oriNet.ParseCIDR(gwip)
+		if err != nil {
+			fmt.Println("转换 gwip 失败, err:", err.Error())
+			return err
+		}
+		err = net.SetDefaultRouteToVeth(gwNetIP, containerVeth)
+		if err != nil {
+			fmt.Println("SetDefaultRouteToVeth 时出错, err: ", err.Error())
+			return err
+		}
+
 		hostNs.Do(func(_ ns.NetNS) error {
 			// 重新获取一次 host 上的 veth, 因为 hostVeth 发生了改变
 			_hostVeth, err := netlink.LinkByName(hostVeth.Attrs().Name)
@@ -93,7 +107,7 @@ func TestNettools(t *testing.T) {
 	})
 }
 
-// // 写到这里方便使用 dlv 进行断点调试
-// func main() {
-// 	TestNettools(nil)
-// }
+// 写到这里方便使用 dlv 进行断点调试
+func main() {
+	TestNettools(nil)
+}
