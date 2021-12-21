@@ -117,8 +117,10 @@ func TestNettools(brName, cidr, ifName, podIP string, mtu int, netns ns.NetNS) {
 }
 
 // 写到这里方便使用 dlv 进行断点调试
+// 在 mac 本地通过 vscode 的 remote 功能时
+// 没法直接打断点, 必须得先开个 dlv
 func main() {
-	brName := "testbr2"
+	brName := "testbr0"
 	cidr := "10.244.1.1/16"
 	ifName := "eth0"
 	podIP := "10.244.1.2/24"
@@ -131,9 +133,7 @@ func main() {
 
 	TestNettools(brName, cidr, ifName, podIP, mtu, netns)
 
-	brName = "testbr2"
-	cidr = "10.244.1.1/16"
-	ifName = "eth0"
+	brName = "testbr0"
 	podIP = "10.244.1.3/24"
 	mtu = 1500
 	netns, err = ns.GetNS("/run/netns/test.net.2")
@@ -142,4 +142,15 @@ func main() {
 		return
 	}
 	TestNettools(brName, cidr, ifName, podIP, mtu, netns)
+
+	// 目前同一台主机上的 pod 可以 ping 通了
+	// 接下来要让不同节点上的 pod 互相通信了
+	/**
+	 * 手动操作
+	 * 	1. 主机上添加路由规则: ip route add 10.244.2.0/24 via 192.168.98.144 dev ens33
+	 *  2. 对方主机也添加
+	 *  3. 将双方主机上的网卡添加进网桥: brctl addif testbr0 ens33
+	 * 以上手动操作可成功
+	 * TODO: 接下来要给它转化成代码
+	 */
 }
