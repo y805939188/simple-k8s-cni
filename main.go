@@ -2,7 +2,7 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
+	// "fmt"
 	"testcni/ipam"
 	"testcni/net"
 	"testcni/skel"
@@ -10,7 +10,8 @@ import (
 
 	"github.com/containernetworking/cni/pkg/types"
 	"github.com/containernetworking/cni/pkg/version"
-	"github.com/containernetworking/plugins/pkg/ns"
+
+	// "github.com/containernetworking/plugins/pkg/ns"
 	bv "github.com/containernetworking/plugins/pkg/utils/buildversion"
 )
 
@@ -105,9 +106,9 @@ func cmdAdd(args *skel.CmdArgs) error {
 	// fmt.Println("创建出来的 bridge mac 是: ", br.Attrs().HardwareAddr.String())
 	utils.WriteLog("创建出来的 bridge 名字是: ", br.Attrs().Name)
 	utils.WriteLog("创建出来的 bridge mac 是: ", br.Attrs().HardwareAddr.String())
-	// 2. 创建 veth pair
-	podEthName := args.IfName          // pod 内的网卡名字
-	netns, err := ns.GetNS(args.Netns) // pod 的 net ns
+	// // 2. 创建 veth pair
+	// podEthName := args.IfName          // pod 内的网卡名字
+	// netns, err := ns.GetNS(args.Netns) // pod 的 net ns
 	// if err != nil {
 	// 	return err
 	// }
@@ -133,29 +134,29 @@ func cmdDel(args *skel.CmdArgs) error {
 
 func _test_clear_etcd() {
 	// ipam.Init("192.168.0.0", "16")
-	ipam.Init("10.244.0.0", "16")
-	is, err := ipam.GetIpamService()
-	if err != nil {
-		fmt.Println("ipam 初始化失败: ", err.Error())
-		return
-	}
-	err = is.EtcdClient.Del("/testcni/ipam/10.244.0.0/16/ding-net-master")
-	if err != nil {
-		fmt.Println("删除 /testcni/ipam/10.244.0.0/16/ding-net-master 失败: ", err.Error())
-		return
-	}
+	// ipam.Init("10.244.0.0", "16")
+	// is, err := ipam.GetIpamService()
+	// if err != nil {
+	// 	fmt.Println("ipam 初始化失败: ", err.Error())
+	// 	return
+	// }
+	// err = is.EtcdClient.Del("/testcni/ipam/10.244.0.0/16/ding-net-master")
+	// if err != nil {
+	// 	fmt.Println("删除 /testcni/ipam/10.244.0.0/16/ding-net-master 失败: ", err.Error())
+	// 	return
+	// }
 
-	err = is.EtcdClient.Del("/testcni/ipam/10.244.0.0/16/pool")
-	if err != nil {
-		fmt.Println("删除 /testcni/ipam/10.244.0.0/16/pool 失败: ", err.Error())
-		return
-	}
+	// err = is.EtcdClient.Del("/testcni/ipam/10.244.0.0/16/pool")
+	// if err != nil {
+	// 	fmt.Println("删除 /testcni/ipam/10.244.0.0/16/pool 失败: ", err.Error())
+	// 	return
+	// }
 
-	err = is.EtcdClient.Del("/testcni/ipam/testcni/ipam/10.244.0.0/16/ding-net-master/10.244.0.0")
-	if err != nil {
-		fmt.Println("删除 /testcni/ipam/testcni/ipam/10.244.0.0/16/ding-net-master/10.244.0.0 失败: ", err.Error())
-		return
-	}
+	// err = is.EtcdClient.Del("/testcni/ipam/testcni/ipam/10.244.0.0/16/ding-net-master/10.244.0.0")
+	// if err != nil {
+	// 	fmt.Println("删除 /testcni/ipam/testcni/ipam/10.244.0.0/16/ding-net-master/10.244.0.0 失败: ", err.Error())
+	// 	return
+	// }
 
 	// err = is.EtcdClient.Del("/testcni/ipam/192.168.0.0/16/ding-net-master")
 	// if err != nil {
@@ -197,8 +198,17 @@ func cmdCheck(args *skel.CmdArgs) error {
 }
 
 func main() {
-	_test_clear_etcd()
-	return
+	// _test_clear_etcd()
+	// return
+
+	// ipam.Init("10.244.0.0/16")
+	// ipamClient, err := ipam.GetIpamService()
+	// if err != nil {
+	// 	utils.WriteLog("创建 ipam 客户端出错, err: ", err.Error())
+	// 	return
+	// }
+	// fmt.Println("这里的 mask 是: ", ipamClient.MaskIP)
+	// return
 
 	// eee, _ := os.Hostname()
 	// fmt.Println("这里的主机名是: ", eee)

@@ -145,8 +145,8 @@ func (c *EtcdClient) Del(key string) error {
 	return err
 }
 
-func (c *EtcdClient) Get(key string) (string, error) {
-	resp, err := c.client.Get(context.TODO(), key)
+func (c *EtcdClient) Get(key string, opts ...etcd.OpOption) (string, error) {
+	resp, err := c.client.Get(context.TODO(), key, opts...)
 	if err != nil {
 		return "", err
 	}
@@ -160,4 +160,55 @@ func (c *EtcdClient) Get(key string) (string, error) {
 		return string(resp.Kvs[len(resp.Kvs)-1:][0].Value), nil
 	}
 	return "", nil
+}
+
+func (c *EtcdClient) GetKey(key string, opts ...etcd.OpOption) (string, error) {
+	resp, err := c.client.Get(context.TODO(), key, opts...)
+	if err != nil {
+		return "", err
+	}
+
+	// for _, ev := range resp.Kvs {
+	// 	fmt.Println("这里的 ev 是: ", ev)
+	// 	fmt.Printf("%s : %s\n", ev.Key, ev.Value)
+	// }
+
+	if len(resp.Kvs) > 0 {
+		return string(resp.Kvs[len(resp.Kvs)-1:][0].Key), nil
+	}
+	return "", nil
+}
+
+func (c *EtcdClient) GetAll(key string, opts ...etcd.OpOption) ([]string, error) {
+	resp, err := c.client.Get(context.TODO(), key, opts...)
+	if err != nil {
+		return nil, err
+	}
+
+	var res []string
+
+	for _, ev := range resp.Kvs {
+		// fmt.Println("这里的 ev 是: ", ev)
+		// fmt.Printf("%s : %s\n", ev.Key, ev.Value)
+		res = append(res, string(ev.Value))
+	}
+
+	return res, nil
+}
+
+func (c *EtcdClient) GetAllKey(key string, opts ...etcd.OpOption) ([]string, error) {
+	resp, err := c.client.Get(context.TODO(), key, opts...)
+	if err != nil {
+		return nil, err
+	}
+
+	var res []string
+
+	for _, ev := range resp.Kvs {
+		// fmt.Println("这里的 ev 是: ", ev)
+		// fmt.Printf("%s : %s\n", ev.Key, ev.Value)
+		res = append(res, string(ev.Key))
+	}
+
+	return res, nil
 }

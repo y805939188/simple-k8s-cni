@@ -12,6 +12,10 @@ import (
 
 	"github.com/containernetworking/plugins/pkg/ns"
 	"github.com/vishvananda/netlink"
+
+	// "k8s.io/client-go/1.5/rest"
+	// "k8s.io/client-go/1.4/rest"
+	"k8s.io/client-go/rest"
 )
 
 func TestNettools(brName, cidr, ifName, podIP string, mtu int, netns ns.NetNS) {
@@ -120,28 +124,58 @@ func TestNettools(brName, cidr, ifName, podIP string, mtu int, netns ns.NetNS) {
 // 在 mac 本地通过 vscode 的 remote 功能时
 // 没法直接打断点, 必须得先开个 dlv
 func main() {
-	brName := "testbr0"
-	cidr := "10.244.1.1/16"
-	ifName := "eth0"
-	podIP := "10.244.1.2/24"
-	mtu := 1500
-	netns, err := ns.GetNS("/run/netns/test.net.1")
+	// brName := "testbr0"
+	// cidr := "10.244.1.1/16"
+	// ifName := "eth0"
+	// podIP := "10.244.1.2/24"
+	// mtu := 1500
+	// netns, err := ns.GetNS("/run/netns/test.net.1")
+	// if err != nil {
+	// 	fmt.Println("获取 ns 失败: ", err.Error())
+	// 	return
+	// }
+
+	// rest.InClusterConfig()
+
+	// TestNettools(brName, cidr, ifName, podIP, mtu, netns)
+
+	config, err := rest.InClusterConfig()
 	if err != nil {
-		fmt.Println("获取 ns 失败: ", err.Error())
+		fmt.Println("链接集群出错: ", err.Error())
 		return
 	}
+	fmt.Println("获取集群 config 成功: ", config)
 
-	TestNettools(brName, cidr, ifName, podIP, mtu, netns)
+	// list, _ := netlink.LinkList()
+	// // fmt.Println("这里的 list 是: ", list)
+	// for _, device := range list {
+	// 	// fmt.Println("这里的类型是: ", device.Type())
+	// 	if device.Type() == "device" {
+	// 		// fmt.Println("这里的玩意儿是: ", device.Attrs().Index)
+	// 		dev, err := netlink.LinkByIndex(device.Attrs().Index)
+	// 		if err != nil {
+	// 			fmt.Println("获取出错: ", err.Error())
+	// 			continue
+	// 		}
+	// 		// fmt.Println("这里的设备是: ", dev.(*netlink.Device).Attrs())
+	// 	}
+	// }
 
-	brName = "testbr0"
-	podIP = "10.244.1.3/24"
-	mtu = 1500
-	netns, err = ns.GetNS("/run/netns/test.net.2")
-	if err != nil {
-		fmt.Println("获取 ns 失败: ", err.Error())
-		return
-	}
-	TestNettools(brName, cidr, ifName, podIP, mtu, netns)
+	// otherHostCIDR := "10.244.2.0/24"
+	// otherHostIP := "192.168.98.144"
+	// dstIpNet:=oriNet.ParseIP()
+
+	// net.AddHostRoute()
+
+	// brName = "testbr0"
+	// podIP = "10.244.1.3/24"
+	// mtu = 1500
+	// netns, err = ns.GetNS("/run/netns/test.net.2")
+	// if err != nil {
+	// 	fmt.Println("获取 ns 失败: ", err.Error())
+	// 	return
+	// }
+	// TestNettools(brName, cidr, ifName, podIP, mtu, netns)
 
 	// 目前同一台主机上的 pod 可以 ping 通了
 	// 接下来要让不同节点上的 pod 互相通信了
@@ -153,4 +187,5 @@ func main() {
 	 * 以上手动操作可成功
 	 * TODO: 接下来要给它转化成代码
 	 */
+
 }

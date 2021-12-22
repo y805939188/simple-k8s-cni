@@ -12,6 +12,9 @@ import (
 	"sync"
 	"testcni/etcd"
 	"testcni/utils"
+
+	"github.com/dlclark/regexp2"
+	oriEtcd "go.etcd.io/etcd/client/v3"
 )
 
 const (
@@ -29,7 +32,6 @@ type operators struct {
 }
 
 type operator struct {
-	lock sync.Mutex
 	*operators
 }
 
@@ -42,6 +44,10 @@ type IpamService struct {
 }
 
 var lock sync.Mutex
+
+func unlock() {
+	lock.Unlock()
+}
 
 func getEtcdClient() *etcd.EtcdClient {
 	etcd.Init()
@@ -84,6 +90,10 @@ func getIPsPoolPath(subnet, mask string) string {
 	return getEtcdPathWithPrefix("/" + subnet + "/" + mask + "/" + "pool")
 }
 
+// func getClusterInfoPath() string {
+// 	return getEtcdPathWithPrefix("/cluster-info")
+// }
+
 var getSet = func() func() *Set {
 	var _set *Set
 	return func() *Set {
@@ -120,14 +130,14 @@ var getRelase = func() func() *Release {
 	}
 }()
 
-func unlock() error {
-	svc, err := GetIpamService()
-	if err != nil {
-		return err
-	}
-	svc.lock.Unlock()
-	return nil
-}
+// func unlock() error {
+// 	svc, err := GetIpamService()
+// 	if err != nil {
+// 		return err
+// 	}
+// 	svc.lock.Unlock()
+// 	return nil
+// }
 
 func isGatewayIP(ip string) bool {
 	// 把每个网段的 x.x.x.1 当做网关
@@ -148,7 +158,7 @@ func isRetainIP(ip string) bool {
 }
 
 func (s *Set) IPs(ips ...string) error {
-	defer lock.Unlock()
+	defer unlock()
 	// 先拿到当前主机对应的网段
 	currentNetwork, err := s.etcdClient.Get(getHostPath())
 	if err != nil {
@@ -156,6 +166,9 @@ func (s *Set) IPs(ips ...string) error {
 	}
 	// 拿到当前主机的网段下所有已经使用的 ip
 	allUsedIPs, err := s.etcdClient.Get(getRecordPath(currentNetwork))
+	if err != nil {
+		return err
+	}
 	_allUsedIPsArr := strings.Split(allUsedIPs, ";")
 	_tempIPs := allUsedIPs
 	for _, ip := range ips {
@@ -247,7 +260,63 @@ func (is *IpamService) _IPsPoolInit(poolPath string) error {
 	return is.EtcdClient.Set(poolPath, _tempIpStr)
 }
 
+func (g *Get) NodeNames() ([]string, error) {
+	defer unlock()
+	const _minionsNodePrefix = "/registry/minions/"
+
+	nodes, err := g.etcdClient.GetAllKey(_minionsNodePrefix, oriEtcd.WithKeysOnly(), oriEtcd.WithPrefix())
+
+	if err != nil {
+		utils.WriteLog("这里从 etcd 获取全部 nodes key 失败, err: ", err.Error())
+		return nil, err
+	}
+
+	var res []string
+	for _, node := range nodes {
+		node = strings.Replace(node, _minionsNodePrefix, "", 1)
+		res = append(res, node)
+	}
+	return res, nil
+}
+
+// func (is *IpamService) _RegisterSelf() error {
+// 	val, err := is.EtcdClient.Get(getClusterInfoPath())
+// 	return nil
+// }
+
+func (g *Get) NodeIp(hostName string) (string, error) {
+	defer unlock()
+	const _minionsNodePrefix = "/registry/minions/"
+	val, err := g.etcdClient.Get(_minionsNodePrefix + hostName)
+
+	if err != nil {
+		utils.WriteLog("获取集群节点 ip 失败, err: ", err.Error())
+		return "", err
+	}
+
+	r, err := regexp2.Compile(`(?<=InternalIP).*(?=\*)`, 0)
+
+	if err != nil {
+		utils.WriteLog("初始化正则表达式失败, err: ", err.Error())
+		return "", nil
+	}
+
+	ip, err := r.FindStringMatch(val)
+	if err != nil {
+		utils.WriteLog("正则匹配 ip 失败, err: ", err.Error())
+		return "", nil
+	}
+
+	_ip := ip.String()
+	if len(_ip) > 0 {
+		return _ip, nil
+	}
+
+	return "", fmt.Errorf("没有找到 ip")
+}
+
 func (g *Get) nextUnusedIP() (string, error) {
+	defer unlock()
 	currentNetwork, err := g.etcdClient.Get(getHostPath())
 	if err != nil {
 		return "", err
@@ -272,6 +341,7 @@ func (g *Get) nextUnusedIP() (string, error) {
 }
 
 func (g *Get) Gateway() (string, error) {
+	defer unlock()
 	currentNetwork, err := g.etcdClient.Get(getHostPath())
 	if err != nil {
 		return "", err
@@ -281,7 +351,7 @@ func (g *Get) Gateway() (string, error) {
 }
 
 func (g *Get) AllUsedIPs() ([]string, error) {
-	defer lock.Unlock()
+	defer unlock()
 	currentNetwork, err := g.etcdClient.Get(getHostPath())
 	if err != nil {
 		return nil, err
@@ -296,7 +366,7 @@ func (g *Get) AllUsedIPs() ([]string, error) {
 }
 
 func (g *Get) UnusedIP() (string, error) {
-	defer lock.Unlock()
+	defer unlock()
 	for {
 		ip, err := g.nextUnusedIP()
 		if err != nil {
@@ -314,7 +384,7 @@ func (g *Get) UnusedIP() (string, error) {
 }
 
 func (r *Release) IPs(ips ...string) error {
-	defer lock.Unlock()
+	defer unlock()
 	currentNetwork, err := r.etcdClient.Get(getHostPath())
 	if err != nil {
 		return err
@@ -347,6 +417,7 @@ func (r *Release) IPs(ips ...string) error {
 }
 
 func (r *Release) Pool() error {
+	defer unlock()
 	currentNetwork, err := r.etcdClient.Get(getIPsPoolPath(getIpamSubnet(), getIpamMask()))
 	if err != nil {
 		return err
