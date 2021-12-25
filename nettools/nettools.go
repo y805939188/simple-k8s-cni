@@ -292,3 +292,99 @@ func SetIptablesForBridgeToForwordAccept(br *netlink.Bridge) error {
 	}
 	return nil
 }
+
+func CreateBridgeAndCreateVethAndSetNetworkDeviceStatusAndSetVethMaster(
+	brName, gw, ifName, podIP string, mtu int, netns ns.NetNS,
+) error {
+	// 先创建网桥
+	br, err := CreateBridge(brName, gw, mtu)
+	if err != nil {
+		utils.WriteLog("创建网卡失败, err: ", err.Error())
+		return err
+	}
+
+	err = netns.Do(func(hostNs ns.NetNS) error {
+		// 创建一对儿 veth 设备
+		containerVeth, hostVeth, err := CreateVethPair(ifName, mtu)
+		if err != nil {
+			utils.WriteLog("创建 veth 失败, err: ", err.Error())
+			return err
+		}
+
+		// 把随机起名的 veth 那头放在主机上
+		err = SetVethNsFd(hostVeth, hostNs)
+		if err != nil {
+			utils.WriteLog("把 veth 设置到 ns 下失败: ", err.Error())
+			return err
+		}
+
+		// 然后把要被放到 pod 中的那头 veth 塞上 podIP
+		err = SetIpForVeth(containerVeth, podIP)
+		if err != nil {
+			utils.WriteLog("给 veth 设置 ip 失败, err: ", err.Error())
+			return err
+		}
+
+		// 然后启动它
+		err = SetUpVeth(containerVeth)
+		if err != nil {
+			utils.WriteLog("启动 veth pair 失败, err: ", err.Error())
+			return err
+		}
+
+		// 启动之后给这个 netns 设置默认路由 以便让其他网段的包也能从 veth 走到网桥
+		// TODO: 实测后发现还必须得写在这里, 如果写在下面 hostNs.Do 里头会报错目标 network 不可达(why?)
+		gwNetIP, _, err := net.ParseCIDR(gw)
+		if err != nil {
+			utils.WriteLog("转换 gwip 失败, err:", err.Error())
+			return err
+		}
+
+		// 给 pod(net ns) 中加一个默认路由规则, 该规则让匹配了 0.0.0.0 的都走上边创建的那个 container veth
+		err = SetDefaultRouteToVeth(gwNetIP, containerVeth)
+		if err != nil {
+			utils.WriteLog("SetDefaultRouteToVeth 时出错, err: ", err.Error())
+			return err
+		}
+
+		hostNs.Do(func(_ ns.NetNS) error {
+			// 重新获取一次 host 上的 veth, 因为 hostVeth 发生了改变
+			_hostVeth, err := netlink.LinkByName(hostVeth.Attrs().Name)
+			hostVeth = _hostVeth.(*netlink.Veth)
+			if err != nil {
+				utils.WriteLog("重新获取 hostVeth 失败, err: ", err.Error())
+				return err
+			}
+			// 启动它
+			err = SetUpVeth(hostVeth)
+			if err != nil {
+				utils.WriteLog("启动 veth pair 失败, err: ", err.Error())
+				return err
+			}
+
+			// 把它塞到网桥上
+			err = SetVethMaster(hostVeth, br)
+			if err != nil {
+				utils.WriteLog("挂载 veth 到网桥失败, err: ", err.Error())
+				return err
+			}
+
+			// 都完事儿之后理论上同一台主机下的俩 netns(pod) 就能通信了
+			// 如果无法通信, 有可能是 iptables 被设置了 forward drop
+			// 需要用 iptables 允许网桥做转发
+			err = SetIptablesForBridgeToForwordAccept(br)
+			if err != nil {
+				return err
+			}
+
+			return nil
+		})
+
+		return nil
+	})
+
+	if err != nil {
+		return err
+	}
+	return nil
+}

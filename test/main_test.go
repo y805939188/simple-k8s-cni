@@ -2,7 +2,6 @@ package test
 
 import (
 	"fmt"
-	net "net"
 
 	"testing"
 
@@ -13,9 +12,6 @@ import (
 	"github.com/containernetworking/cni/pkg/types"
 	"github.com/containernetworking/plugins/pkg/ns"
 	"github.com/vishvananda/netlink"
-	// "github.com/containernetworking/cni/pkg/version"
-	// "github.com/containernetworking/plugins/pkg/ns"
-	// bv "github.com/containernetworking/plugins/pkg/utils/buildversion"
 )
 
 type PluginConf struct {
@@ -38,100 +34,6 @@ type PluginConf struct {
 	// 这里可以自由定义自己的 plugin 中配置了的参数然后自由处理
 	Bridge string `json:"bridge"`
 	Subnet string `json:"subnet"`
-}
-
-func _nettools(brName, gw, ifName, podIP string, mtu int, netns ns.NetNS) error {
-	// 先创建网桥
-	br, err := nettools.CreateBridge(brName, gw, mtu)
-	if err != nil {
-		fmt.Println("创建网卡失败, err: ", err.Error())
-		return err
-	}
-
-	err = netns.Do(func(hostNs ns.NetNS) error {
-		// 创建一对儿 veth 设备
-		containerVeth, hostVeth, err := nettools.CreateVethPair(ifName, mtu)
-		if err != nil {
-			fmt.Println("创建 veth 失败, err: ", err.Error())
-			return err
-		}
-
-		// 放一个到主机上
-		err = nettools.SetVethNsFd(hostVeth, hostNs)
-		if err != nil {
-			fmt.Println("把 veth 设置到 ns 下失败: ", err.Error())
-			return err
-		}
-
-		// 然后把要被放到 pod 中的塞上 podIP
-		err = nettools.SetIpForVeth(containerVeth, podIP)
-		if err != nil {
-			fmt.Println("给 veth 设置 ip 失败, err: ", err.Error())
-			return err
-		}
-
-		// 然后启动它
-		err = nettools.SetUpVeth(containerVeth)
-		if err != nil {
-			fmt.Println("启动 veth pair 失败, err: ", err.Error())
-			return err
-		}
-
-		// 启动之后给这个 netns 设置默认路由 以便让其他网段的包也能从 veth 走到网桥
-		// TODO: 实测后发现还必须得写在这里, 如果写在下面 hostNs.Do 里头会报错目标 network 不可达(why?)
-		fmt.Println("这里的 gw 是: ", gw)
-		gwNetIP, _, err := net.ParseCIDR(gw)
-		if err != nil {
-			fmt.Println("转换 gwip 失败, err:", err.Error())
-			return err
-		}
-		err = nettools.SetDefaultRouteToVeth(gwNetIP, containerVeth)
-		if err != nil {
-			fmt.Println("SetDefaultRouteToVeth 时出错, err: ", err.Error())
-			return err
-		}
-
-		hostNs.Do(func(_ ns.NetNS) error {
-			// 重新获取一次 host 上的 veth, 因为 hostVeth 发生了改变
-			_hostVeth, err := netlink.LinkByName(hostVeth.Attrs().Name)
-			hostVeth = _hostVeth.(*netlink.Veth)
-			if err != nil {
-				fmt.Println("重新获取 hostVeth 失败, err: ", err.Error())
-				return err
-			}
-			// 启动它
-			err = nettools.SetUpVeth(hostVeth)
-			if err != nil {
-				fmt.Println("启动 veth pair 失败, err: ", err.Error())
-				return err
-			}
-
-			// 把它塞到网桥上
-			err = nettools.SetVethMaster(hostVeth, br)
-			if err != nil {
-				fmt.Println("挂载 veth 到网桥失败, err: ", err.Error())
-				return err
-			}
-
-			// 都完事儿之后理论上同一台主机下的俩 netns(pod) 就能通信了
-			// 如果无法通信, 有可能是 iptables 被设置了 forward drop
-			// 需要用 iptables 允许网桥做转发
-			err = nettools.SetIptablesForBridgeToForwordAccept(br)
-			if err != nil {
-				fmt.Println("set iptables 失败", err.Error())
-			}
-
-			return nil
-		})
-
-		return nil
-	})
-
-	if err != nil {
-		fmt.Println("这里的 err 是: ", err.Error())
-		return err
-	}
-	return nil
 }
 
 func TestMain(t *testing.T) {
@@ -236,7 +138,7 @@ func TestMain(t *testing.T) {
 	 *		7. 设置主机的 iptables, 让所有来自 bridgeName 的流量都能做 forward(因为 docker 可能会自己设置 iptables 不让转发的规则)
 	 */
 
-	err = _nettools(bridgeName, gatewayWithMaskSegment, ifName, podIP, mtu, netns)
+	err = nettools.CreateBridgeAndCreateVethAndSetNetworkDeviceStatusAndSetVethMaster(bridgeName, gatewayWithMaskSegment, ifName, podIP, mtu, netns)
 	if err != nil {
 		fmt.Println("执行创建网桥, 创建 veth 设备, 添加默认路由等操作失败, err: ", err.Error())
 		err = ipamClient.Release().IPs(podIP)
