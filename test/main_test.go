@@ -2,6 +2,7 @@ package test
 
 import (
 	"fmt"
+	"net"
 
 	"testing"
 
@@ -10,6 +11,7 @@ import (
 	"testcni/nettools"
 
 	"github.com/containernetworking/cni/pkg/types"
+	current "github.com/containernetworking/cni/pkg/types/100"
 	"github.com/containernetworking/plugins/pkg/ns"
 	"github.com/vishvananda/netlink"
 )
@@ -39,21 +41,6 @@ type PluginConf struct {
 func TestMain(t *testing.T) {
 	// 测试代码执行后, 可通过执行 ./clear.sh testcni0 来清掉测试的操作,
 	// 不过注意不同节点上要把对应的其他节点 ip 改咯
-
-	// // netlink.RouteListFiltered(netlink.FAMILY_V4, )
-	// dev, _ := netlink.LinkByName("ens33")
-	// list, _ := netlink.RouteList(dev, netlink.FAMILY_V4)
-	// fmt.Println("这里的 list 是: ", list)
-	// // e := list[0].Dst
-	// for _, l := range list {
-	// 	fmt.Println("Dst: ", l.Dst)
-	// 	fmt.Println("Src: ", l.Src)
-	// 	fmt.Println("Gw: ", l.Gw.String())
-	// 	fmt.Println("net: ", "192.168.98.0/24")
-	// 	fmt.Println("-------------")
-	// }
-
-	// return
 
 	type TestArgs struct {
 		ContainerID string
@@ -179,7 +166,6 @@ func TestMain(t *testing.T) {
 	 *  2. 其他每台集群中的主机也添加
 	 *  3. 将双方主机上的网卡添加进网桥: brctl addif testcni0 ens33(网卡名根据不同主机而异)
 	 * 以上手动操作可成功
-	 * TODO: 接下来要给它转化成代码
 	 */
 
 	// 首先通过 ipam 获取到 etcd 中存放的集群中所有节点的相关网络信息
@@ -223,5 +209,21 @@ func TestMain(t *testing.T) {
 	}
 
 	fmt.Println("搞定!!!")
+	_gw := net.ParseIP(gateway)
 
+	_, _podIP, _ := net.ParseCIDR(podIP)
+
+	result := &current.Result{
+		CNIVersion: pluginConfig.CNIVersion,
+		IPs: []*current.IPConfig{
+			{
+				// Version: "IPv4",
+				Address: *_podIP,
+				Gateway: _gw,
+			},
+		},
+	}
+	types.PrintResult(result, pluginConfig.CNIVersion)
+
+	return
 }
