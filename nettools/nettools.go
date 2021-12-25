@@ -187,6 +187,24 @@ func SetVethMaster(veth *netlink.Veth, br *netlink.Bridge) error {
 }
 
 func SetDeviceMaster(device *netlink.Device, br *netlink.Bridge) error {
+
+	if device == nil {
+		return nil
+	}
+
+	if br == nil {
+		return nil
+	}
+
+	deviceMaster := device.Attrs().MasterIndex
+
+	brIndex := br.Index
+
+	if deviceMaster == brIndex {
+		fmt.Println("已经将网卡添加过网桥中, 无需添加")
+		return nil
+	}
+
 	err := netlink.LinkSetMaster(device, br)
 	if err != nil {
 		return fmt.Errorf("把 veth %q 干到网桥上失败: %v", device.Attrs().Name, err)
@@ -201,6 +219,8 @@ func SetDefaultRouteToVeth(gwIP net.IP, veth netlink.Link) error {
 func SetOtherHostRouteToCurrentHost(networks []*ipam.Network, currentNetwork *ipam.Network) error {
 
 	link, err := netlink.LinkByName(currentNetwork.Name)
+
+	list, _ := netlink.RouteList(link, netlink.FAMILY_V4)
 
 	if err != nil {
 		return err
@@ -217,6 +237,19 @@ func SetOtherHostRouteToCurrentHost(networks []*ipam.Network, currentNetwork *ip
 			_, cidr, err := net.ParseCIDR(network.CIDR)
 			if err != nil {
 				return err
+			}
+
+			isSkip := false
+			for _, l := range list {
+				if l.Dst != nil && l.Dst.String() == network.CIDR {
+					isSkip = true
+					break
+				}
+			}
+
+			if isSkip {
+				fmt.Println(network.CIDR, " 已存在路由表中, 直接跳过")
+				continue
 			}
 
 			ip := net.ParseIP(network.IP)

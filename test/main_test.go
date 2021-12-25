@@ -40,6 +40,21 @@ func TestMain(t *testing.T) {
 	// 测试代码执行后, 可通过执行 ./clear.sh testcni0 来清掉测试的操作,
 	// 不过注意不同节点上要把对应的其他节点 ip 改咯
 
+	// // netlink.RouteListFiltered(netlink.FAMILY_V4, )
+	// dev, _ := netlink.LinkByName("ens33")
+	// list, _ := netlink.RouteList(dev, netlink.FAMILY_V4)
+	// fmt.Println("这里的 list 是: ", list)
+	// // e := list[0].Dst
+	// for _, l := range list {
+	// 	fmt.Println("Dst: ", l.Dst)
+	// 	fmt.Println("Src: ", l.Src)
+	// 	fmt.Println("Gw: ", l.Gw.String())
+	// 	fmt.Println("net: ", "192.168.98.0/24")
+	// 	fmt.Println("-------------")
+	// }
+
+	// return
+
 	type TestArgs struct {
 		ContainerID string
 		Netns       string

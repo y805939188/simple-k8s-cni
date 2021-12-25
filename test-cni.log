@@ -142,3 +142,9 @@ AddDefaultRoute 时出错, err:  network is unreachable
 转换 podIP 为 net 类型失败:  10.244.0.2  err:  invalid CIDR address: 10.244.0.2 
 转换 podIP 为 net 类型失败:  10.244.0.2  err:  invalid CIDR address: 10.244.0.2 
 转换 podIP 为 net 类型失败:  10.244.0.2  err:  invalid CIDR address: 10.244.0.2 
+创建 veth 设备失败, err:  file exists 
+创建 veth 失败, err:  file exists 
+创建 veth 设备失败, err:  file exists 
+创建 veth 失败, err:  file exists 
+创建 veth 设备失败, err:  file exists 
+创建 veth 失败, err:  file exists 
