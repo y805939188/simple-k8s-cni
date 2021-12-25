@@ -26,9 +26,9 @@ import (
 	"os"
 	"strings"
 
-	"github.com/containernetworking/cni/pkg/types"
-	"github.com/containernetworking/cni/pkg/utils"
-	"github.com/containernetworking/cni/pkg/version"
+	"testcni/types"
+	"testcni/utils"
+	"testcni/version"
 
 	testutils "testcni/utils"
 )

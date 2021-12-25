@@ -10,8 +10,9 @@ import (
 	"testcni/ipam"
 	"testcni/nettools"
 
-	"github.com/containernetworking/cni/pkg/types"
-	current "github.com/containernetworking/cni/pkg/types/100"
+	"testcni/types"
+	current "testcni/types/100"
+
 	"github.com/containernetworking/plugins/pkg/ns"
 	"github.com/vishvananda/netlink"
 )
