@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	// "fmt"
 	"testcni/ipam"
-	"testcni/net"
+	"testcni/nettools"
 	"testcni/skel"
 	"testcni/utils"
 
@@ -57,7 +57,6 @@ func cmdAdd(args *skel.CmdArgs) error {
 	// utils.WriteLog("这里的结果是: pluginConfig.Name", pluginConfig.Name)
 	// utils.WriteLog("这里的结果是: pluginConfig.Subnet", pluginConfig.Subnet)
 	// utils.WriteLog("这里的结果是: pluginConfig.Type", pluginConfig.Type)
-	// return errors.New("test cmdAdd")
 
 	// 使用 kubelet(containerd) 传过来的 subnet 地址初始化 ipam
 	ipam.Init(pluginConfig.Subnet)
@@ -94,8 +93,8 @@ func cmdAdd(args *skel.CmdArgs) error {
 	mtu := 1500 // 1460
 
 	// br, err := net.CreateBridge(bridgeName,  gateway, mtu)
-	cidr := gateway + "/" + ipamClient.Mask
-	br, err := net.CreateBridge(bridgeName, cidr, mtu)
+	cidr := gateway + "/" + ipamClient.MaskSegment
+	br, err := nettools.CreateBridge(bridgeName, cidr, mtu)
 	if err != nil {
 		utils.WriteLog("创建网卡失败, err: ", err.Error())
 		return err

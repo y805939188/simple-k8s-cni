@@ -1,4 +1,4 @@
-package net
+package nettools
 
 import (
 	"crypto/rand"
@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net"
 	"os"
+	"testcni/ipam"
 	"testcni/utils"
 
 	"github.com/containernetworking/plugins/pkg/ns"
@@ -185,8 +186,49 @@ func SetVethMaster(veth *netlink.Veth, br *netlink.Bridge) error {
 	return nil
 }
 
+func SetDeviceMaster(device *netlink.Device, br *netlink.Bridge) error {
+	err := netlink.LinkSetMaster(device, br)
+	if err != nil {
+		return fmt.Errorf("把 veth %q 干到网桥上失败: %v", device.Attrs().Name, err)
+	}
+	return nil
+}
+
 func SetDefaultRouteToVeth(gwIP net.IP, veth netlink.Link) error {
 	return AddDefaultRoute(gwIP, veth)
+}
+
+func SetOtherHostRouteToCurrentHost(networks []*ipam.Network, currentNetwork *ipam.Network) error {
+
+	link, err := netlink.LinkByName(currentNetwork.Name)
+
+	if err != nil {
+		return err
+	}
+
+	for _, network := range networks {
+		if !network.IsCurrentHost {
+			// 对于其他主机, 需要获取到其他主机的对外网卡 ip, 以及它的 pods 们所占用的网段的 cidr
+			// 然后用这个 cidr 和这个 ip 做一个路由表的映射
+			if link == nil {
+				return err
+			}
+
+			_, cidr, err := net.ParseCIDR(network.CIDR)
+			if err != nil {
+				return err
+			}
+
+			ip := net.ParseIP(network.IP)
+
+			err = AddHostRoute(cidr, ip, link)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
 }
 
 // forked from plugins/pkg/ip/route_linux.go
@@ -203,9 +245,18 @@ func AddRoute(ipn *net.IPNet, gw net.IP, dev netlink.Link) error {
 func AddHostRoute(ipn *net.IPNet, gw net.IP, dev netlink.Link) error {
 	return netlink.RouteAdd(&netlink.Route{
 		LinkIndex: dev.Attrs().Index,
+		// Scope:     netlink.SCOPE_HOST,
+		Dst: ipn,
+		Gw:  gw,
+	})
+}
+
+func AddHostRouteWithVia(ipn *net.IPNet, via *netlink.Via, dev netlink.Link) error {
+	return netlink.RouteAdd(&netlink.Route{
+		LinkIndex: dev.Attrs().Index,
 		Scope:     netlink.SCOPE_HOST,
 		Dst:       ipn,
-		Gw:        gw,
+		Via:       via,
 	})
 }
 

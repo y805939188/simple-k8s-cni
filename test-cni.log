@@ -138,3 +138,7 @@ AddDefaultRoute 时出错, err:  network is unreachable
 AddDefaultRoute 时出错, err:  network is unreachable 
 AddDefaultRoute 时出错, err:  network is unreachable 
 AddDefaultRoute 时出错, err:  network is unreachable 
+转换 podIP 为 net 类型失败:  10.244.0.2  err:  invalid CIDR address: 10.244.0.2 
+转换 podIP 为 net 类型失败:  10.244.0.2  err:  invalid CIDR address: 10.244.0.2 
+转换 podIP 为 net 类型失败:  10.244.0.2  err:  invalid CIDR address: 10.244.0.2 
+转换 podIP 为 net 类型失败:  10.244.0.2  err:  invalid CIDR address: 10.244.0.2 
