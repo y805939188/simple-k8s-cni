@@ -164,7 +164,7 @@ func TestMain(t *testing.T) {
 	 * 可以尝试先手动操作
 	 * 	1. 主机上添加路由规则: ip route add 10.244.x.0/24 via 192.168.98.x dev ens33, 也就是把非本机的节点的网段和其他 node 的 ip 做个映射
 	 *  2. 其他每台集群中的主机也添加
-	 *  3. 将双方主机上的网卡添加进网桥: brctl addif testcni0 ens33(网卡名根据不同主机而异)
+	 *  3. 把每台主机上的对外网卡都用 iptables 设置为可 ip forward
 	 * 以上手动操作可成功
 	 */
 

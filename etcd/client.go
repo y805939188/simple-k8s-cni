@@ -86,7 +86,7 @@ func _GetEtcdClient() func() (*EtcdClient, error) {
 		} else {
 			// ETCDCTL_API=3 etcdctl --endpoints https://192.168.98.143:2379:2379 --cacert /etc/kubernetes/pki/etcd/ca.crt --cert /etc/kubernetes/pki/etcd/healthcheck-client.crt --key /etc/kubernetes/pki/etcd/healthcheck-client.key get / --prefix --keys-only
 
-			// fmt.Println("正在创建 etcd 客户端......")
+			// TODO: 这里暂时把 etcd 的地址写死了
 			client, err := newEtcdClient(&EtcdConfig{
 				EtcdEndpoints:  "https://192.168.98.143:2379",
 				EtcdCertFile:   "/etc/kubernetes/pki/etcd/healthcheck-client.crt",
