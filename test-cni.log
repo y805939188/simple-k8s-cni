@@ -1,150 +1,120 @@
-进入到了 pluginMain 并且没有 err, cmd 是:  DEL 
-进入到 cmdDel 
-这里的 CmdArgs 是:  ContainerID:  30226eb5c94ec805ecd37382c41bbac0b9ba92a8fb771c421cac856660dc6e7b Netns:   IfName:  eth0 Args:  IgnoreUnknown=1;K8S_POD_NAMESPACE=kube-system;K8S_POD_NAME=coredns-64897985d-wjwxv;K8S_POD_INFRA_CONTAINER_ID=30226eb5c94ec805ecd37382c41bbac0b9ba92a8fb771c421cac856660dc6e7b Path:  /opt/cni/bin StdinData:  {"bridge":"testcni0","capabilities":{"test1":true,"test2":false},"cniVersion":"0.3.0","name":"testcni","subnet":"10.244.0.0/16","type":"testcni"} 
-进入到了 pluginMain 并且没有 err, cmd 是:  ADD 
-进入到 cmdAdd 
-这里的 CmdArgs 是:  ContainerID:  70affedb5aa000ddbbbbefa7352dfa0f5866e931b295961c9b6ba804d2d66e98 Netns:  /proc/171655/ns/net IfName:  eth0 Args:  IgnoreUnknown=1;K8S_POD_NAMESPACE=kube-system;K8S_POD_NAME=coredns-64897985d-wjwxv;K8S_POD_INFRA_CONTAINER_ID=70affedb5aa000ddbbbbefa7352dfa0f5866e931b295961c9b6ba804d2d66e98 Path:  /opt/cni/bin StdinData:  {"bridge":"testcni0","capabilities":{"test1":true,"test2":false},"cniVersion":"0.3.0","name":"testcni","subnet":"10.244.0.0/16","type":"testcni"} 
-这里获取到的 podIP 是:  10.244.0.2 
-这里获取到的 gateway 是:  10.244.0.1 
-创建出来的 bridge 名字是:  testcni0 
-创建出来的 bridge mac 是:  6a:35:89:51:2b:43 
-进入到了 pluginMain 并且没有 err, cmd 是:  DEL 
-进入到 cmdDel 
-这里的 CmdArgs 是:  ContainerID:  70affedb5aa000ddbbbbefa7352dfa0f5866e931b295961c9b6ba804d2d66e98 Netns:  /proc/171655/ns/net IfName:  eth0 Args:  IgnoreUnknown=1;K8S_POD_NAMESPACE=kube-system;K8S_POD_NAME=coredns-64897985d-wjwxv;K8S_POD_INFRA_CONTAINER_ID=70affedb5aa000ddbbbbefa7352dfa0f5866e931b295961c9b6ba804d2d66e98 Path:  /opt/cni/bin StdinData:  {"bridge":"testcni0","capabilities":{"test1":true,"test2":false},"cniVersion":"0.3.0","name":"testcni","subnet":"10.244.0.0/16","type":"testcni"} 
-进入到了 pluginMain 并且没有 err, cmd 是:  DEL 
-进入到 cmdDel 
-这里的 CmdArgs 是:  ContainerID:  70affedb5aa000ddbbbbefa7352dfa0f5866e931b295961c9b6ba804d2d66e98 Netns:   IfName:  eth0 Args:  IgnoreUnknown=1;K8S_POD_NAMESPACE=kube-system;K8S_POD_NAME=coredns-64897985d-wjwxv;K8S_POD_INFRA_CONTAINER_ID=70affedb5aa000ddbbbbefa7352dfa0f5866e931b295961c9b6ba804d2d66e98 Path:  /opt/cni/bin StdinData:  {"bridge":"testcni0","capabilities":{"test1":true,"test2":false},"cniVersion":"0.3.0","name":"testcni","subnet":"10.244.0.0/16","type":"testcni"} 
-进入到了 pluginMain 并且没有 err, cmd 是:  ADD 
-进入到 cmdAdd 
-这里的 CmdArgs 是:  ContainerID:  09d8082397d626d978ac2d65322af229c540779373cd5630adf5f47c71c9877b Netns:  /proc/171804/ns/net IfName:  eth0 Args:  IgnoreUnknown=1;K8S_POD_NAMESPACE=kube-system;K8S_POD_NAME=coredns-64897985d-wjwxv;K8S_POD_INFRA_CONTAINER_ID=09d8082397d626d978ac2d65322af229c540779373cd5630adf5f47c71c9877b Path:  /opt/cni/bin StdinData:  {"bridge":"testcni0","capabilities":{"test1":true,"test2":false},"cniVersion":"0.3.0","name":"testcni","subnet":"10.244.0.0/16","type":"testcni"} 
-这里获取到的 podIP 是:  10.244.0.2 
-这里获取到的 gateway 是:  10.244.0.1 
-创建出来的 bridge 名字是:  testcni0 
-创建出来的 bridge mac 是:  6a:35:89:51:2b:43 
-进入到了 pluginMain 并且没有 err, cmd 是:  DEL 
-进入到 cmdDel 
-这里的 CmdArgs 是:  ContainerID:  09d8082397d626d978ac2d65322af229c540779373cd5630adf5f47c71c9877b Netns:  /proc/171804/ns/net IfName:  eth0 Args:  IgnoreUnknown=1;K8S_POD_NAMESPACE=kube-system;K8S_POD_NAME=coredns-64897985d-wjwxv;K8S_POD_INFRA_CONTAINER_ID=09d8082397d626d978ac2d65322af229c540779373cd5630adf5f47c71c9877b Path:  /opt/cni/bin StdinData:  {"bridge":"testcni0","capabilities":{"test1":true,"test2":false},"cniVersion":"0.3.0","name":"testcni","subnet":"10.244.0.0/16","type":"testcni"} 
-进入到了 pluginMain 并且没有 err, cmd 是:  DEL 
-进入到 cmdDel 
-这里的 CmdArgs 是:  ContainerID:  09d8082397d626d978ac2d65322af229c540779373cd5630adf5f47c71c9877b Netns:   IfName:  eth0 Args:  IgnoreUnknown=1;K8S_POD_NAMESPACE=kube-system;K8S_POD_NAME=coredns-64897985d-wjwxv;K8S_POD_INFRA_CONTAINER_ID=09d8082397d626d978ac2d65322af229c540779373cd5630adf5f47c71c9877b Path:  /opt/cni/bin StdinData:  {"bridge":"testcni0","capabilities":{"test1":true,"test2":false},"cniVersion":"0.3.0","name":"testcni","subnet":"10.244.0.0/16","type":"testcni"} 
+进入到了 pluginMain 并且没有 err, cmd 是:  VERSION 
+进入到了 pluginMain 并且没有 err, cmd 是:  VERSION 
+进入到了 pluginMain 并且没有 err, cmd 是:  VERSION 
+进入到了 pluginMain 并且没有 err, cmd 是:  VERSION 
+进入到了 pluginMain 并且没有 err, cmd 是:  VERSION 
+进入到了 pluginMain 并且没有 err, cmd 是:  VERSION 
+进入到了 pluginMain 并且没有 err, cmd 是:  VERSION 
+进入到了 pluginMain 并且没有 err, cmd 是:  VERSION 
+进入到了 pluginMain 并且没有 err, cmd 是:  VERSION 
+进入到了 pluginMain 并且没有 err, cmd 是:  VERSION 
+进入到了 pluginMain 并且没有 err, cmd 是:  VERSION 
+进入到了 pluginMain 并且没有 err, cmd 是:  VERSION 
+进入到了 pluginMain 并且没有 err, cmd 是:  VERSION 
+进入到了 pluginMain 并且没有 err, cmd 是:  VERSION 
+进入到了 pluginMain 并且没有 err, cmd 是:  VERSION 
+进入到了 pluginMain 并且没有 err, cmd 是:  VERSION 
+进入到了 pluginMain 并且没有 err, cmd 是:  VERSION 
 进入到了 pluginMain 并且没有 err, cmd 是:  VERSION 
 进入到了 pluginMain 并且没有 err, cmd 是:  ADD 
 进入到 cmdAdd 
-这里的 CmdArgs 是:  ContainerID:  ea1e6b04c1abaea5784554cf710b6e5a42ae0f2385085b99e96c0df69db8253e Netns:  /proc/171914/ns/net IfName:  eth0 Args:  IgnoreUnknown=1;K8S_POD_NAMESPACE=kube-system;K8S_POD_NAME=coredns-64897985d-wjwxv;K8S_POD_INFRA_CONTAINER_ID=ea1e6b04c1abaea5784554cf710b6e5a42ae0f2385085b99e96c0df69db8253e Path:  /opt/cni/bin StdinData:  {"bridge":"testcni0","capabilities":{"test1":true,"test2":false},"cniVersion":"0.3.0","name":"testcni","subnet":"10.244.0.0/16","type":"testcni"} 
-这里获取到的 podIP 是:  10.244.0.2 
-这里获取到的 gateway 是:  10.244.0.1 
-创建出来的 bridge 名字是:  testcni0 
-创建出来的 bridge mac 是:  6a:35:89:51:2b:43 
+这里的 CmdArgs 是:  ContainerID:  b624d684d12a7a82276ac598501f9d900c02e6c2802390a3bc00a289612d78a0 Netns:  /proc/23027/ns/net IfName:  eth0 Args:  IgnoreUnknown=1;K8S_POD_NAMESPACE=default;K8S_POD_NAME=busybox-9b595fddc-v4pkt;K8S_POD_INFRA_CONTAINER_ID=b624d684d12a7a82276ac598501f9d900c02e6c2802390a3bc00a289612d78a0 Path:  /opt/cni/bin StdinData:  {"bridge":"testcni0","cniVersion":"0.3.0","name":"testcni","subnet":"10.244.0.0/16","type":"testcni"} 
+进入到了 pluginMain 并且没有 err, cmd 是:  VERSION 
+进入到了 pluginMain 并且没有 err, cmd 是:  VERSION 
+进入到了 pluginMain 并且没有 err, cmd 是:  VERSION 
+进入到了 pluginMain 并且没有 err, cmd 是:  VERSION 
+进入到了 pluginMain 并且没有 err, cmd 是:  VERSION 
+进入到了 pluginMain 并且没有 err, cmd 是:  VERSION 
+进入到了 pluginMain 并且没有 err, cmd 是:  VERSION 
+进入到了 pluginMain 并且没有 err, cmd 是:  VERSION 
+进入到了 pluginMain 并且没有 err, cmd 是:  VERSION 
+进入到了 pluginMain 并且没有 err, cmd 是:  VERSION 
 进入到了 pluginMain 并且没有 err, cmd 是:  DEL 
 进入到 cmdDel 
-这里的 CmdArgs 是:  ContainerID:  ea1e6b04c1abaea5784554cf710b6e5a42ae0f2385085b99e96c0df69db8253e Netns:  /proc/171914/ns/net IfName:  eth0 Args:  IgnoreUnknown=1;K8S_POD_NAMESPACE=kube-system;K8S_POD_NAME=coredns-64897985d-wjwxv;K8S_POD_INFRA_CONTAINER_ID=ea1e6b04c1abaea5784554cf710b6e5a42ae0f2385085b99e96c0df69db8253e Path:  /opt/cni/bin StdinData:  {"bridge":"testcni0","capabilities":{"test1":true,"test2":false},"cniVersion":"0.3.0","name":"testcni","subnet":"10.244.0.0/16","type":"testcni"} 
-进入到了 pluginMain 并且没有 err, cmd 是:  DEL 
-进入到 cmdDel 
-这里的 CmdArgs 是:  ContainerID:  ea1e6b04c1abaea5784554cf710b6e5a42ae0f2385085b99e96c0df69db8253e Netns:   IfName:  eth0 Args:  IgnoreUnknown=1;K8S_POD_NAMESPACE=kube-system;K8S_POD_NAME=coredns-64897985d-wjwxv;K8S_POD_INFRA_CONTAINER_ID=ea1e6b04c1abaea5784554cf710b6e5a42ae0f2385085b99e96c0df69db8253e Path:  /opt/cni/bin StdinData:  {"bridge":"testcni0","capabilities":{"test1":true,"test2":false},"cniVersion":"0.3.0","name":"testcni","subnet":"10.244.0.0/16","type":"testcni"} 
-进入到了 pluginMain 并且没有 err, cmd 是:  ADD 
-进入到 cmdAdd 
-这里的 CmdArgs 是:  ContainerID:  1d7121c2ccdefeab7ef93274f7b8f76ece37475ca8ecf426eb39de56a03af0ea Netns:  /proc/172020/ns/net IfName:  eth0 Args:  IgnoreUnknown=1;K8S_POD_NAMESPACE=kube-system;K8S_POD_NAME=coredns-64897985d-wjwxv;K8S_POD_INFRA_CONTAINER_ID=1d7121c2ccdefeab7ef93274f7b8f76ece37475ca8ecf426eb39de56a03af0ea Path:  /opt/cni/bin StdinData:  {"bridge":"testcni0","capabilities":{"test1":true,"test2":false},"cniVersion":"0.3.0","name":"testcni","subnet":"10.244.0.0/16","type":"testcni"} 
-这里获取到的 podIP 是:  10.244.0.2 
-这里获取到的 gateway 是:  10.244.0.1 
-创建出来的 bridge 名字是:  testcni0 
-创建出来的 bridge mac 是:  6a:35:89:51:2b:43 
-进入到了 pluginMain 并且没有 err, cmd 是:  DEL 
-进入到 cmdDel 
-这里的 CmdArgs 是:  ContainerID:  1d7121c2ccdefeab7ef93274f7b8f76ece37475ca8ecf426eb39de56a03af0ea Netns:  /proc/172020/ns/net IfName:  eth0 Args:  IgnoreUnknown=1;K8S_POD_NAMESPACE=kube-system;K8S_POD_NAME=coredns-64897985d-wjwxv;K8S_POD_INFRA_CONTAINER_ID=1d7121c2ccdefeab7ef93274f7b8f76ece37475ca8ecf426eb39de56a03af0ea Path:  /opt/cni/bin StdinData:  {"bridge":"testcni0","capabilities":{"test1":true,"test2":false},"cniVersion":"0.3.0","name":"testcni","subnet":"10.244.0.0/16","type":"testcni"} 
-进入到了 pluginMain 并且没有 err, cmd 是:  DEL 
-进入到 cmdDel 
-这里的 CmdArgs 是:  ContainerID:  1d7121c2ccdefeab7ef93274f7b8f76ece37475ca8ecf426eb39de56a03af0ea Netns:   IfName:  eth0 Args:  IgnoreUnknown=1;K8S_POD_NAMESPACE=kube-system;K8S_POD_NAME=coredns-64897985d-wjwxv;K8S_POD_INFRA_CONTAINER_ID=1d7121c2ccdefeab7ef93274f7b8f76ece37475ca8ecf426eb39de56a03af0ea Path:  /opt/cni/bin StdinData:  {"bridge":"testcni0","capabilities":{"test1":true,"test2":false},"cniVersion":"0.3.0","name":"testcni","subnet":"10.244.0.0/16","type":"testcni"} 
-进入到了 pluginMain 并且没有 err, cmd 是:  ADD 
-进入到 cmdAdd 
-这里的 CmdArgs 是:  ContainerID:  3c53081090ff28bb7cbdd6926938734291d2a37e79c9a490ef6a8aba79e19656 Netns:  /proc/172127/ns/net IfName:  eth0 Args:  IgnoreUnknown=1;K8S_POD_NAMESPACE=kube-system;K8S_POD_NAME=coredns-64897985d-wjwxv;K8S_POD_INFRA_CONTAINER_ID=3c53081090ff28bb7cbdd6926938734291d2a37e79c9a490ef6a8aba79e19656 Path:  /opt/cni/bin StdinData:  {"bridge":"testcni0","capabilities":{"test1":true,"test2":false},"cniVersion":"0.3.0","name":"testcni","subnet":"10.244.0.0/16","type":"testcni"} 
-这里获取到的 podIP 是:  10.244.0.2 
-这里获取到的 gateway 是:  10.244.0.1 
-创建出来的 bridge 名字是:  testcni0 
-创建出来的 bridge mac 是:  6a:35:89:51:2b:43 
-进入到了 pluginMain 并且没有 err, cmd 是:  DEL 
-进入到 cmdDel 
-这里的 CmdArgs 是:  ContainerID:  3c53081090ff28bb7cbdd6926938734291d2a37e79c9a490ef6a8aba79e19656 Netns:  /proc/172127/ns/net IfName:  eth0 Args:  IgnoreUnknown=1;K8S_POD_NAMESPACE=kube-system;K8S_POD_NAME=coredns-64897985d-wjwxv;K8S_POD_INFRA_CONTAINER_ID=3c53081090ff28bb7cbdd6926938734291d2a37e79c9a490ef6a8aba79e19656 Path:  /opt/cni/bin StdinData:  {"bridge":"testcni0","capabilities":{"test1":true,"test2":false},"cniVersion":"0.3.0","name":"testcni","subnet":"10.244.0.0/16","type":"testcni"} 
-进入到了 pluginMain 并且没有 err, cmd 是:  DEL 
-进入到 cmdDel 
-这里的 CmdArgs 是:  ContainerID:  3c53081090ff28bb7cbdd6926938734291d2a37e79c9a490ef6a8aba79e19656 Netns:   IfName:  eth0 Args:  IgnoreUnknown=1;K8S_POD_NAMESPACE=kube-system;K8S_POD_NAME=coredns-64897985d-wjwxv;K8S_POD_INFRA_CONTAINER_ID=3c53081090ff28bb7cbdd6926938734291d2a37e79c9a490ef6a8aba79e19656 Path:  /opt/cni/bin StdinData:  {"bridge":"testcni0","capabilities":{"test1":true,"test2":false},"cniVersion":"0.3.0","name":"testcni","subnet":"10.244.0.0/16","type":"testcni"} 
-进入到了 pluginMain 并且没有 err, cmd 是:  ADD 
-进入到 cmdAdd 
-这里的 CmdArgs 是:  ContainerID:  80dbeb7af84c623e0c1c9723d64abb92640360deead4f0232f61aa68a30fb336 Netns:  /proc/172233/ns/net IfName:  eth0 Args:  IgnoreUnknown=1;K8S_POD_NAMESPACE=kube-system;K8S_POD_NAME=coredns-64897985d-wjwxv;K8S_POD_INFRA_CONTAINER_ID=80dbeb7af84c623e0c1c9723d64abb92640360deead4f0232f61aa68a30fb336 Path:  /opt/cni/bin StdinData:  {"bridge":"testcni0","capabilities":{"test1":true,"test2":false},"cniVersion":"0.3.0","name":"testcni","subnet":"10.244.0.0/16","type":"testcni"} 
-这里获取到的 podIP 是:  10.244.0.2 
-这里获取到的 gateway 是:  10.244.0.1 
-创建出来的 bridge 名字是:  testcni0 
-创建出来的 bridge mac 是:  6a:35:89:51:2b:43 
-进入到了 pluginMain 并且没有 err, cmd 是:  DEL 
-进入到 cmdDel 
-这里的 CmdArgs 是:  ContainerID:  80dbeb7af84c623e0c1c9723d64abb92640360deead4f0232f61aa68a30fb336 Netns:  /proc/172233/ns/net IfName:  eth0 Args:  IgnoreUnknown=1;K8S_POD_NAMESPACE=kube-system;K8S_POD_NAME=coredns-64897985d-wjwxv;K8S_POD_INFRA_CONTAINER_ID=80dbeb7af84c623e0c1c9723d64abb92640360deead4f0232f61aa68a30fb336 Path:  /opt/cni/bin StdinData:  {"bridge":"testcni0","capabilities":{"test1":true,"test2":false},"cniVersion":"0.3.0","name":"testcni","subnet":"10.244.0.0/16","type":"testcni"} 
-进入到了 pluginMain 并且没有 err, cmd 是:  DEL 
-进入到 cmdDel 
-这里的 CmdArgs 是:  ContainerID:  80dbeb7af84c623e0c1c9723d64abb92640360deead4f0232f61aa68a30fb336 Netns:   IfName:  eth0 Args:  IgnoreUnknown=1;K8S_POD_NAMESPACE=kube-system;K8S_POD_NAME=coredns-64897985d-wjwxv;K8S_POD_INFRA_CONTAINER_ID=80dbeb7af84c623e0c1c9723d64abb92640360deead4f0232f61aa68a30fb336 Path:  /opt/cni/bin StdinData:  {"bridge":"testcni0","capabilities":{"test1":true,"test2":false},"cniVersion":"0.3.0","name":"testcni","subnet":"10.244.0.0/16","type":"testcni"} 
-进入到了 pluginMain 并且没有 err, cmd 是:  ADD 
-进入到 cmdAdd 
-这里的 CmdArgs 是:  ContainerID:  84459f8526950186b320433cba87af4bcbf3430b54f6a4b8836ca9b98d0a21c2 Netns:  /proc/172340/ns/net IfName:  eth0 Args:  IgnoreUnknown=1;K8S_POD_NAMESPACE=kube-system;K8S_POD_NAME=coredns-64897985d-wjwxv;K8S_POD_INFRA_CONTAINER_ID=84459f8526950186b320433cba87af4bcbf3430b54f6a4b8836ca9b98d0a21c2 Path:  /opt/cni/bin StdinData:  {"bridge":"testcni0","capabilities":{"test1":true,"test2":false},"cniVersion":"0.3.0","name":"testcni","subnet":"10.244.0.0/16","type":"testcni"} 
-这里获取到的 podIP 是:  10.244.0.2 
-这里获取到的 gateway 是:  10.244.0.1 
-创建出来的 bridge 名字是:  testcni0 
-创建出来的 bridge mac 是:  6a:35:89:51:2b:43 
-进入到了 pluginMain 并且没有 err, cmd 是:  DEL 
-进入到 cmdDel 
-这里的 CmdArgs 是:  ContainerID:  84459f8526950186b320433cba87af4bcbf3430b54f6a4b8836ca9b98d0a21c2 Netns:  /proc/172340/ns/net IfName:  eth0 Args:  IgnoreUnknown=1;K8S_POD_NAMESPACE=kube-system;K8S_POD_NAME=coredns-64897985d-wjwxv;K8S_POD_INFRA_CONTAINER_ID=84459f8526950186b320433cba87af4bcbf3430b54f6a4b8836ca9b98d0a21c2 Path:  /opt/cni/bin StdinData:  {"bridge":"testcni0","capabilities":{"test1":true,"test2":false},"cniVersion":"0.3.0","name":"testcni","subnet":"10.244.0.0/16","type":"testcni"} 
-进入到了 pluginMain 并且没有 err, cmd 是:  DEL 
-进入到 cmdDel 
-这里的 CmdArgs 是:  ContainerID:  8307539a025e7a95a86172283a86cd6c3521a9c0adb09114921ec2553317a57a Netns:   IfName:  eth0 Args:  IgnoreUnknown=1;K8S_POD_NAMESPACE=kube-system;K8S_POD_NAME=coredns-64897985d-vq7q7;K8S_POD_INFRA_CONTAINER_ID=8307539a025e7a95a86172283a86cd6c3521a9c0adb09114921ec2553317a57a Path:  /opt/cni/bin StdinData:  {"bridge":"testcni0","capabilities":{"test1":true,"test2":false},"cniVersion":"0.3.0","name":"testcni","subnet":"10.244.0.0/16","type":"testcni"} 
-进入到了 pluginMain 并且没有 err, cmd 是:  ADD 
-进入到 cmdAdd 
-这里的 CmdArgs 是:  ContainerID:  b694fb57b43cfb6e99c64bc741e85df2c91cd2415bb82b73414421cc7f872119 Netns:  /proc/172443/ns/net IfName:  eth0 Args:  IgnoreUnknown=1;K8S_POD_NAMESPACE=kube-system;K8S_POD_NAME=coredns-64897985d-vq7q7;K8S_POD_INFRA_CONTAINER_ID=b694fb57b43cfb6e99c64bc741e85df2c91cd2415bb82b73414421cc7f872119 Path:  /opt/cni/bin StdinData:  {"bridge":"testcni0","capabilities":{"test1":true,"test2":false},"cniVersion":"0.3.0","name":"testcni","subnet":"10.244.0.0/16","type":"testcni"} 
-这里获取到的 podIP 是:  10.244.0.2 
-这里获取到的 gateway 是:  10.244.0.1 
-创建出来的 bridge 名字是:  testcni0 
-创建出来的 bridge mac 是:  6a:35:89:51:2b:43 
-进入到了 pluginMain 并且没有 err, cmd 是:  DEL 
-进入到 cmdDel 
-这里的 CmdArgs 是:  ContainerID:  b694fb57b43cfb6e99c64bc741e85df2c91cd2415bb82b73414421cc7f872119 Netns:  /proc/172443/ns/net IfName:  eth0 Args:  IgnoreUnknown=1;K8S_POD_NAMESPACE=kube-system;K8S_POD_NAME=coredns-64897985d-vq7q7;K8S_POD_INFRA_CONTAINER_ID=b694fb57b43cfb6e99c64bc741e85df2c91cd2415bb82b73414421cc7f872119 Path:  /opt/cni/bin StdinData:  {"bridge":"testcni0","capabilities":{"test1":true,"test2":false},"cniVersion":"0.3.0","name":"testcni","subnet":"10.244.0.0/16","type":"testcni"} 
-进入到了 pluginMain 并且没有 err, cmd 是:  DEL 
-进入到 cmdDel 
-这里的 CmdArgs 是:  ContainerID:  84459f8526950186b320433cba87af4bcbf3430b54f6a4b8836ca9b98d0a21c2 Netns:   IfName:  eth0 Args:  IgnoreUnknown=1;K8S_POD_NAMESPACE=kube-system;K8S_POD_NAME=coredns-64897985d-wjwxv;K8S_POD_INFRA_CONTAINER_ID=84459f8526950186b320433cba87af4bcbf3430b54f6a4b8836ca9b98d0a21c2 Path:  /opt/cni/bin StdinData:  {"bridge":"testcni0","capabilities":{"test1":true,"test2":false},"cniVersion":"0.3.0","name":"testcni","subnet":"10.244.0.0/16","type":"testcni"} 
-进入到了 pluginMain 并且没有 err, cmd 是:  DEL 
-进入到 cmdDel 
-这里的 CmdArgs 是:  ContainerID:  b694fb57b43cfb6e99c64bc741e85df2c91cd2415bb82b73414421cc7f872119 Netns:   IfName:  eth0 Args:  IgnoreUnknown=1;K8S_POD_NAMESPACE=kube-system;K8S_POD_NAME=coredns-64897985d-vq7q7;K8S_POD_INFRA_CONTAINER_ID=b694fb57b43cfb6e99c64bc741e85df2c91cd2415bb82b73414421cc7f872119 Path:  /opt/cni/bin StdinData:  {"bridge":"testcni0","capabilities":{"test1":true,"test2":false},"cniVersion":"0.3.0","name":"testcni","subnet":"10.244.0.0/16","type":"testcni"} 
+这里的 CmdArgs 是:  ContainerID:  b624d684d12a7a82276ac598501f9d900c02e6c2802390a3bc00a289612d78a0 Netns:  /proc/23027/ns/net IfName:  eth0 Args:  IgnoreUnknown=1;K8S_POD_NAMESPACE=default;K8S_POD_NAME=busybox-9b595fddc-v4pkt;K8S_POD_INFRA_CONTAINER_ID=b624d684d12a7a82276ac598501f9d900c02e6c2802390a3bc00a289612d78a0 Path:  /opt/cni/bin StdinData:  {"bridge":"testcni0","cniVersion":"0.3.0","name":"testcni","subnet":"10.244.0.0/16","type":"testcni"} 
+进入到了 pluginMain 并且没有 err, cmd 是:  VERSION 
+进入到了 pluginMain 并且没有 err, cmd 是:  VERSION 
+进入到了 pluginMain 并且没有 err, cmd 是:  VERSION 
+进入到了 pluginMain 并且没有 err, cmd 是:  VERSION 
+进入到了 pluginMain 并且没有 err, cmd 是:  VERSION 
+进入到了 pluginMain 并且没有 err, cmd 是:  VERSION 
+进入到了 pluginMain 并且没有 err, cmd 是:  VERSION 
+进入到了 pluginMain 并且没有 err, cmd 是:  VERSION 
+进入到了 pluginMain 并且没有 err, cmd 是:  VERSION 
+进入到了 pluginMain 并且没有 err, cmd 是:  VERSION 
+进入到了 pluginMain 并且没有 err, cmd 是:  VERSION 
+进入到了 pluginMain 并且没有 err, cmd 是:  VERSION 
+进入到了 pluginMain 并且没有 err, cmd 是:  VERSION 
+进入到了 pluginMain 并且没有 err, cmd 是:  VERSION 
+进入到了 pluginMain 并且没有 err, cmd 是:  VERSION 
+进入到了 pluginMain 并且没有 err, cmd 是:  VERSION 
+进入到了 pluginMain 并且没有 err, cmd 是:  VERSION 
+进入到了 pluginMain 并且没有 err, cmd 是:  VERSION 
+进入到了 pluginMain 并且没有 err, cmd 是:  VERSION 
+进入到了 pluginMain 并且没有 err, cmd 是:  VERSION 
+进入到了 pluginMain 并且没有 err, cmd 是:  VERSION 
+进入到了 pluginMain 并且没有 err, cmd 是:  VERSION 
+进入到了 pluginMain 并且没有 err, cmd 是:  VERSION 
+进入到了 pluginMain 并且没有 err, cmd 是:  VERSION 
+进入到了 pluginMain 并且没有 err, cmd 是:  VERSION 
+进入到了 pluginMain 并且没有 err, cmd 是:  VERSION 
+进入到了 pluginMain 并且没有 err, cmd 是:  VERSION 
+进入到了 pluginMain 并且没有 err, cmd 是:  VERSION 
+进入到了 pluginMain 并且没有 err, cmd 是:  VERSION 
+进入到了 pluginMain 并且没有 err, cmd 是:  VERSION 
+进入到了 pluginMain 并且没有 err, cmd 是:  VERSION 
 进入到了 pluginMain 并且没有 err, cmd 是:  VERSION 
 进入到了 pluginMain 并且没有 err, cmd 是:  ADD 
 进入到 cmdAdd 
-这里的 CmdArgs 是:  ContainerID:  7c6d0372ed812b9c3a0f835bf515f3233448114dc71c5f323754d07bdc9ad737 Netns:  /proc/172577/ns/net IfName:  eth0 Args:  IgnoreUnknown=1;K8S_POD_NAMESPACE=kube-system;K8S_POD_NAME=coredns-64897985d-wjwxv;K8S_POD_INFRA_CONTAINER_ID=7c6d0372ed812b9c3a0f835bf515f3233448114dc71c5f323754d07bdc9ad737 Path:  /opt/cni/bin StdinData:  {"bridge":"testcni0","capabilities":{"test1":true,"test2":false},"cniVersion":"0.3.0","name":"testcni","subnet":"10.244.0.0/16","type":"testcni"} 
+这里的 CmdArgs 是:  ContainerID:  575e1277c0373a624db154c7832ec1214d4e2a2ab4ca67c0facb77603b997c4f Netns:  /proc/24883/ns/net IfName:  eth0 Args:  IgnoreUnknown=1;K8S_POD_NAMESPACE=default;K8S_POD_NAME=busybox-9b595fddc-dcgtl;K8S_POD_INFRA_CONTAINER_ID=575e1277c0373a624db154c7832ec1214d4e2a2ab4ca67c0facb77603b997c4f Path:  /opt/cni/bin StdinData:  {"bridge":"testcni0","cniVersion":"0.3.0","name":"testcni","subnet":"10.244.0.0/16","type":"testcni"} 
+进入到了 pluginMain 并且没有 err, cmd 是:  VERSION 
+进入到了 pluginMain 并且没有 err, cmd 是:  VERSION 
+进入到了 pluginMain 并且没有 err, cmd 是:  VERSION 
+进入到了 pluginMain 并且没有 err, cmd 是:  VERSION 
+进入到了 pluginMain 并且没有 err, cmd 是:  VERSION 
 进入到了 pluginMain 并且没有 err, cmd 是:  ADD 
 进入到 cmdAdd 
-这里的 CmdArgs 是:  ContainerID:  42b9176baac4d61aa243d622f636d1f25a442d4d812bd3e987661f033d4c43cd Netns:  /proc/172599/ns/net IfName:  eth0 Args:  IgnoreUnknown=1;K8S_POD_NAMESPACE=kube-system;K8S_POD_NAME=coredns-64897985d-vq7q7;K8S_POD_INFRA_CONTAINER_ID=42b9176baac4d61aa243d622f636d1f25a442d4d812bd3e987661f033d4c43cd Path:  /opt/cni/bin StdinData:  {"bridge":"testcni0","capabilities":{"test1":true,"test2":false},"cniVersion":"0.3.0","name":"testcni","subnet":"10.244.0.0/16","type":"testcni"} 
-这里获取到的 podIP 是:  10.244.0.2 
-这里获取到的 gateway 是:  10.244.0.1 
-创建出来的 bridge 名字是:  testcni0 
-创建出来的 bridge mac 是:  6a:35:89:51:2b:43 
-这里获取到的 podIP 是:  10.244.0.2 
-这里获取到的 gateway 是:  10.244.0.1 
-创建出来的 bridge 名字是:  testcni0 
-创建出来的 bridge mac 是:  6a:35:89:51:2b:43 
+这里的 CmdArgs 是:  ContainerID:  339bee80cf581db2d1f7fb23e6426b6e726c56e7e829d68f98669cc851748905 Netns:  /proc/25245/ns/net IfName:  eth0 Args:  IgnoreUnknown=1;K8S_POD_NAMESPACE=default;K8S_POD_NAME=busybox-9b595fddc-7t4p8;K8S_POD_INFRA_CONTAINER_ID=339bee80cf581db2d1f7fb23e6426b6e726c56e7e829d68f98669cc851748905 Path:  /opt/cni/bin StdinData:  {"bridge":"testcni0","cniVersion":"0.3.0","name":"testcni","subnet":"10.244.0.0/16","type":"testcni"} 
+进入到了 pluginMain 并且没有 err, cmd 是:  VERSION 
+进入到了 pluginMain 并且没有 err, cmd 是:  VERSION 
+进入到了 pluginMain 并且没有 err, cmd 是:  VERSION 
 进入到了 pluginMain 并且没有 err, cmd 是:  DEL 
 进入到 cmdDel 
-这里的 CmdArgs 是:  ContainerID:  7c6d0372ed812b9c3a0f835bf515f3233448114dc71c5f323754d07bdc9ad737 Netns:  /proc/172577/ns/net IfName:  eth0 Args:  IgnoreUnknown=1;K8S_POD_NAMESPACE=kube-system;K8S_POD_NAME=coredns-64897985d-wjwxv;K8S_POD_INFRA_CONTAINER_ID=7c6d0372ed812b9c3a0f835bf515f3233448114dc71c5f323754d07bdc9ad737 Path:  /opt/cni/bin StdinData:  {"bridge":"testcni0","capabilities":{"test1":true,"test2":false},"cniVersion":"0.3.0","name":"testcni","subnet":"10.244.0.0/16","type":"testcni"} 
+这里的 CmdArgs 是:  ContainerID:  575e1277c0373a624db154c7832ec1214d4e2a2ab4ca67c0facb77603b997c4f Netns:  /proc/24883/ns/net IfName:  eth0 Args:  IgnoreUnknown=1;K8S_POD_NAMESPACE=default;K8S_POD_NAME=busybox-9b595fddc-dcgtl;K8S_POD_INFRA_CONTAINER_ID=575e1277c0373a624db154c7832ec1214d4e2a2ab4ca67c0facb77603b997c4f Path:  /opt/cni/bin StdinData:  {"bridge":"testcni0","cniVersion":"0.3.0","name":"testcni","subnet":"10.244.0.0/16","type":"testcni"} 
+进入到了 pluginMain 并且没有 err, cmd 是:  VERSION 
+进入到了 pluginMain 并且没有 err, cmd 是:  VERSION 
+进入到了 pluginMain 并且没有 err, cmd 是:  VERSION 
+进入到了 pluginMain 并且没有 err, cmd 是:  VERSION 
+进入到了 pluginMain 并且没有 err, cmd 是:  VERSION 
+进入到了 pluginMain 并且没有 err, cmd 是:  VERSION 
+进入到了 pluginMain 并且没有 err, cmd 是:  VERSION 
+进入到了 pluginMain 并且没有 err, cmd 是:  VERSION 
+进入到了 pluginMain 并且没有 err, cmd 是:  ADD 
+进入到 cmdAdd 
+这里的 CmdArgs 是:  ContainerID:  d46753dfcdc0d691e184388f98b4b58d562d831829a1bca5c0789a11a5924845 Netns:  /proc/25889/ns/net IfName:  eth0 Args:  IgnoreUnknown=1;K8S_POD_NAMESPACE=default;K8S_POD_NAME=busybox-9b595fddc-q7f8p;K8S_POD_INFRA_CONTAINER_ID=d46753dfcdc0d691e184388f98b4b58d562d831829a1bca5c0789a11a5924845 Path:  /opt/cni/bin StdinData:  {"bridge":"testcni0","cniVersion":"0.3.0","name":"testcni","subnet":"10.244.0.0/16","type":"testcni"} 
+进入到了 pluginMain 并且没有 err, cmd 是:  VERSION 
+进入到了 pluginMain 并且没有 err, cmd 是:  VERSION 
+进入到了 pluginMain 并且没有 err, cmd 是:  VERSION 
 进入到了 pluginMain 并且没有 err, cmd 是:  DEL 
 进入到 cmdDel 
-这里的 CmdArgs 是:  ContainerID:  42b9176baac4d61aa243d622f636d1f25a442d4d812bd3e987661f033d4c43cd Netns:  /proc/172599/ns/net IfName:  eth0 Args:  IgnoreUnknown=1;K8S_POD_NAMESPACE=kube-system;K8S_POD_NAME=coredns-64897985d-vq7q7;K8S_POD_INFRA_CONTAINER_ID=42b9176baac4d61aa243d622f636d1f25a442d4d812bd3e987661f033d4c43cd Path:  /opt/cni/bin StdinData:  {"bridge":"testcni0","capabilities":{"test1":true,"test2":false},"cniVersion":"0.3.0","name":"testcni","subnet":"10.244.0.0/16","type":"testcni"} 
-给 veth 添加 podIP 失败, podIP 是:  192.168.1.6/16  err:  no such device 
-启动 veth1 失败, err:  no such device 
-启动 veth1 失败, err:  no such device 
-AddDefaultRoute 时出错, err:  network is unreachable 
-AddDefaultRoute 时出错, err:  network is unreachable 
-AddDefaultRoute 时出错, err:  network is unreachable 
-AddDefaultRoute 时出错, err:  network is unreachable 
-AddDefaultRoute 时出错, err:  network is unreachable 
-转换 podIP 为 net 类型失败:  10.244.0.2  err:  invalid CIDR address: 10.244.0.2 
-转换 podIP 为 net 类型失败:  10.244.0.2  err:  invalid CIDR address: 10.244.0.2 
-转换 podIP 为 net 类型失败:  10.244.0.2  err:  invalid CIDR address: 10.244.0.2 
-转换 podIP 为 net 类型失败:  10.244.0.2  err:  invalid CIDR address: 10.244.0.2 
-创建 veth 设备失败, err:  file exists 
-创建 veth 失败, err:  file exists 
-创建 veth 设备失败, err:  file exists 
-创建 veth 失败, err:  file exists 
-创建 veth 设备失败, err:  file exists 
-创建 veth 失败, err:  file exists 
+这里的 CmdArgs 是:  ContainerID:  339bee80cf581db2d1f7fb23e6426b6e726c56e7e829d68f98669cc851748905 Netns:  /proc/25245/ns/net IfName:  eth0 Args:  IgnoreUnknown=1;K8S_POD_NAMESPACE=default;K8S_POD_NAME=busybox-9b595fddc-7t4p8;K8S_POD_INFRA_CONTAINER_ID=339bee80cf581db2d1f7fb23e6426b6e726c56e7e829d68f98669cc851748905 Path:  /opt/cni/bin StdinData:  {"bridge":"testcni0","cniVersion":"0.3.0","name":"testcni","subnet":"10.244.0.0/16","type":"testcni"} 
+进入到了 pluginMain 并且没有 err, cmd 是:  VERSION 
+进入到了 pluginMain 并且没有 err, cmd 是:  VERSION 
+进入到了 pluginMain 并且没有 err, cmd 是:  VERSION 
+进入到了 pluginMain 并且没有 err, cmd 是:  VERSION 
+进入到了 pluginMain 并且没有 err, cmd 是:  VERSION 
+进入到了 pluginMain 并且没有 err, cmd 是:  VERSION 
+进入到了 pluginMain 并且没有 err, cmd 是:  VERSION 
+进入到了 pluginMain 并且没有 err, cmd 是:  VERSION 
+进入到了 pluginMain 并且没有 err, cmd 是:  VERSION 
+进入到了 pluginMain 并且没有 err, cmd 是:  VERSION 
+进入到了 pluginMain 并且没有 err, cmd 是:  VERSION 
+进入到了 pluginMain 并且没有 err, cmd 是:  VERSION 
+进入到了 pluginMain 并且没有 err, cmd 是:  VERSION 
+进入到了 pluginMain 并且没有 err, cmd 是:  VERSION 
+进入到了 pluginMain 并且没有 err, cmd 是:  VERSION 
+进入到了 pluginMain 并且没有 err, cmd 是:  VERSION 
+进入到了 pluginMain 并且没有 err, cmd 是:  DEL 
+进入到 cmdDel 
+这里的 CmdArgs 是:  ContainerID:  d46753dfcdc0d691e184388f98b4b58d562d831829a1bca5c0789a11a5924845 Netns:  /proc/25889/ns/net IfName:  eth0 Args:  IgnoreUnknown=1;K8S_POD_NAMESPACE=default;K8S_POD_NAME=busybox-9b595fddc-q7f8p;K8S_POD_INFRA_CONTAINER_ID=d46753dfcdc0d691e184388f98b4b58d562d831829a1bca5c0789a11a5924845 Path:  /opt/cni/bin StdinData:  {"bridge":"testcni0","cniVersion":"0.3.0","name":"testcni","subnet":"10.244.0.0/16","type":"testcni"} 
+进入到了 pluginMain 并且没有 err, cmd 是:  VERSION 

@@ -2,13 +2,13 @@ package utils
 
 import (
 	"bufio"
-	"fmt"
+	// "fmt"
 	"io/ioutil"
 	"os"
 )
 
-const logPath string = "/home/ding/go/test-cni/test-cni.log"
-const logErrPath string = "/home/ding/go/test-cni/log.error.txt"
+const logPath string = "/home/ding/go/k8s-cni-test/test-cni.log"
+const logErrPath string = "/home/ding/go/k8s-cni-test/log.error.txt"
 
 func WriteFile(content ...string) {
 	contentRes := ""
@@ -18,9 +18,9 @@ func WriteFile(content ...string) {
 	var d = []byte(contentRes)
 	err := ioutil.WriteFile(logErrPath, d, 0666)
 	if err != nil {
-		fmt.Println("覆盖写入文件失败: ", err.Error())
+		// fmt.Println("覆盖写入文件失败: ", err.Error())
 	}
-	fmt.Println("覆盖写入文件成功")
+	// fmt.Println("覆盖写入文件成功")
 }
 
 func WriteLog(log ...string) {
@@ -38,10 +38,10 @@ func WriteLog(log ...string) {
 		logRes += c
 		logRes += " "
 	}
-	fmt.Println(logRes)
+	// fmt.Println(logRes)
 	_, err = write.WriteString(logRes + "\r\n")
 	if err != nil {
-		fmt.Println("失败: ", err.Error())
+		// fmt.Println("失败: ", err.Error())
 	}
 	//Flush将缓存的文件真正写入到文件中
 	write.Flush()

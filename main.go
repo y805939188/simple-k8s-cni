@@ -176,24 +176,35 @@ func cmdAdd(args *skel.CmdArgs) error {
 		return err
 	}
 
-	// 接下来获取网卡信息, 把本机网卡插入到网桥上
 	link, err := netlink.LinkByName(currentNetwork.Name)
 	if err != nil {
 		utils.WriteLog("获取本机网卡失败, err: ", err.Error())
 		return err
 	}
-
-	bridge, err := netlink.LinkByName(pluginConfig.Bridge)
+	err = nettools.SetIptablesForDeviceToFarwordAccept(link.(*netlink.Device))
 	if err != nil {
-		utils.WriteLog("获取网桥设备失败, err: ", err.Error())
+		utils.WriteLog("设置本机网卡转发规则失败")
 		return err
 	}
 
-	err = nettools.SetDeviceMaster(link.(*netlink.Device), bridge.(*netlink.Bridge))
-	if err != nil {
-		utils.WriteLog("把网卡塞入网桥 gg, err: ", err.Error())
-		return err
-	}
+	// // 接下来获取网卡信息, 把本机网卡插入到网桥上
+	// link, err := netlink.LinkByName(currentNetwork.Name)
+	// if err != nil {
+	// 	utils.WriteLog("获取本机网卡失败, err: ", err.Error())
+	// 	return err
+	// }
+
+	// bridge, err := netlink.LinkByName(pluginConfig.Bridge)
+	// if err != nil {
+	// 	utils.WriteLog("获取网桥设备失败, err: ", err.Error())
+	// 	return err
+	// }
+
+	// err = nettools.SetDeviceMaster(link.(*netlink.Device), bridge.(*netlink.Bridge))
+	// if err != nil {
+	// 	utils.WriteLog("把网卡塞入网桥 gg, err: ", err.Error())
+	// 	return err
+	// }
 
 	_gw := net.ParseIP(gateway)
 
@@ -203,7 +214,6 @@ func cmdAdd(args *skel.CmdArgs) error {
 		CNIVersion: pluginConfig.CNIVersion,
 		IPs: []*current.IPConfig{
 			{
-				// Version: "IPv4",
 				Address: *_podIP,
 				Gateway: _gw,
 			},

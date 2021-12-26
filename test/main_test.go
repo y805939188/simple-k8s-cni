@@ -168,6 +168,8 @@ func TestMain(t *testing.T) {
 	 * 以上手动操作可成功
 	 */
 
+	// return
+
 	// 首先通过 ipam 获取到 etcd 中存放的集群中所有节点的相关网络信息
 	networks, err := ipamClient.Get().AllHostNetwork()
 	if err != nil {
@@ -189,24 +191,39 @@ func TestMain(t *testing.T) {
 		return
 	}
 
+	// 都完事儿之后理论上同一台主机下的俩 netns(pod) 就能通信了
+	// 如果无法通信, 有可能是 iptables 被设置了 forward drop
+	// 需要用 iptables 允许网桥做转发
 	// 接下来获取网卡信息, 把本机网卡插入到网桥上
 	link, err := netlink.LinkByName(currentNetwork.Name)
 	if err != nil {
 		fmt.Println("获取本机网卡失败, err: ", err.Error())
 		return
 	}
-
-	bridge, err := netlink.LinkByName(pluginConfig.Bridge)
+	err = nettools.SetIptablesForDeviceToFarwordAccept(link.(*netlink.Device))
 	if err != nil {
-		fmt.Println("获取网桥设备失败, err: ", err.Error())
+		fmt.Println("设置 ens33 转发规则失败")
 		return
 	}
 
-	err = nettools.SetDeviceMaster(link.(*netlink.Device), bridge.(*netlink.Bridge))
-	if err != nil {
-		fmt.Println("把网卡塞入网桥 gg, err: ", err.Error())
-		return
-	}
+	// // 接下来获取网卡信息, 把本机网卡插入到网桥上
+	// link, err := netlink.LinkByName(currentNetwork.Name)
+	// if err != nil {
+	// 	fmt.Println("获取本机网卡失败, err: ", err.Error())
+	// 	return
+	// }
+
+	// bridge, err := netlink.LinkByName(pluginConfig.Bridge)
+	// if err != nil {
+	// 	fmt.Println("获取网桥设备失败, err: ", err.Error())
+	// 	return
+	// }
+
+	// err = nettools.SetDeviceMaster(link.(*netlink.Device), bridge.(*netlink.Bridge))
+	// if err != nil {
+	// 	fmt.Println("把网卡塞入网桥 gg, err: ", err.Error())
+	// 	return
+	// }
 
 	fmt.Println("搞定!!!")
 	_gw := net.ParseIP(gateway)

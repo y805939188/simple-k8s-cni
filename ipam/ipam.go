@@ -97,7 +97,7 @@ func getIpamMaskIP() string {
 func getHostPath() string {
 	hostname, err := os.Hostname()
 	if err != nil {
-		fmt.Println("获取主机名失败: ", err.Error())
+		// fmt.Println("获取主机名失败: ", err.Error())
 		return "/test-error-path"
 	}
 	return getEtcdPathWithPrefix("/" + getIpamSubnet() + "/" + getIpamMaskSegment() + "/" + hostname)
@@ -343,7 +343,7 @@ func (g *Get) HostNetwork() (*Network, error) {
 	// 先获取一下 ipam
 	ipam, err := GetIpamService()
 	if err != nil {
-		fmt.Println("在 HostNetwork 方法中获取 ipam svc 失败: ", err.Error())
+		// fmt.Println("在 HostNetwork 方法中获取 ipam svc 失败: ", err.Error())
 		return nil, err
 	}
 	// 然后拿本机的 hostname
@@ -384,7 +384,7 @@ func (g *Get) HostNetwork() (*Network, error) {
 			}
 		}
 	}
-	fmt.Println("没找到有效的网卡")
+	// fmt.Println("没找到有效的网卡")
 	return nil, fmt.Errorf("No valid network device found")
 }
 
@@ -435,7 +435,7 @@ func (g *Get) NodeIp(hostName string) (string, error) {
 		utils.WriteLog("正则匹配 ip 失败, err: ", err.Error())
 		return "", nil
 	}
-	fmt.Println("这里的 ip 是: ", ip)
+	// fmt.Println("这里的 ip 是: ", ip)
 	if ip == nil {
 		return "", fmt.Errorf("没有找到 ip")
 	}

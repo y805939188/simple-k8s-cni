@@ -88,7 +88,7 @@ func _nettools(brName, gw, ifName, podIP string, mtu int, netns ns.NetNS) {
 			// 都完事儿之后理论上同一台主机下的俩 netns(pod) 就能通信了
 			// 如果无法通信, 有可能是 iptables 被设置了 forward drop
 			// 需要用 iptables 允许网桥做转发
-			err = nettools.SetIptablesForBridgeToForwordAccept(br)
+			err = nettools.SetIptablesForBridgeToForwardAccept(br)
 			if err != nil {
 				fmt.Println("set iptables 失败", err.Error())
 			}

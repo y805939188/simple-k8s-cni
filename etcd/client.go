@@ -3,7 +3,6 @@ package etcd
 import (
 	"context"
 	"errors"
-	"fmt"
 	"strings"
 	"time"
 
@@ -87,7 +86,7 @@ func _GetEtcdClient() func() (*EtcdClient, error) {
 		} else {
 			// ETCDCTL_API=3 etcdctl --endpoints https://192.168.98.143:2379:2379 --cacert /etc/kubernetes/pki/etcd/ca.crt --cert /etc/kubernetes/pki/etcd/healthcheck-client.crt --key /etc/kubernetes/pki/etcd/healthcheck-client.key get / --prefix --keys-only
 
-			fmt.Println("正在创建 etcd 客户端......")
+			// fmt.Println("正在创建 etcd 客户端......")
 			client, err := newEtcdClient(&EtcdConfig{
 				EtcdEndpoints:  "https://192.168.98.143:2379",
 				EtcdCertFile:   "/etc/kubernetes/pki/etcd/healthcheck-client.crt",
@@ -102,7 +101,7 @@ func _GetEtcdClient() func() (*EtcdClient, error) {
 			status, err := client.Status(context.TODO(), "https://192.168.98.143:2379")
 
 			if err != nil {
-				fmt.Println("无法获取到 etcd 版本: ", err.Error())
+				// fmt.Println("无法获取到 etcd 版本: ", err.Error())
 			}
 
 			if client != nil {
@@ -113,7 +112,7 @@ func _GetEtcdClient() func() (*EtcdClient, error) {
 				if status != nil && status.Version != "" {
 					_client.Version = status.Version
 				}
-				fmt.Println("etcd 客户端初始化成功")
+				// fmt.Println("etcd 客户端初始化成功")
 				return _client, nil
 			}
 		}

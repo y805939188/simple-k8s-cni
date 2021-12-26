@@ -123,7 +123,6 @@ func CreateVethPair(ifName string, mtu int) (*netlink.Veth, *netlink.Veth, error
 	// 尝试重新获取 veth 设备看是否能成功
 	veth1, err := netlink.LinkByName(ifName) // veth1 一会儿要在 pod(net ns) 里
 	if err != nil {
-		fmt.Println("创建完 veth11111 但是获取失败, err: ", err.Error())
 		// 如果获取失败就尝试删掉
 		netlink.LinkDel(veth1)
 		utils.WriteLog("创建完 veth 但是获取失败, err: ", err.Error())
@@ -133,7 +132,6 @@ func CreateVethPair(ifName string, mtu int) (*netlink.Veth, *netlink.Veth, error
 	// 尝试重新获取 veth 设备看是否能成功
 	veth2, err := netlink.LinkByName(vethPairName) // veth2 在主机上
 	if err != nil {
-		fmt.Println("创建完 veth2222222 但是获取失败, err: ", err.Error())
 		// 如果获取失败就尝试删掉
 		netlink.LinkDel(veth2)
 		utils.WriteLog("创建完 veth 但是获取失败, err: ", err.Error())
@@ -201,7 +199,7 @@ func SetDeviceMaster(device *netlink.Device, br *netlink.Bridge) error {
 	brIndex := br.Index
 
 	if deviceMaster == brIndex {
-		fmt.Println("已经将网卡添加过网桥中, 无需添加")
+		// fmt.Println("已经将网卡添加过网桥中, 无需添加")
 		return nil
 	}
 
@@ -248,7 +246,7 @@ func SetOtherHostRouteToCurrentHost(networks []*ipam.Network, currentNetwork *ip
 			}
 
 			if isSkip {
-				fmt.Println(network.CIDR, " 已存在路由表中, 直接跳过")
+				// fmt.Println(network.CIDR, " 已存在路由表中, 直接跳过")
 				continue
 			}
 
@@ -312,13 +310,27 @@ func RandomVethName() (string, error) {
 	return fmt.Sprintf("veth%x", entropy), nil
 }
 
-func SetIptablesForBridgeToForwordAccept(br *netlink.Bridge) error {
+func SetIptablesForBridgeToForwardAccept(br *netlink.Bridge) error {
 	ipt, err := iptables.NewWithProtocol(iptables.ProtocolIPv4)
 	if err != nil {
 		utils.WriteLog("这里 NewWithProtocol 失败, err: ", err.Error())
 		return err
 	}
 	err = ipt.Append("filter", "FORWARD", "-i", br.Attrs().Name, "-j", "ACCEPT")
+	if err != nil {
+		utils.WriteLog("这里 ipt.Append 失败, err: ", err.Error())
+		return err
+	}
+	return nil
+}
+
+func SetIptablesForDeviceToFarwordAccept(device *netlink.Device) error {
+	ipt, err := iptables.NewWithProtocol(iptables.ProtocolIPv4)
+	if err != nil {
+		utils.WriteLog("这里 NewWithProtocol 失败, err: ", err.Error())
+		return err
+	}
+	err = ipt.Append("filter", "FORWARD", "-i", device.Attrs().Name, "-j", "ACCEPT")
 	if err != nil {
 		utils.WriteLog("这里 ipt.Append 失败, err: ", err.Error())
 		return err
@@ -405,7 +417,7 @@ func CreateBridgeAndCreateVethAndSetNetworkDeviceStatusAndSetVethMaster(
 			// 都完事儿之后理论上同一台主机下的俩 netns(pod) 就能通信了
 			// 如果无法通信, 有可能是 iptables 被设置了 forward drop
 			// 需要用 iptables 允许网桥做转发
-			err = SetIptablesForBridgeToForwordAccept(br)
+			err = SetIptablesForBridgeToForwardAccept(br)
 			if err != nil {
 				return err
 			}
