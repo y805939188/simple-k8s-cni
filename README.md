@@ -1,5 +1,10 @@
 # k8s-cni-test
 
+## 相关文章链接
+[深入理解 k8s 的 CNI 网络](https://zhuanlan.zhihu.com/p/450140876)
+</br>
+[从 0 实现一个 CNI 网络插件](https://zhuanlan.zhihu.com/p/450514389)
+
 ## 测试方法
 1. 
 ```js
