@@ -3,6 +3,7 @@ module testcni
 go 1.16
 
 require (
+	github.com/cilium/ebpf v0.9.1 // indirect
 	github.com/containernetworking/cni v1.0.1
 	github.com/containernetworking/plugins v1.0.1
 	github.com/coreos/go-iptables v0.6.0
