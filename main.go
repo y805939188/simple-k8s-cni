@@ -4,37 +4,15 @@ import (
 	"encoding/json"
 	"errors"
 	"testcni/consts"
+	"testcni/ebpf-vxlan/vxlan"
 	"testcni/skel"
+	"testcni/struct/plugins"
 	"testcni/utils"
 
-	"github.com/containernetworking/cni/pkg/types"
 	"github.com/containernetworking/cni/pkg/version"
 
 	bv "github.com/containernetworking/plugins/pkg/utils/buildversion"
 )
-
-type PluginConf struct {
-	// NetConf 里头指定了一个 plugin 的最基本的信息, 比如 CNIVersion, Name, Type 等, 当然还有在 containerd 中塞进来的 PrevResult
-	types.NetConf
-
-	// 这个 runtimeConfig 是可以在 /etc/cni/net.d/xxx.conf 中配置一个
-	// 类似 "capabilities": {"xxx": true, "yyy": false} 这样的属性
-	// 表示说要在运行时开启 xxx 的能力, 不开启 yyy 的能力
-	// 然后等容器跑起来之后(或者被拉起来之前)可以直接通过设置环境变量 export CAP_ARGS='{ "xxx": "aaaa", "yyy": "bbbb" }'
-	// 来开启或关闭某些能力
-	// 然后通过 stdin 标准输入读进来的数据中就会多出一个 RuntimeConfig 属性, 里面就是 runtimeConfig: { "xxx": "aaaa" }
-	// 因为 yyy 在 /etc/cni/net.d/xxx.conf 中被设置为了 false
-	// 官方使用范例: https://kubernetes.feisky.xyz/extension/network/cni
-	// cni 源码中实现: /cni/libcni/api.go:injectRuntimeConfig
-	RuntimeConfig *struct {
-		TestConfig map[string]interface{} `json:"testConfig"`
-	} `json:"runtimeConfig"`
-
-	// 这里可以自由定义自己的 plugin 中配置了的参数然后自由处理
-	Bridge string `json:"bridge"`
-	Subnet string `json:"subnet"`
-	Mode   string `json:"mode" default:"host-gw"`
-}
 
 func cmdAdd(args *skel.CmdArgs) error {
 	utils.WriteLog("进入到 cmdAdd")
@@ -46,7 +24,7 @@ func cmdAdd(args *skel.CmdArgs) error {
 		"Path: ", args.Path,
 		"StdinData: ", string(args.StdinData))
 
-	pluginConfig := &PluginConf{}
+	pluginConfig := &plugins.PluginConf{}
 	if err := json.Unmarshal(args.StdinData, pluginConfig); err != nil {
 		utils.WriteLog("args.StdinData 转 pluginConfig 失败")
 		return err
@@ -57,15 +35,24 @@ func cmdAdd(args *skel.CmdArgs) error {
 	utils.WriteLog("这里的结果是: pluginConfig.Subnet", pluginConfig.Subnet)
 	utils.WriteLog("这里的结果是: pluginConfig.Type", pluginConfig.Type)
 	utils.WriteLog("这里的结果是: pluginConfig.Mode", pluginConfig.Mode)
-	return errors.New("temp error")
+	// return errors.New("temp error")
 
 	mode := pluginConfig.Mode
 	if mode == "" {
 		mode = consts.MODE_HOST_GW
 	}
 	if mode == consts.MODE_VXLAN {
-		// return
+		utils.WriteLog("将要使用 vxlan 模式")
+		vxlan := vxlan.VxlanMode{}
+		err := vxlan.SetupVxlanMode(args, pluginConfig)
+		if err != nil {
+			utils.WriteLog("设置 vxlan 模式失败: ", err.Error())
+			return err
+		}
+		return errors.New("temporary error")
 	}
+	utils.WriteLog("将要使用 host-gw 模式")
+	return errors.New("temp error")
 
 	// // 使用 kubelet(containerd) 传过来的 subnet 地址初始化 ipam
 	// ipam.Init(pluginConfig.Subnet)

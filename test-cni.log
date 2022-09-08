@@ -1,36 +1,28 @@
 进入到了 pluginMain 并且没有 err, cmd 是:  ADD 
 进入到 cmdAdd 
-这里的 CmdArgs 是:  ContainerID:  9055e0c512fa441526354ae051c1129af58a51a73812e31d90a03bdcc6f38f38 Netns:  /var/run/netns/cni-3a81c31b-8da8-4927-6aa2-7bc8d8076cca IfName:  eth0 Args:  IgnoreUnknown=1;K8S_POD_NAMESPACE=kube-system;K8S_POD_NAME=coredns-c676cc86f-qgfrd;K8S_POD_INFRA_CONTAINER_ID=9055e0c512fa441526354ae051c1129af58a51a73812e31d90a03bdcc6f38f38;K8S_POD_UID=3a869421-df39-4be8-a933-bb70c2799153 Path:  /opt/cni/bin StdinData:  {"cniVersion":"0.3.0","name":"testcni","subnet":"10.244.0.0/16","type":"testcni"} 
+这里的 CmdArgs 是:  ContainerID:  1ae57a811dfd953a66336d87060739de0952c7a314af203feae0a98eb9fe6d45 Netns:  /var/run/netns/cni-d59ea263-9080-b96b-7259-8bb18735ff88 IfName:  eth0 Args:  IgnoreUnknown=1;K8S_POD_NAMESPACE=kube-system;K8S_POD_NAME=coredns-c676cc86f-qgfrd;K8S_POD_INFRA_CONTAINER_ID=1ae57a811dfd953a66336d87060739de0952c7a314af203feae0a98eb9fe6d45;K8S_POD_UID=3a869421-df39-4be8-a933-bb70c2799153 Path:  /opt/cni/bin StdinData:  {"cniVersion":"0.3.0","mode":"vxlan","name":"testcni","subnet":"10.244.0.0/16","type":"testcni"} 
 这里的结果是: pluginConfig.Bridge  
 这里的结果是: pluginConfig.CNIVersion 0.3.0 
 这里的结果是: pluginConfig.Name testcni 
 这里的结果是: pluginConfig.Subnet 10.244.0.0/16 
 这里的结果是: pluginConfig.Type testcni 
-这里的结果是: pluginConfig.Mode  
-进入到了 pluginMain 并且没有 err, cmd 是:  DEL 
-进入到 cmdDel 
-这里的 CmdArgs 是:  ContainerID:  9055e0c512fa441526354ae051c1129af58a51a73812e31d90a03bdcc6f38f38 Netns:  /var/run/netns/cni-3a81c31b-8da8-4927-6aa2-7bc8d8076cca IfName:  eth0 Args:  K8S_POD_NAME=coredns-c676cc86f-qgfrd;K8S_POD_INFRA_CONTAINER_ID=9055e0c512fa441526354ae051c1129af58a51a73812e31d90a03bdcc6f38f38;K8S_POD_UID=3a869421-df39-4be8-a933-bb70c2799153;IgnoreUnknown=1;K8S_POD_NAMESPACE=kube-system Path:  /opt/cni/bin StdinData:  {"cniVersion":"0.3.0","name":"testcni","subnet":"10.244.0.0/16","type":"testcni"} 
+这里的结果是: pluginConfig.Mode vxlan 
+将要使用 vxlan 模式 
+进到了 vxlan 模式了 
 进入到了 pluginMain 并且没有 err, cmd 是:  ADD 
 进入到 cmdAdd 
-这里的 CmdArgs 是:  ContainerID:  9ff4817b3235c9b06995d9f083341759663fb01f48191d6eec118e9bbce8c783 Netns:  /var/run/netns/cni-367ab2c6-8b65-3c9e-ecf2-b68159f96efe IfName:  eth0 Args:  IgnoreUnknown=1;K8S_POD_NAMESPACE=kube-system;K8S_POD_NAME=coredns-c676cc86f-4kz2t;K8S_POD_INFRA_CONTAINER_ID=9ff4817b3235c9b06995d9f083341759663fb01f48191d6eec118e9bbce8c783;K8S_POD_UID=d392609d-6aa2-4757-9745-b85d35e3d326 Path:  /opt/cni/bin StdinData:  {"cniVersion":"0.3.0","name":"testcni","subnet":"10.244.0.0/16","type":"testcni"} 
+这里的 CmdArgs 是:  ContainerID:  3dc9b576518b1f4953d352bc936a5a15dc7d1ff070e9b7f0fba800c00bbedaed Netns:  /var/run/netns/cni-a15cb632-c59c-8a2a-f826-fccda49b5e68 IfName:  eth0 Args:  IgnoreUnknown=1;K8S_POD_NAMESPACE=kube-system;K8S_POD_NAME=coredns-c676cc86f-4kz2t;K8S_POD_INFRA_CONTAINER_ID=3dc9b576518b1f4953d352bc936a5a15dc7d1ff070e9b7f0fba800c00bbedaed;K8S_POD_UID=d392609d-6aa2-4757-9745-b85d35e3d326 Path:  /opt/cni/bin StdinData:  {"cniVersion":"0.3.0","mode":"vxlan","name":"testcni","subnet":"10.244.0.0/16","type":"testcni"} 
 这里的结果是: pluginConfig.Bridge  
 这里的结果是: pluginConfig.CNIVersion 0.3.0 
 这里的结果是: pluginConfig.Name testcni 
 这里的结果是: pluginConfig.Subnet 10.244.0.0/16 
 这里的结果是: pluginConfig.Type testcni 
-这里的结果是: pluginConfig.Mode  
+这里的结果是: pluginConfig.Mode vxlan 
+将要使用 vxlan 模式 
+进到了 vxlan 模式了 
 进入到了 pluginMain 并且没有 err, cmd 是:  DEL 
 进入到 cmdDel 
-这里的 CmdArgs 是:  ContainerID:  9ff4817b3235c9b06995d9f083341759663fb01f48191d6eec118e9bbce8c783 Netns:  /var/run/netns/cni-367ab2c6-8b65-3c9e-ecf2-b68159f96efe IfName:  eth0 Args:  IgnoreUnknown=1;K8S_POD_NAMESPACE=kube-system;K8S_POD_NAME=coredns-c676cc86f-4kz2t;K8S_POD_INFRA_CONTAINER_ID=9ff4817b3235c9b06995d9f083341759663fb01f48191d6eec118e9bbce8c783;K8S_POD_UID=d392609d-6aa2-4757-9745-b85d35e3d326 Path:  /opt/cni/bin StdinData:  {"cniVersion":"0.3.0","name":"testcni","subnet":"10.244.0.0/16","type":"testcni"} 
-进入到了 pluginMain 并且没有 err, cmd 是:  ADD 
-进入到 cmdAdd 
-这里的 CmdArgs 是:  ContainerID:  d032dc8e49d328159cc99c421c8d623fb89298748f03d91768ea8685278a067d Netns:  /var/run/netns/cni-27fdea91-7e58-bf48-2bdc-ec14245adb7c IfName:  eth0 Args:  IgnoreUnknown=1;K8S_POD_NAMESPACE=kube-system;K8S_POD_NAME=coredns-c676cc86f-qgfrd;K8S_POD_INFRA_CONTAINER_ID=d032dc8e49d328159cc99c421c8d623fb89298748f03d91768ea8685278a067d;K8S_POD_UID=3a869421-df39-4be8-a933-bb70c2799153 Path:  /opt/cni/bin StdinData:  {"cniVersion":"0.3.0","name":"testcni","subnet":"10.244.0.0/16","type":"testcni"} 
-这里的结果是: pluginConfig.Bridge  
-这里的结果是: pluginConfig.CNIVersion 0.3.0 
-这里的结果是: pluginConfig.Name testcni 
-这里的结果是: pluginConfig.Subnet 10.244.0.0/16 
-这里的结果是: pluginConfig.Type testcni 
-这里的结果是: pluginConfig.Mode  
+这里的 CmdArgs 是:  ContainerID:  1ae57a811dfd953a66336d87060739de0952c7a314af203feae0a98eb9fe6d45 Netns:  /var/run/netns/cni-d59ea263-9080-b96b-7259-8bb18735ff88 IfName:  eth0 Args:  IgnoreUnknown=1;K8S_POD_NAMESPACE=kube-system;K8S_POD_NAME=coredns-c676cc86f-qgfrd;K8S_POD_INFRA_CONTAINER_ID=1ae57a811dfd953a66336d87060739de0952c7a314af203feae0a98eb9fe6d45;K8S_POD_UID=3a869421-df39-4be8-a933-bb70c2799153 Path:  /opt/cni/bin StdinData:  {"cniVersion":"0.3.0","mode":"vxlan","name":"testcni","subnet":"10.244.0.0/16","type":"testcni"} 
 进入到了 pluginMain 并且没有 err, cmd 是:  DEL 
 进入到 cmdDel 
-这里的 CmdArgs 是:  ContainerID:  d032dc8e49d328159cc99c421c8d623fb89298748f03d91768ea8685278a067d Netns:  /var/run/netns/cni-27fdea91-7e58-bf48-2bdc-ec14245adb7c IfName:  eth0 Args:  K8S_POD_NAME=coredns-c676cc86f-qgfrd;K8S_POD_INFRA_CONTAINER_ID=d032dc8e49d328159cc99c421c8d623fb89298748f03d91768ea8685278a067d;K8S_POD_UID=3a869421-df39-4be8-a933-bb70c2799153;IgnoreUnknown=1;K8S_POD_NAMESPACE=kube-system Path:  /opt/cni/bin StdinData:  {"cniVersion":"0.3.0","name":"testcni","subnet":"10.244.0.0/16","type":"testcni"} 
+这里的 CmdArgs 是:  ContainerID:  3dc9b576518b1f4953d352bc936a5a15dc7d1ff070e9b7f0fba800c00bbedaed Netns:  /var/run/netns/cni-a15cb632-c59c-8a2a-f826-fccda49b5e68 IfName:  eth0 Args:  K8S_POD_INFRA_CONTAINER_ID=3dc9b576518b1f4953d352bc936a5a15dc7d1ff070e9b7f0fba800c00bbedaed;K8S_POD_UID=d392609d-6aa2-4757-9745-b85d35e3d326;IgnoreUnknown=1;K8S_POD_NAMESPACE=kube-system;K8S_POD_NAME=coredns-c676cc86f-4kz2t Path:  /opt/cni/bin StdinData:  {"cniVersion":"0.3.0","mode":"vxlan","name":"testcni","subnet":"10.244.0.0/16","type":"testcni"} 
