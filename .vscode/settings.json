@@ -1,0 +1,6 @@
+{
+  "files.associations": {
+    "common.h": "c",
+    "if_arp.h": "c"
+  }
+}
