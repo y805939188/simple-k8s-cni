@@ -231,7 +231,7 @@ func (manager *CNIManager) BootstrapCNI() error {
 	if err != nil {
 		return err
 	}
-	types100Result, err := transformCNIResultToTypes100(cniRes)
+	types100Result, err := transformCNIResultToPrintTypes(cniRes)
 	if err != nil {
 		return err
 	}
@@ -288,7 +288,7 @@ func GetCNIManager() *CNIManager {
 	return manager
 }
 
-func transformCNIResultToTypes100(cniResult *CNIResult) (*types.Result, error) {
+func transformCNIResultToPrintTypes(cniResult *CNIResult) (*types.Result, error) {
 	data, err := json.Marshal(&cniResult)
 	if err != nil {
 		return nil, err
