@@ -223,21 +223,31 @@ func (is *IpamService) _NetworkInit(hostPath, poolPath string) (string, error) {
 	}
 
 	_tempIPs := strings.Split(pool, ";")
-	currentHostNetwork := _tempIPs[0]
-	_tempIPs = _tempIPs[1:]
-	// 捞完这个网段存到对应的这台主机的 key 下
-	err = is.EtcdClient.Set(hostPath, currentHostNetwork)
-	if err != nil {
-		return "", err
-	}
-	// 然后把 pool 更新一下
+	tmpRandom := utils.GetRandomNumber(len(_tempIPs))
+	// TODO: 这块还是得想办法加锁
+	currentHostNetwork := _tempIPs[tmpRandom]
+	newTmpIps := append([]string{}, _tempIPs[0:tmpRandom]...)
+	_tempIPs = append(newTmpIps, _tempIPs[tmpRandom+1:]...)
+	// 先把 pool 更新一下
 	err = is.EtcdClient.Set(poolPath, strings.Join(_tempIPs, ";"))
 	if err != nil {
 		return "", err
 	}
+	// 再把这个网段存到对应的这台主机的 key 下
+	err = is.EtcdClient.Set(hostPath, currentHostNetwork)
+	if err != nil {
+		return "", err
+	}
+
 	return currentHostNetwork, nil
 }
 
+/**
+ * 用来初始化 ip 网段池
+ * 比如 subnet 是 10.244.0.0, mask 是 24 的话
+ * 就会在 etcd 中初始化出一个
+ * 	10.244.0.0;10.244.1.0;10.244.2.0;......;10.244.254.0;10.244.255.0
+ */
 func (is *IpamService) _IPsPoolInit(poolPath string) error {
 	lock()
 	defer unlock()
@@ -645,12 +655,14 @@ func _GetIpamService(subnet string, maskSegment ...string) func() (*IpamService,
 			}
 
 			// 如果不是合法的子网地址的话就强转成合法
+			// 比如 _subnet 传了个数字过来, 要给它先干成 a.b.c.d 的样子
+			// 然后 & maskIP, 给做成类似 a.b.0.0 的样子
 			_subnet = utils.InetInt2Ip(utils.InetIP2Int(_subnet) & utils.InetIP2Int(_maskIP))
 			_ipam = &IpamService{
 				Subnet: _subnet,
 				// Mask:        _maskSegment,
-				MaskSegment: _maskSegment,
-				MaskIP:      _maskIP,
+				MaskSegment: _maskSegment, // 掩码 10 进制
+				MaskIP:      _maskIP,      // 掩码 ip
 			}
 			_ipam.EtcdClient = getEtcdClient()
 			// 初始化一个 ip 网段的 pool

@@ -36,7 +36,7 @@ int cls_main(struct __sk_buff *skb) {
    *                    把 nodeMac 作为 srouce mac, mac 作为 target mac
    *                    然后重定向到目标 pod 留在 host 上的那半拉 veth
    *                    使用 bpf_redirect_peer 能直接给发到 ns 下
-   * 2.
+   * 2. 
    *  a. 如果没找到对应的 value 说明目标 ip 是集群内其他 node 的 pod
    *  b. 访问跨节点的 pod ip 需要将流量包给重定向到本机 vxlan 设备上
    *     vxlan 的设备 ifindex 从 NODE_LOCAL_MAP_DEFAULT_PATH 中获取

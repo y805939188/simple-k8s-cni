@@ -19,6 +19,15 @@ func (vx *VxlanCNI) GetMode() string {
 
 func (vx *VxlanCNI) Bootstrap(args *skel.CmdArgs, pluginConfig *cni.PluginConf) (*cni.CNIResult, error) {
 	utils.WriteLog("进到了 vxlan 模式了")
+
+	// 1. 创建一对儿 veth pair
+
+	// 2. 将 veth pair 的
+
+	// 2. 创建一块儿 vxlan 设备
+
+	// 3.
+
 	return nil, errors.New("tmp error")
 }
 
