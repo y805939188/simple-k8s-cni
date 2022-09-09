@@ -2,13 +2,30 @@ package utils
 
 import (
 	"bufio"
-	// "fmt"
 	"io/ioutil"
 	"os"
 )
 
-const logPath string = "/root/ding/go/src/simple-k8s-cni/test-cni.log"
-const logErrPath string = "/root/ding/go/src/simple-k8s-cni/log.error.txt"
+const DEFAULT_LOG_PATH = "/root/ding/go/src/simple-k8s-cni/test-cni.log"
+
+var CURRENT_LOG_PATH = os.Getenv("TEST_CNI_LOG_PATH")
+
+const DEFAULT_LOG_ERROR_PATH = "/root/ding/go/src/simple-k8s-cni/test-cni.log"
+
+var CURRENT_LOG_ERROR_PATH = os.Getenv("TEST_CNI_LOG_ERROR_PATH")
+
+var logPath string
+var logErrPath string
+
+func init() {
+	logPath = DEFAULT_LOG_PATH
+	if CURRENT_LOG_PATH != "" {
+		logPath = CURRENT_LOG_PATH
+	}
+	if CURRENT_LOG_ERROR_PATH != "" {
+		logErrPath = CURRENT_LOG_ERROR_PATH
+	}
+}
 
 func WriteFile(content ...string) {
 	contentRes := ""
