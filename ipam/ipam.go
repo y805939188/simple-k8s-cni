@@ -118,15 +118,9 @@ func getIpamMaskSegment() string {
 	return ipam.MaskSegment
 }
 
-func getIpamMaskIP() string {
-	ipam, _ := GetIpamService()
-	return ipam.MaskIP
-}
-
 func getHostPath() string {
 	hostname, err := os.Hostname()
 	if err != nil {
-		// fmt.Println("获取主机名失败: ", err.Error())
 		return "/test-error-path"
 	}
 	return getEtcdPathWithPrefix("/" + getIpamSubnet() + "/" + getIpamMaskSegment() + "/" + hostname)
@@ -197,6 +191,9 @@ func isRetainIP(ip string) bool {
 	return _arr[3] == "0"
 }
 
+/**
+ * 将参数的 ips 设置到 etcd 中
+ */
 func (s *Set) IPs(ips ...string) error {
 	defer unlock()
 	// 先拿到当前主机对应的网段
@@ -572,6 +569,9 @@ func (g *Get) UnusedIP() (string, error) {
 	}
 }
 
+/**
+ * 释放这堆 ip
+ */
 func (r *Release) IPs(ips ...string) error {
 	defer unlock()
 	currentNetwork, err := r.etcdClient.Get(getHostPath())
