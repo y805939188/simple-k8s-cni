@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"testcni/cni"
+	"testcni/helper"
 
 	_ "testcni/plugins/hostgw"
 	_ "testcni/plugins/vxlan/vxlan"
@@ -16,17 +17,17 @@ import (
 
 func cmdAdd(args *skel.CmdArgs) error {
 	utils.WriteLog("进入到 cmdAdd")
-	TmpLogArgs(args)
+	helper.TmpLogArgs(args)
 
 	// 从 args 里把 config 给捞出来
-	pluginConfig := getConfigs(args)
+	pluginConfig := helper.GetConfigs(args)
 	if pluginConfig == nil {
 		errMsg := fmt.Sprintf("add: 从 args 中获取 plugin config 失败, config: %s", string(args.StdinData))
 		utils.WriteLog(errMsg)
 		return errors.New(errMsg)
 	}
 
-	mode, cniVersion := getBaseInfo(pluginConfig)
+	mode, cniVersion := helper.GetBaseInfo(pluginConfig)
 	if pluginConfig.CNIVersion == "" {
 		pluginConfig.CNIVersion = cniVersion
 	}
@@ -60,15 +61,15 @@ func cmdAdd(args *skel.CmdArgs) error {
 
 func cmdDel(args *skel.CmdArgs) error {
 	utils.WriteLog("进入到 cmdDel")
-	TmpLogArgs(args)
+	helper.TmpLogArgs(args)
 
-	pluginConfig := getConfigs(args)
+	pluginConfig := helper.GetConfigs(args)
 	if pluginConfig == nil {
 		errMsg := fmt.Sprintf("del: 从 args 中获取 plugin config 失败, config: %s", string(args.StdinData))
 		utils.WriteLog(errMsg)
 		return errors.New(errMsg)
 	}
-	mode, _ := getBaseInfo(pluginConfig)
+	mode, _ := helper.GetBaseInfo(pluginConfig)
 
 	cniManager := cni.
 		GetCNIManager().
@@ -84,15 +85,15 @@ func cmdDel(args *skel.CmdArgs) error {
 
 func cmdCheck(args *skel.CmdArgs) error {
 	utils.WriteLog("进入到 cmdCheck")
-	TmpLogArgs(args)
+	helper.TmpLogArgs(args)
 
-	pluginConfig := getConfigs(args)
+	pluginConfig := helper.GetConfigs(args)
 	if pluginConfig == nil {
 		errMsg := fmt.Sprintf("check: 从 args 中获取 plugin config 失败, config: %s", string(args.StdinData))
 		utils.WriteLog(errMsg)
 		return errors.New(errMsg)
 	}
-	mode, _ := getBaseInfo(pluginConfig)
+	mode, _ := helper.GetBaseInfo(pluginConfig)
 
 	cniManager := cni.
 		GetCNIManager().

@@ -11,10 +11,12 @@ import (
 	"os"
 	"strings"
 	"sync"
+	"testcni/client"
+	"testcni/consts"
 	"testcni/etcd"
+	"testcni/helper"
 	"testcni/utils"
 
-	"github.com/dlclark/regexp2"
 	"github.com/vishvananda/netlink"
 	oriEtcd "go.etcd.io/etcd/client/v3"
 )
@@ -23,9 +25,18 @@ const (
 	prefix = "testcni/ipam"
 )
 
-type Get struct{ etcdClient *etcd.EtcdClient }
-type Release struct{ etcdClient *etcd.EtcdClient }
-type Set struct{ etcdClient *etcd.EtcdClient }
+type Get struct {
+	etcdClient *etcd.EtcdClient
+	k8sClient  *client.LightK8sClient
+}
+type Release struct {
+	etcdClient *etcd.EtcdClient
+	k8sClient  *client.LightK8sClient
+}
+type Set struct {
+	etcdClient *etcd.EtcdClient
+	k8sClient  *client.LightK8sClient
+}
 
 type operators struct {
 	Get     *Get
@@ -46,11 +57,14 @@ type Network struct {
 }
 
 type IpamService struct {
-	Subnet string
-	// Mask        string
-	MaskSegment string
-	MaskIP      string
-	EtcdClient  *etcd.EtcdClient
+	Subnet             string
+	MaskSegment        string
+	MaskIP             string
+	PodMaskSegment     string
+	PodMaskIP          string
+	CurrentHostNetwork string
+	EtcdClient         *etcd.EtcdClient
+	K8sClient          *client.LightK8sClient
 	*operator
 }
 
@@ -78,6 +92,20 @@ func getEtcdClient() *etcd.EtcdClient {
 		return nil
 	}
 	return etcdClient
+}
+
+func getLightK8sClient() *client.LightK8sClient {
+	paths, err := helper.GetHostAuthenticationInfoPath()
+	if err != nil {
+		utils.WriteLog("GetHostAuthenticationInfoPath 执行失败")
+		return nil
+	}
+	client.Init(paths.CaPath, paths.CertPath, paths.KeyPath)
+	k8sClient, err := client.GetLightK8sClient()
+	if err != nil {
+		return nil
+	}
+	return k8sClient
 }
 
 func getIpamSubnet() string {
@@ -120,6 +148,7 @@ var getSet = func() func() *Set {
 		}
 		_set = &Set{}
 		_set.etcdClient = getEtcdClient()
+		_set.k8sClient = getLightK8sClient()
 		return _set
 	}
 }()
@@ -132,6 +161,7 @@ var getGet = func() func() *Get {
 		}
 		_get = &Get{}
 		_get.etcdClient = getEtcdClient()
+		_get.k8sClient = getLightK8sClient()
 		return _get
 	}
 }()
@@ -144,6 +174,7 @@ var getRelase = func() func() *Release {
 		}
 		_release = &Release{}
 		_release.etcdClient = getEtcdClient()
+		_release.k8sClient = getLightK8sClient()
 		return _release
 	}
 }()
@@ -197,13 +228,14 @@ func (s *Set) IPs(ips ...string) error {
 			}
 		}
 	}
+	// s.
 	s.etcdClient.Set(getRecordPath(currentNetwork), _tempIPs)
 	// return unlock()
 	return nil
 }
 
 // 根据主机名获取一个当前主机可用的网段
-func (is *IpamService) _NetworkInit(hostPath, poolPath string) (string, error) {
+func (is *IpamService) networkInit(hostPath, poolPath string) (string, error) {
 	lock()
 	defer unlock()
 	network, err := is.EtcdClient.Get(hostPath)
@@ -283,6 +315,9 @@ func (is *IpamService) _IPsPoolInit(poolPath string) error {
 	return is.EtcdClient.Set(poolPath, _tempIpStr)
 }
 
+/**
+ * 用来获取集群中全部的 host name
+ */
 func (g *Get) NodeNames() ([]string, error) {
 	defer unlock()
 	const _minionsNodePrefix = "/registry/minions/"
@@ -302,6 +337,9 @@ func (g *Get) NodeNames() ([]string, error) {
 	return res, nil
 }
 
+/**
+ * 获取集群中全部节点的网络信息
+ */
 func (g *Get) AllHostNetwork() ([]*Network, error) {
 	names, err := g.NodeNames()
 	if err != nil {
@@ -344,6 +382,9 @@ func (g *Get) AllHostNetwork() ([]*Network, error) {
 	return res, nil
 }
 
+/**
+ * 获取本机网卡的信息
+ */
 func (g *Get) HostNetwork() (*Network, error) {
 	// 先拿到本机上所有的网络相关设备
 	linkList, err := netlink.LinkList()
@@ -354,7 +395,6 @@ func (g *Get) HostNetwork() (*Network, error) {
 	// 先获取一下 ipam
 	ipam, err := GetIpamService()
 	if err != nil {
-		// fmt.Println("在 HostNetwork 方法中获取 ipam svc 失败: ", err.Error())
 		return nil, err
 	}
 	// 然后拿本机的 hostname
@@ -395,10 +435,10 @@ func (g *Get) HostNetwork() (*Network, error) {
 			}
 		}
 	}
-	// fmt.Println("没找到有效的网卡")
-	return nil, fmt.Errorf("No valid network device found")
+	return nil, errors.New("no valid network device found")
 }
 
+// 获取当前节点被分配到的网段 + mask
 func (g *Get) CIDR(hostName string) (string, error) {
 	defer unlock()
 
@@ -406,7 +446,7 @@ func (g *Get) CIDR(hostName string) (string, error) {
 
 	etcd := getEtcdClient()
 	if etcd == nil {
-		return "", fmt.Errorf("etcd client not found")
+		return "", errors.New("etcd client not found")
 	}
 
 	cidr, err := etcd.Get(_cidrPath)
@@ -418,47 +458,31 @@ func (g *Get) CIDR(hostName string) (string, error) {
 		return "", fmt.Errorf("the host %s cidr not found", hostName)
 	}
 
-	// TODO: 先默让网段都按照 24 算, 这里可能会改
-	cidr += "/24"
+	// 先获取一下 ipam
+	ipam, err := GetIpamService()
+	if err != nil {
+		return "", err
+	}
+	cidr += ("/" + ipam.PodMaskSegment)
 
 	return cidr, nil
 }
 
+/**
+ * 根据 host name 获取节点 ip
+ */
 func (g *Get) NodeIp(hostName string) (string, error) {
 	defer unlock()
-
-	const _minionsNodePrefix = "/registry/minions/"
-	val, err := g.etcdClient.Get(_minionsNodePrefix + hostName)
-
+	node, err := g.k8sClient.Get().Node(hostName)
 	if err != nil {
-		utils.WriteLog("获取集群节点 ip 失败, err: ", err.Error())
 		return "", err
 	}
-
-	r, err := regexp2.Compile(`(?<=InternalIP).*(?=\*)`, 0)
-
-	if err != nil {
-		utils.WriteLog("初始化正则表达式失败, err: ", err.Error())
-		return "", nil
+	for _, addr := range node.Status.Addresses {
+		if addr.Type == "InternalIP" {
+			return addr.Address, nil
+		}
 	}
-	ip, err := r.FindStringMatch(val)
-	if err != nil {
-		utils.WriteLog("正则匹配 ip 失败, err: ", err.Error())
-		return "", nil
-	}
-	// fmt.Println("这里的 ip 是: ", ip)
-	if ip == nil {
-		return "", fmt.Errorf("没有找到 ip")
-	}
-	// TODO: 这里匹配出来的东西很诡异, 匹配出来的 ip 前头会有个两个字节分别是 18 和 14
-	// 不知道是不是 etcd 中存储的文档的特殊格式还是咋得, 真 der
-	// 这里先 hack 得强行把它替换成空
-	_ip := strings.Replace(ip.String(), string([]byte{18, 14}), "", 1)
-	if len(_ip) > 0 {
-		return _ip, nil
-	}
-
-	return "", fmt.Errorf("没有找到 ip")
+	return "", errors.New("没有找到 ip")
 }
 
 func (g *Get) nextUnusedIP() (string, error) {
@@ -616,6 +640,21 @@ func getEtcdPathWithPrefix(path string) string {
 	return "/" + prefix + "/" + path
 }
 
+func getMaskIpFromNum(numStr string) string {
+	switch numStr {
+	case "8":
+		return "255.0.0.0"
+	case "16":
+		return "255.255.0.0"
+	case "24":
+		return "255.255.255.0"
+	case "32":
+		return "255.255.255.255"
+	default:
+		return "255.255.0.0"
+	}
+}
+
 var __GetIpamService func() (*IpamService, error)
 
 func _GetIpamService(subnet string, maskSegment ...string) func() (*IpamService, error) {
@@ -627,44 +666,40 @@ func _GetIpamService(subnet string, maskSegment ...string) func() (*IpamService,
 			return _ipam, nil
 		} else {
 			_subnet := subnet
-			var _maskSegment string
+			var _maskSegment string = consts.DEFAULT_MASK_NUM
+			var _podIpMaskSegment string = consts.DEFAULT_MASK_NUM
 
 			if len(maskSegment) > 0 {
 				_maskSegment = maskSegment[0]
 			}
+			if len(maskSegment) > 1 {
+				_podIpMaskSegment = maskSegment[1]
+			}
 
+			// 配置文件中传参数的时候可能直接传了个子网掩码
+			// 传了的话就直接使用这个掩码
 			if withMask := strings.Contains(subnet, "/"); withMask {
 				subnetAndMask := strings.Split(subnet, "/")
 				_subnet = subnetAndMask[0]
 				_maskSegment = subnetAndMask[1]
 			}
 
-			var _maskIP string
-			switch _maskSegment {
-			case "8":
-				_maskIP = "255.0.0.0"
-				break
-			case "16":
-				_maskIP = "255.255.0.0"
-				break
-			case "24":
-				_maskIP = "255.255.255.0"
-				break
-			default:
-				_maskIP = "255.255.0.0"
-			}
+			var _maskIP string = getMaskIpFromNum(_maskSegment)
+			var _podMaskIP string = getMaskIpFromNum(_podIpMaskSegment)
 
 			// 如果不是合法的子网地址的话就强转成合法
 			// 比如 _subnet 传了个数字过来, 要给它先干成 a.b.c.d 的样子
 			// 然后 & maskIP, 给做成类似 a.b.0.0 的样子
 			_subnet = utils.InetInt2Ip(utils.InetIP2Int(_subnet) & utils.InetIP2Int(_maskIP))
 			_ipam = &IpamService{
-				Subnet: _subnet,
-				// Mask:        _maskSegment,
-				MaskSegment: _maskSegment, // 掩码 10 进制
-				MaskIP:      _maskIP,      // 掩码 ip
+				Subnet:         _subnet,           // 子网网段
+				MaskSegment:    _maskSegment,      // 掩码 10 进制
+				MaskIP:         _maskIP,           // 掩码 ip
+				PodMaskSegment: _podIpMaskSegment, // pod 的 mask 10 进制
+				PodMaskIP:      _podMaskIP,        // pod 的 mask ip
 			}
 			_ipam.EtcdClient = getEtcdClient()
+			_ipam.K8sClient = getLightK8sClient()
 			// 初始化一个 ip 网段的 pool
 			// 如果已经初始化过就不再初始化
 			poolPath := getEtcdPathWithPrefix("/" + _ipam.Subnet + "/" + _ipam.MaskSegment + "/" + "pool")
@@ -680,10 +715,11 @@ func _GetIpamService(subnet string, maskSegment ...string) func() (*IpamService,
 				return nil, err
 			}
 			hostPath := getEtcdPathWithPrefix("/" + _ipam.Subnet + "/" + _ipam.MaskSegment + "/" + hostname)
-			_, err = _ipam._NetworkInit(hostPath, poolPath)
+			currentHostNetwork, err := _ipam.networkInit(hostPath, poolPath)
 			if err != nil {
 				return nil, err
 			}
+			_ipam.CurrentHostNetwork = currentHostNetwork
 			return _ipam, nil
 		}
 	}
@@ -701,8 +737,19 @@ func GetIpamService() (*IpamService, error) {
 	return ipamService, nil
 }
 
-func Init(subnet string, maskSegment ...string) {
+func (is *IpamService) clear() error {
+	return is.EtcdClient.Del("/"+prefix, oriEtcd.WithPrefix())
+}
+
+func Init(subnet string, maskSegment ...string) func() error {
 	if __GetIpamService == nil {
 		__GetIpamService = _GetIpamService(subnet, maskSegment...)
 	}
+	is, err := GetIpamService()
+	if err != nil {
+		return func() error {
+			return err
+		}
+	}
+	return is.clear
 }

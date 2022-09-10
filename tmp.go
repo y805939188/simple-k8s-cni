@@ -3,20 +3,7 @@ package main
 import (
 	"fmt"
 	"testcni/ipam"
-	"testcni/skel"
-	"testcni/utils"
 )
-
-func TmpLogArgs(args *skel.CmdArgs) {
-	utils.WriteLog(
-		"这里的 CmdArgs 是: ", "ContainerID: ", args.ContainerID,
-		"Netns: ", args.Netns,
-		"IfName: ", args.IfName,
-		"Args: ", args.Args,
-		"Path: ", args.Path,
-		"StdinData: ", string(args.StdinData),
-	)
-}
 
 // 用来临时清理一些东西
 func Tmp_test_clear_etcd() {

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"os"
 	"strings"
+	"testcni/utils"
 	"time"
 
 	"go.etcd.io/etcd/client/pkg/v3/transport"
@@ -105,7 +106,8 @@ func _GetEtcdClient() func() (*EtcdClient, error) {
 			status, err := client.Status(context.TODO(), etcdEp)
 
 			if err != nil {
-				// fmt.Println("无法获取到 etcd 版本: ", err.Error())
+				utils.WriteLog("无法获取到 etcd 版本")
+				return nil, err
 			}
 
 			if client != nil {
@@ -136,11 +138,11 @@ func (c *EtcdClient) Set(key, value string) error {
 	if err != nil {
 		return err
 	}
-	return err
+	return nil
 }
 
-func (c *EtcdClient) Del(key string) error {
-	_, err := c.client.Delete(context.TODO(), key)
+func (c *EtcdClient) Del(key string, opts ...etcd.OpOption) error {
+	_, err := c.client.Delete(context.TODO(), key, opts...)
 
 	if err != nil {
 		return err
@@ -208,8 +210,6 @@ func (c *EtcdClient) GetAllKey(key string, opts ...etcd.OpOption) ([]string, err
 	var res []string
 
 	for _, ev := range resp.Kvs {
-		// fmt.Println("这里的 ev 是: ", ev)
-		// fmt.Printf("%s : %s\n", ev.Key, ev.Value)
 		res = append(res, string(ev.Key))
 	}
 

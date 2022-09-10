@@ -2,7 +2,7 @@ package bpf_map
 
 import (
 	"fmt"
-	"os"
+	"testcni/utils"
 
 	"github.com/cilium/ebpf"
 )
@@ -13,17 +13,6 @@ import (
 // 	MAC:     4,
 // 	NodeMAC: 5,
 // })
-
-func PathExists(path string) bool {
-	_, err := os.Stat(path)
-	if err == nil {
-		return true
-	}
-	if os.IsNotExist(err) {
-		return false
-	}
-	return false
-}
 
 func GetMapByPinned(pinPath string, opts ...*ebpf.LoadPinOptions) *ebpf.Map {
 	var options *ebpf.LoadPinOptions
@@ -72,7 +61,7 @@ func CreateOnceMapWithPin(
 	maxEntries uint32,
 	flags uint32,
 ) (*ebpf.Map, error) {
-	if PathExists(pinPath) {
+	if utils.PathExists(pinPath) {
 		return GetMapByPinned(pinPath), nil
 	}
 	m, err := createMap(
