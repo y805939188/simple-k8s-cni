@@ -8,6 +8,7 @@ import (
 	"testcni/utils"
 	"time"
 
+	"go.etcd.io/etcd/api/v3/mvccpb"
 	"go.etcd.io/etcd/client/pkg/v3/transport"
 	etcd "go.etcd.io/etcd/client/v3"
 )
@@ -24,8 +25,17 @@ type EtcdConfig struct {
 	EtcdCACertFile   string `json:"etcdCACertFile" envconfig:"APIV1_ETCD_CA_CERT_FILE"`
 }
 
+type Watcher struct {
+	client        *EtcdClient
+	watcher       etcd.Watcher
+	cancelWatcher context.CancelFunc
+	ctx           context.Context
+	// kMap map[string]
+}
+
 type EtcdClient struct {
 	client  *etcd.Client
+	watcher *Watcher
 	Version string
 }
 
@@ -150,6 +160,17 @@ func (c *EtcdClient) Del(key string, opts ...etcd.OpOption) error {
 	return err
 }
 
+func (c *EtcdClient) GetVersion(key string, opts ...etcd.OpOption) (int64, error) {
+	resp, err := c.client.Get(context.TODO(), key, opts...)
+	if err != nil {
+		return 0, err
+	}
+	if len(resp.Kvs) > 0 {
+		return resp.Kvs[len(resp.Kvs)-1:][0].Version, nil
+	}
+	return 0, nil
+}
+
 func (c *EtcdClient) Get(key string, opts ...etcd.OpOption) (string, error) {
 	resp, err := c.client.Get(context.TODO(), key, opts...)
 	if err != nil {
@@ -214,4 +235,66 @@ func (c *EtcdClient) GetAllKey(key string, opts ...etcd.OpOption) ([]string, err
 	}
 
 	return res, nil
+}
+
+func (c *EtcdClient) Watch(key string, cb watchCallback) {
+	go func() {
+		for {
+			change := c.client.Watch(context.Background(), key)
+			for wresp := range change {
+				for _, ev := range wresp.Events {
+					cb(ev.Type, ev.Kv.Key, ev.Kv.Value)
+				}
+			}
+		}
+	}()
+}
+
+func (w *Watcher) Done() <-chan struct{} {
+	return w.ctx.Done()
+}
+
+func (w *Watcher) Deadline() (deadline time.Time, ok bool) {
+	return w.ctx.Deadline()
+}
+
+func (w *Watcher) Error() error {
+	return w.ctx.Err()
+}
+
+func (w *Watcher) Value(_any interface{}) interface{} {
+	return w.ctx.Value(_any)
+}
+
+func (w *Watcher) Cancel() {
+	w.cancelWatcher()
+}
+
+type watchCallback func(_type mvccpb.Event_EventType, key, value []byte)
+
+func (w *Watcher) Watch(key string, cb watchCallback) {
+	go func() {
+		for {
+			change := w.watcher.Watch(context.Background(), key)
+			for wresp := range change {
+				for _, ev := range wresp.Events {
+					cb(ev.Type, ev.Kv.Key, ev.Kv.Value)
+				}
+			}
+		}
+	}()
+}
+
+func (c *EtcdClient) GetWatcher() (*Watcher, error) {
+	if c.watcher != nil {
+		return c.watcher, nil
+	}
+	watcher := &Watcher{client: c}
+	_watcher := etcd.NewWatcher(c.client)
+	watcher.watcher = _watcher
+	ctx, cancelFunc := context.WithCancel(context.TODO())
+	watcher.cancelWatcher = cancelFunc
+	watcher.ctx = ctx
+
+	return watcher, nil
 }

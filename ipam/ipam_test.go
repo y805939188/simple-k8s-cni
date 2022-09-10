@@ -12,7 +12,9 @@ import (
 func TestIpam(t *testing.T) {
 	test := assert.New(t)
 
-	clear := Init("10.244.0.0", "16", "32")
+	// clear := Init("10.244.0.0", "16", "32")
+	Init("10.244.0.0", "16", "32")
+
 	is, err := GetIpamService()
 	if err != nil {
 		fmt.Println("ipam 初始化失败: ", err.Error())
@@ -72,6 +74,6 @@ func TestIpam(t *testing.T) {
 	test.Nil(err)
 	test.Len(ips, 1)
 
-	err = clear()
-	test.Nil(err)
+	// err = clear()
+	// test.Nil(err)
 }

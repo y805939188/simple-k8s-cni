@@ -22,11 +22,15 @@ func (vx *VxlanCNI) Bootstrap(args *skel.CmdArgs, pluginConfig *cni.PluginConf) 
 
 	// 1. 创建一对儿 veth pair
 
-	// 2. 将 veth pair 的
+	// 2. 将 veth pair 的信息写入到 LXC_MAP_DEFAULT_PATH
 
-	// 2. 创建一块儿 vxlan 设备
+	// 3. 将 veth pair 的 ip 与 node ip 的映射写入到 NODE_LOCAL_MAP_DEFAULT_PATH
 
-	// 3.
+	// 3. 将 veth pair 的 ip 与 node ip 的映射同步到 etcd
+
+	// 4. 创建一块儿 vxlan 设备
+
+	// 5.
 
 	return nil, errors.New("tmp error")
 }
