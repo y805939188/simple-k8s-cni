@@ -317,6 +317,8 @@ func (is *IpamService) _IPsPoolInit(poolPath string) error {
 
 /**
  * 用来获取集群中全部的 host name
+ * 这里直接从 etcd 的 key 下边查
+ * 不调 k8s 去捞, k8s 捞一次出来的东西太多了
  */
 func (g *Get) NodeNames() ([]string, error) {
 	defer unlock()
@@ -455,7 +457,7 @@ func (g *Get) CIDR(hostName string) (string, error) {
 	}
 
 	if cidr == "" {
-		return "", fmt.Errorf("the host %s cidr not found", hostName)
+		return "", nil
 	}
 
 	// 先获取一下 ipam
