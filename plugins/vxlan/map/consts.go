@@ -5,6 +5,10 @@ const (
 )
 
 const (
+	MAX_ENTRIES = 255
+)
+
+const (
 	DEFAULT_MAP_ROOT   = "/sys/fs/bpf"
 	DEFAULT_MAP_PREFIX = "tc/globals"
 )

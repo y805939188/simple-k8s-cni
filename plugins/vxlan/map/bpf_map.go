@@ -7,12 +7,19 @@ import (
 	"github.com/cilium/ebpf"
 )
 
-// err = m.Put(EndpointKey{IP: 6}, EndpointInfo{
-// 	IfIndex: 2,
-// 	LxcID:   3,
-// 	MAC:     4,
-// 	NodeMAC: 5,
-// })
+func SetMap(m *ebpf.Map, key, value interface{}) error {
+	// err := m.Put(EndpointKey{IP: 6}, EndpointInfo{
+	// 	IfIndex: 2,
+	// 	LxcID:   3,
+	// 	MAC:     4,
+	// 	NodeMAC: 5,
+	// })
+	return m.Put(key, value)
+}
+
+func GetMapValue(m *ebpf.Map, key, valueOut interface{}) error {
+	return m.Lookup(key, valueOut)
+}
 
 func GetMapByPinned(pinPath string, opts ...*ebpf.LoadPinOptions) *ebpf.Map {
 	var options *ebpf.LoadPinOptions
@@ -72,6 +79,10 @@ func CreateOnceMapWithPin(
 		maxEntries,
 		flags,
 	)
+	if err != nil {
+		return nil, err
+	}
+	err = m.Pin(pinPath)
 	if err != nil {
 		return nil, err
 	}

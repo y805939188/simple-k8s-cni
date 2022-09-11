@@ -22,8 +22,8 @@ type WatcherProcess struct {
 }
 
 type Handlers struct {
-	HostnameAndSubnetMapsHandler etcd.WatchCallback
-	SubnetRecordHandler          etcd.WatchCallback
+	// HostnameAndSubnetMapsHandler etcd.WatchCallback
+	SubnetRecordHandler etcd.WatchCallback
 }
 
 func (wp *WatcherProcess) doWatch(promise []string) {

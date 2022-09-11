@@ -3,6 +3,7 @@ package utils
 import (
 	"io"
 	"os"
+	"strings"
 )
 
 func PathExists(path string) bool {
@@ -14,6 +15,19 @@ func PathExists(path string) bool {
 		return false
 	}
 	return false
+}
+
+func substr(s string, pos, length int) string {
+	runes := []rune(s)
+	l := pos + length
+	if l > len(runes) {
+		l = len(runes)
+	}
+	return string(runes[pos:l])
+}
+
+func GetParentDirectory(dirctory string) string {
+	return substr(dirctory, 0, strings.LastIndex(dirctory, "/"))
 }
 
 func CreateFile(filename string, data []byte, perm os.FileMode) error {

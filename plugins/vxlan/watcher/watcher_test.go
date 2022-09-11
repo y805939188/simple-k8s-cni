@@ -6,15 +6,16 @@ import (
 	"testcni/etcd"
 	"testcni/ipam"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"go.etcd.io/etcd/api/v3/mvccpb"
 )
 
-func TestIpam(t *testing.T) {
+func TestWatcher(t *testing.T) {
 	test := assert.New(t)
-	// clear := ipam.Init("10.244.0.0", "16", "32")
-	ipam.Init("10.244.0.0", "16", "32")
+	clear := ipam.Init("10.244.0.0", "16", "32")
+	// ipam.Init("10.244.0.0", "16", "32")
 	etcd.Init()
 	i, err := ipam.GetIpamService()
 	test.Nil(err)
@@ -45,10 +46,11 @@ func TestIpam(t *testing.T) {
 	e.Set("/testcni/ipam/10.244.0.0/16/cni-test-666", "1.1.1.1")
 	// /testcni/ipam/10.244.0.0/16/maps: {1.1.1.1: cni-test-666, 10.244.71.6: cni-test-1}
 	e.Set("/testcni/ipam/10.244.0.0/16/maps", "{\"1.1.1.1\":\"cni-test-666\",\"10.244.71.6\":\"cni-test-1\"}")
+	time.Sleep(2 * time.Second)
 	// 增加一个 /testcni/ipam/10.244.0.0/16/cni-test-666/1.1.1.1: 2.2.2.2
 	e.Set("/testcni/ipam/10.244.0.0/16/cni-test-666/1.1.1.1", "2.2.2.2")
 	e.Set("/testcni/ipam/10.244.0.0/16/cni-test-666/1.1.1.1", "3.4.5.6")
 	wg.Wait()
 	test.Equal(nums, 2)
-	// clear()
+	clear()
 }

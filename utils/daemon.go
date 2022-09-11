@@ -1,9 +1,9 @@
-package daemon
+package utils
 
 import (
 	"fmt"
 	"log"
-	"time"
+	"os"
 
 	"github.com/sevlyar/go-daemon"
 )
@@ -12,23 +12,14 @@ func Parent() {
 	fmt.Println("这里的 parent")
 }
 
-func Child() {
-	i := 0
-	for {
-		i++
-		time.Sleep(1 * time.Second)
-		fmt.Println("这里的 i 是: ", i)
-		if i == 10 {
-			break
-		}
-	}
+func Child(f func()) {
+	f()
 }
 
-func Start() {
+func StartDeamon(f func()) *os.Process {
 
 	context := new(daemon.Context)
 	child, _ := context.Reborn()
-	fmt.Println("这里的 child 是: ", child)
 	if child != nil {
 		Parent()
 	} else {
@@ -37,7 +28,7 @@ func Start() {
 				log.Printf("Unable to release pid-file: %s", err.Error())
 			}
 		}()
-
-		Child()
+		Child(f)
 	}
+	return child
 }

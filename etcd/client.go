@@ -273,6 +273,10 @@ func (w *Watcher) Cancel() {
 
 func (w *Watcher) Watch(key string, cb WatchCallback) {
 	go func() {
+		defer func() {
+			w.Cancel()
+			time.Sleep(2 * time.Second)
+		}()
 		for {
 			change := w.watcher.Watch(context.Background(), key)
 			for wresp := range change {
