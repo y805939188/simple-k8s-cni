@@ -6,6 +6,7 @@ package ipam
  */
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
@@ -127,11 +128,41 @@ func getHostPath() string {
 }
 
 func getRecordPath(hostNetwork string) string {
-	return getEtcdPathWithPrefix(getHostPath() + "/" + hostNetwork)
+	return getHostPath() + "/" + hostNetwork
 }
 
 func getIPsPoolPath(subnet, mask string) string {
 	return getEtcdPathWithPrefix("/" + subnet + "/" + mask + "/" + "pool")
+}
+
+func (g *Get) HostSubnetMapPath() (string, error) {
+	ipam, err := GetIpamService()
+	if err != nil {
+		return "", err
+	}
+	m := fmt.Sprintf("/%s/%s/maps", ipam.Subnet, ipam.MaskSegment)
+	return getEtcdPathWithPrefix(m), nil
+}
+
+func (g *Get) HostSubnetMap() (map[string]string, error) {
+	ipam, err := GetIpamService()
+	if err != nil {
+		return nil, err
+	}
+	return ipam.getHostSubnetMap()
+}
+
+func (g *Get) RecordPathByHost(hostname string) (string, error) {
+	cidr, err := g.CIDR(hostname)
+	if err != nil {
+		return "", err
+	}
+	subnetAndMask := strings.Split(cidr, "/")
+	if len(subnetAndMask) > 1 {
+		path := fmt.Sprintf("/%s/%s/%s/%s", getIpamSubnet(), getIpamMaskSegment(), hostname, subnetAndMask[0])
+		return getEtcdPathWithPrefix(path), nil
+	}
+	return "", errors.New("can not get subnet address")
 }
 
 var getSet = func() func() *Set {
@@ -271,13 +302,71 @@ func (is *IpamService) networkInit(hostPath, poolPath string) (string, error) {
 	return currentHostNetwork, nil
 }
 
+// 获取主机名和网段的映射
+func (is *IpamService) getHostSubnetMap() (map[string]string, error) {
+	path, err := is.Get().HostSubnetMapPath()
+	if err != nil {
+		return nil, err
+	}
+
+	_maps, err := is.EtcdClient.Get(path)
+	if err != nil {
+		return nil, err
+	}
+
+	resMaps := map[string]string{}
+	err = json.Unmarshal(([]byte)(_maps), &resMaps)
+	if err != nil {
+		return nil, err
+	}
+	return resMaps, nil
+}
+
+// 初始化
+func (is *IpamService) subnetMapInit(subnet, mask, hostname, currentSubnet string) error {
+	lock()
+	defer unlock()
+	m := fmt.Sprintf("/%s/%s/maps", subnet, mask)
+	path := getEtcdPathWithPrefix(m)
+	maps, err := is.EtcdClient.Get(path)
+	if err != nil {
+		return err
+	}
+
+	if len(maps) == 0 {
+		_maps := map[string]string{}
+		_maps[currentSubnet] = hostname
+		mapsStr, err := json.Marshal(_maps)
+		if err != nil {
+			return err
+		}
+		return is.EtcdClient.Set(path, string(mapsStr))
+	}
+
+	_tmpMaps := map[string]string{}
+	err = json.Unmarshal(([]byte)(maps), &_tmpMaps)
+	if err != nil {
+		return err
+	}
+
+	if _, ok := _tmpMaps[currentSubnet]; ok {
+		return nil
+	}
+	_tmpMaps[currentSubnet] = hostname
+	mapsStr, err := json.Marshal(_tmpMaps)
+	if err != nil {
+		return err
+	}
+	return is.EtcdClient.Set(path, string(mapsStr))
+}
+
 /**
  * 用来初始化 ip 网段池
  * 比如 subnet 是 10.244.0.0, mask 是 24 的话
  * 就会在 etcd 中初始化出一个
  * 	10.244.0.0;10.244.1.0;10.244.2.0;......;10.244.254.0;10.244.255.0
  */
-func (is *IpamService) _IPsPoolInit(poolPath string) error {
+func (is *IpamService) ipsPoolInit(poolPath string) error {
 	lock()
 	defer unlock()
 	val, err := is.EtcdClient.Get(poolPath)
@@ -379,6 +468,28 @@ func (g *Get) AllHostNetwork() ([]*Network, error) {
 		}
 	}
 	return res, nil
+}
+
+/**
+ * 获取集群中除了本机以外的全部节点的网络信息
+ */
+func (g *Get) AllOtherHostNetwork() ([]*Network, error) {
+	networks, err := g.AllHostNetwork()
+	if err != nil {
+		return nil, err
+	}
+	hostname, err := os.Hostname()
+	if err != nil {
+		return nil, err
+	}
+	result := []*Network{}
+	for _, network := range networks {
+		if network.Hostname == hostname {
+			continue
+		}
+		result = append(result, network)
+	}
+	return result, nil
 }
 
 /**
@@ -705,7 +816,7 @@ func _GetIpamService(subnet string, maskSegment ...string) func() (*IpamService,
 			// 初始化一个 ip 网段的 pool
 			// 如果已经初始化过就不再初始化
 			poolPath := getEtcdPathWithPrefix("/" + _ipam.Subnet + "/" + _ipam.MaskSegment + "/" + "pool")
-			err := _ipam._IPsPoolInit(poolPath)
+			err := _ipam.ipsPoolInit(poolPath)
 			if err != nil {
 				return nil, err
 			}
@@ -721,6 +832,17 @@ func _GetIpamService(subnet string, maskSegment ...string) func() (*IpamService,
 			if err != nil {
 				return nil, err
 			}
+
+			err = _ipam.subnetMapInit(
+				_subnet,
+				_maskSegment,
+				hostname,
+				currentHostNetwork,
+			)
+			if err != nil {
+				return nil, err
+			}
+
 			_ipam.CurrentHostNetwork = currentHostNetwork
 			return _ipam, nil
 		}

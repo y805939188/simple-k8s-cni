@@ -16,10 +16,11 @@ func TestIpam(t *testing.T) {
 	Init("10.244.0.0", "16", "32")
 
 	is, err := GetIpamService()
-	if err != nil {
-		fmt.Println("ipam 初始化失败: ", err.Error())
-		return
-	}
+	test.Nil(err)
+	// record, err := is.Get().RecordPathByHost("cni-test-1")
+	// test.Nil(err)
+	// test.Equal(record, "/testcni/ipam/10.244.0.0/16/cni-test-1/10.244.215.0")
+	// return
 
 	test.Equal(is.Subnet, "10.244.0.0")
 	test.Equal(is.MaskSegment, "16")
@@ -51,10 +52,20 @@ func TestIpam(t *testing.T) {
 	test.Nil(err)
 	for _, network := range networks {
 		fmt.Println("节点 ", network.Name, " 的 ip 是: ", network.IP)
+		fmt.Println("节点 ", network.Name, " 的 cidr 是: ", network.CIDR)
 		if network.IP == hostIp {
 			test.Equal(cidr, network.CIDR)
 		}
 	}
+
+	path, err := is.Get().HostSubnetMapPath()
+	test.Nil(err)
+	test.Equal(path, "/testcni/ipam/10.244.0.0/16/maps")
+	maps, err := is.Get().HostSubnetMap()
+	test.Nil(err)
+	test.Len(maps, 1)
+	test.NotNil(maps[is.CurrentHostNetwork])
+	test.Equal(maps[is.CurrentHostNetwork], hostName)
 
 	/********** test set **********/
 	ip := strings.Split(is.CurrentHostNetwork, ".")

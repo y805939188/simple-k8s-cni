@@ -13,6 +13,8 @@ import (
 	etcd "go.etcd.io/etcd/client/v3"
 )
 
+type WatchCallback func(_type mvccpb.Event_EventType, key, value []byte)
+
 type EtcdConfig struct {
 	EtcdScheme       string `json:"etcdScheme" envconfig:"APIV1_ETCD_SCHEME" default:""`
 	EtcdAuthority    string `json:"etcdAuthority" envconfig:"APIV1_ETCD_AUTHORITY" default:""`
@@ -153,7 +155,6 @@ func (c *EtcdClient) Set(key, value string) error {
 
 func (c *EtcdClient) Del(key string, opts ...etcd.OpOption) error {
 	_, err := c.client.Delete(context.TODO(), key, opts...)
-
 	if err != nil {
 		return err
 	}
@@ -237,7 +238,7 @@ func (c *EtcdClient) GetAllKey(key string, opts ...etcd.OpOption) ([]string, err
 	return res, nil
 }
 
-func (c *EtcdClient) Watch(key string, cb watchCallback) {
+func (c *EtcdClient) Watch(key string, cb WatchCallback) {
 	go func() {
 		for {
 			change := c.client.Watch(context.Background(), key)
@@ -270,9 +271,7 @@ func (w *Watcher) Cancel() {
 	w.cancelWatcher()
 }
 
-type watchCallback func(_type mvccpb.Event_EventType, key, value []byte)
-
-func (w *Watcher) Watch(key string, cb watchCallback) {
+func (w *Watcher) Watch(key string, cb WatchCallback) {
 	go func() {
 		for {
 			change := w.watcher.Watch(context.Background(), key)
@@ -283,6 +282,8 @@ func (w *Watcher) Watch(key string, cb watchCallback) {
 			}
 		}
 	}()
+	// TODO: sleep change to sync
+	time.Sleep(1 * time.Second)
 }
 
 func (c *EtcdClient) GetWatcher() (*Watcher, error) {
