@@ -56,6 +56,26 @@ struct {
 // 加了 SEC(".maps") 的话, clang 在编译时需要加 -g 参数用来生成调试信息
 } ding_lxc __section_maps_btf;
 
+
+
+
+struct podNodeKey {
+  __u32 ip;
+};
+
+struct podNodeValue {
+  __u32 ip;
+};
+
+struct {
+	__uint(type, BPF_MAP_TYPE_HASH);
+  __uint(max_entries, 255);
+	__type(key, struct podNodeKey);
+  __type(value, struct podNodeValue);
+  __uint(pinning, LIBBPF_PIN_BY_NAME);
+} ding_ip __section_maps_btf;
+
+
 // struct bpf_map_def ding_lxc = {
 //   .type = BPF_MAP_TYPE_HASH,
 //   .key_size = sizeof(struct endpointKey),
@@ -111,12 +131,19 @@ int cls_main(struct __sk_buff *skb) {
     bpf_skb_store_bytes(skb, offsetof(struct ethhdr, h_source), dst_mac, ETH_ALEN, 0);
 	  bpf_skb_store_bytes(skb, offsetof(struct ethhdr, h_dest), src_mac, ETH_ALEN, 0);
     return bpf_redirect_peer(ep->lxcIfIndex, 0);
-  } else {
-    bpf_printk("get value failed 999");
+  }
+  bpf_printk("get value failed from ding_lxc, try to find from ding_ip");
+  struct podNodeKey podNodeKey = {};
+  podNodeKey.ip = dst_ip;
+  struct podNodeValue *podNode = bpf_map_lookup_elem(&ding_ip, &podNodeKey);
+  if (podNode) {
+    bpf_printk("get value succeed from ding_ip, pod node ip: %d", podNode->ip);
+
     return TC_ACT_UNSPEC;
+    // return TC_ACT_OK;
   }
   
-  return TC_ACT_OK;
+  return TC_ACT_UNSPEC;
 }
 
 char _license[] SEC("license") = "GPL";

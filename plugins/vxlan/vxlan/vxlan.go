@@ -8,9 +8,7 @@ import (
 	"strings"
 	"testcni/cni"
 	"testcni/consts"
-	"testcni/etcd"
 	_etcd "testcni/etcd"
-	"testcni/ipam"
 	_ipam "testcni/ipam"
 	"testcni/nettools"
 	bpf_map "testcni/plugins/vxlan/map"
@@ -31,7 +29,7 @@ func (vx *VxlanCNI) GetMode() string {
 	return MODE
 }
 
-func startWatchNodeChange(ipam *ipam.IpamService, etcd *etcd.EtcdClient) error {
+func startWatchNodeChange(ipam *_ipam.IpamService, etcd *_etcd.EtcdClient) error {
 	// 如果这个默认端口已经正在使用了, 则认为之前已经有 pod 在在调用 cni 时启动过监听进程了, 这里可直接跳过
 	pidInt, pidStr, err := utils.GetPidByPort(consts.DEFAULT_TMP_PORT)
 	if err == nil && pidInt != -1 {
@@ -57,7 +55,7 @@ func startWatchNodeChange(ipam *ipam.IpamService, etcd *etcd.EtcdClient) error {
 	return watcher.StartMapWatcher(ipam, etcd)
 }
 
-func initEveryClient(args *skel.CmdArgs, pluginConfig *cni.PluginConf) (*ipam.IpamService, *etcd.EtcdClient, *bpf_map.MapsManager, error) {
+func initEveryClient(args *skel.CmdArgs, pluginConfig *cni.PluginConf) (*_ipam.IpamService, *_etcd.EtcdClient, *bpf_map.MapsManager, error) {
 	_ipam.Init(pluginConfig.Subnet, "16", "32")
 	ipam, err := _ipam.GetIpamService()
 	if err != nil {

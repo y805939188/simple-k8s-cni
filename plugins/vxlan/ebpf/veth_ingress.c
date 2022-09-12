@@ -96,6 +96,7 @@ int cls_main(struct __sk_buff *skb) {
     // 在 "/sys/fs/bpf/tc/globals/ding_ip" 中查一下
     // 是的话发给 vxlan, 不是的话就撇了
     bpf_printk("get value failed from ding_lxc, try to find from ding_ip");
+
     return TC_ACT_UNSPEC;
   }
   
