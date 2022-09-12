@@ -1,7 +1,11 @@
-// #include "vmlinux.h"
 #include <linux/bpf.h>
 #include <linux/pkt_cls.h>
 #include <bpf/bpf_helpers.h>
+#include <linux/if_ether.h>
+#include <linux/ip.h>
+#include <netinet/in.h>
+
+#include "common.h"
 
 #ifndef __section
 # define __section(x)  __attribute__((section(x), used))
@@ -11,28 +15,39 @@
 # define __section_maps_btf		__section(".maps")
 #endif
 
-struct endpointInfo {
-  __u32 ifIndex;
-  __u16 lxcID;
-  __u16 _;
-  __u64 mac;
-  __u64 nodeMac;
-};
+// struct endpointInfo {
+//   __u32 ifIndex;
+//   __u16 lxcIfIndex;
+//   __u16 _;
+//   __u64 mac;
+//   __u64 nodeMac;
+// };
+
+// struct endpointInfo {
+//   __u32 ifIndex;
+//   __u32 lxcIfIndex;
+//   __u8 mac[8];
+//   __u8 nodeMac[8];
+// };
+
+// struct endpointKey {
+//   __u32 ip;
+// };
 
 struct endpointKey {
   __u32 ip;
 };
 
-// struct bpf_map_def ding_lxc = {
-//   .type = BPF_MAP_TYPE_HASH,
-//   .key_size = sizeof(struct endpointKey),
-//   .value_size = sizeof(struct endpointInfo),
-//   .max_entries = 65535,
-//   .map_flags = 0,
-// };
+struct endpointInfo {
+  __u32 ifIndex;
+  __u32 lxcIfIndex;
+  __u8 mac[8];
+  __u8 nodeMac[8];
+};
+
 struct {
 	__uint(type, BPF_MAP_TYPE_HASH);
-  __uint(max_entries, 65535);
+  __uint(max_entries, 255);
 	__type(key, struct endpointKey);
   __type(value, struct endpointInfo);
   // 如果别的地方已经往某条路径 pin 了, 需要加上这个属性
@@ -41,20 +56,66 @@ struct {
 // 加了 SEC(".maps") 的话, clang 在编译时需要加 -g 参数用来生成调试信息
 } ding_lxc __section_maps_btf;
 
+// struct bpf_map_def ding_lxc = {
+//   .type = BPF_MAP_TYPE_HASH,
+//   .key_size = sizeof(struct endpointKey),
+//   .value_size = sizeof(struct endpointInfo),
+//   .max_entries = 65535,
+//   .map_flags = 0,
+// };
+// struct {
+// 	__uint(type, BPF_MAP_TYPE_HASH);
+//   __uint(max_entries, 65535);
+// 	__type(key, struct endpointKey);
+//   __type(value, struct endpointInfo);
+//   // 如果别的地方已经往某条路径 pin 了, 需要加上这个属性
+//   // 并且 struct 的名字一定得和 bpftool map list 出来的 pinned 中的名字一样
+//   __uint(pinning, LIBBPF_PIN_BY_NAME);
+// // 加了 SEC(".maps") 的话, clang 在编译时需要加 -g 参数用来生成调试信息
+// } ding_lxc __section_maps_btf;
+
 __section("classifier")
 int cls_main(struct __sk_buff *skb) {
-  bpf_printk("key size: %d", sizeof(struct endpointKey));
-  bpf_printk("value size: %d", sizeof(struct endpointInfo));
-  struct endpointKey epKey = {};
-  epKey.ip = 6;
-
-  struct endpointInfo *ep = bpf_map_lookup_elem(&ding_lxc, &epKey);
-  // bpf_printk("33333: %d", ep);
-  if (!ep) {
-    bpf_printk("get value failed");
-  } else {
-    bpf_printk("value ifIndex: %d; nodeMac: %d", ep->ifIndex, ep->nodeMac);
+	void *data = (void *)(long)skb->data;
+	void *data_end = (void *)(long)skb->data_end;
+	if (data + sizeof(struct ethhdr) + sizeof(struct iphdr) > data_end) {
+    return TC_ACT_UNSPEC;
   }
+
+	struct ethhdr  *eth  = data;
+	struct iphdr   *ip   = (data + sizeof(struct ethhdr));
+  if (eth->h_proto != __constant_htons(ETH_P_IP)) {
+		return TC_ACT_UNSPEC;
+  }
+
+  // 在 go 那头儿往 ebpf 的 map 里存的时候我这个 arm 是按照小端序存的
+  // 这里给转成网络的大端序
+  __u32 src_ip = htonl(ip->saddr);
+	__u32 dst_ip = htonl(ip->daddr);
+  // 拿到 mac 地址
+  __u8 src_mac[ETH_ALEN];
+	__u8 dst_mac[ETH_ALEN];
+  struct endpointKey epKey = {};
+  epKey.ip = dst_ip;
+  // 在 lxc 中查找
+  struct endpointInfo *ep = bpf_map_lookup_elem(&ding_lxc, &epKey);
+  if (ep) {
+    // 如果能找到说明是要发往本机其他 pod 中的
+    bpf_printk("ifIndex: %d", ep->ifIndex);
+    bpf_printk("lxcIndex: %d", ep->lxcIfIndex);
+    bpf_printk("mac: %d", ep->mac);
+    bpf_printk("nodeMac: %d", ep->nodeMac);
+    // 把 mac 地址改成目标 pod 的两对儿 veth 的 mac 地址
+    bpf_memcpy(src_mac, ep->nodeMac, ETH_ALEN);
+	  bpf_memcpy(dst_mac, ep->mac, ETH_ALEN);
+    bpf_skb_store_bytes(skb, offsetof(struct ethhdr, h_source), dst_mac, ETH_ALEN, 0);
+	  bpf_skb_store_bytes(skb, offsetof(struct ethhdr, h_dest), src_mac, ETH_ALEN, 0);
+    return bpf_redirect_peer(ep->lxcIfIndex, 0);
+  } else {
+    bpf_printk("get value failed 999");
+    return TC_ACT_UNSPEC;
+  }
+  
   return TC_ACT_OK;
 }
 

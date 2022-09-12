@@ -6,6 +6,7 @@
 #include <linux/icmp.h>
 
 #include "common.h"
+#include "maps.h"
 
 __section("classifier")
 int cls_main(struct __sk_buff *skb) {
@@ -53,12 +54,52 @@ int cls_main(struct __sk_buff *skb) {
    *      不确定他们是怎么处理的 arp response
    *     )
    */
+  void *data = (void *)(long)skb->data;
+	void *data_end = (void *)(long)skb->data_end;
+  // 简单校验, 看看如果连 mac 头和 ip 头都没有的话那就直接 gg
+	if (data + sizeof(struct ethhdr) + sizeof(struct iphdr) > data_end) {
+    return TC_ACT_UNSPEC;
+  }
 
-  bpf_printk("host skb_len: %d", skb->data_end - skb->data);
-  // return bpf_redirect_peer(8, 0);
+	struct ethhdr  *eth  = data;
+	struct iphdr   *ip   = (data + sizeof(struct ethhdr));
+  if (eth->h_proto != __constant_htons(ETH_P_IP)) {
+		return TC_ACT_UNSPEC;
+  }
 
-  // return bpf_redirect_neigh(16, NULL, 0, 0);
-  return bpf_redirect(16, 0);
+  // 在 go 那头儿往 ebpf 的 map 里存的时候我这个 arm 是按照小端序存的
+  // 这里给转成网络的大端序
+  __u32 src_ip = htonl(ip->saddr);
+	__u32 dst_ip = htonl(ip->daddr);
+  // 准备好装 mac 地址的地儿
+  __u8 src_mac[ETH_ALEN];
+	__u8 dst_mac[ETH_ALEN];
+  struct endpointKey epKey = {};
+  epKey.ip = dst_ip;
+  // 先尝试在 lxc 中查找
+  struct endpointInfo *ep = bpf_map_lookup_elem(&ding_lxc, &epKey);
+  if (ep) {
+    // 如果能找到说明是要发往本机其他 pod 中的
+    // bpf_printk("ifIndex: %d", ep->ifIndex);
+    // bpf_printk("lxcIndex: %d", ep->lxcIfIndex);
+    // bpf_printk("mac: %d", ep->mac);
+    // bpf_printk("nodeMac: %d", ep->nodeMac);
+    // 把 mac 地址改成目标 pod 的两对儿 veth 的 mac 地址
+    bpf_memcpy(src_mac, ep->nodeMac, ETH_ALEN);
+	  bpf_memcpy(dst_mac, ep->mac, ETH_ALEN);
+    bpf_skb_store_bytes(skb, offsetof(struct ethhdr, h_source), dst_mac, ETH_ALEN, 0);
+	  bpf_skb_store_bytes(skb, offsetof(struct ethhdr, h_dest), src_mac, ETH_ALEN, 0);
+    // 流量通过 peer 重定向到查询到的 pod 的 veth 上
+    return bpf_redirect_peer(ep->lxcIfIndex, 0);
+  } else {
+    // 进到这里说明可能是要发往其他 node 的 pod 上
+    // 在 "/sys/fs/bpf/tc/globals/ding_ip" 中查一下
+    // 是的话发给 vxlan, 不是的话就撇了
+    bpf_printk("get value failed from ding_lxc, try to find from ding_ip");
+    return TC_ACT_UNSPEC;
+  }
+  
+  return TC_ACT_OK;
 }
 
 char _license[] SEC("license") = "GPL";

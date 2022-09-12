@@ -1,6 +1,7 @@
 {
   "files.associations": {
     "common.h": "c",
-    "if_arp.h": "c"
+    "if_arp.h": "c",
+    "in.h": "c"
   }
 }

@@ -382,14 +382,16 @@ func (vx *VxlanCNI) Bootstrap(args *skel.CmdArgs, pluginConfig *cni.PluginConf) 
 
 		// 9. 将 veth pair 的信息写入到 LXC_MAP_DEFAULT_PATH
 		err = setVethPairInfoToLxcMap(bpfmap, hostNs, podIP, hostPair, nsPair)
-		return err
+		if err != nil {
+			return err
+		}
+		// TODO(这步暂时不要好像也 ok): 10. 将 veth pair 的 ip 与 node ip 的映射写入到 NODE_LOCAL_MAP_DEFAULT_PATH
+		return nil
 	})
 
 	if err != nil {
 		return nil, err
 	}
-
-	// 10. 将 veth pair 的 ip 与 node ip 的映射写入到 NODE_LOCAL_MAP_DEFAULT_PATH
 
 	// 11. 给 veth pair 中留在 host 上的那半拉的 tc 打上 ingress 和 egress
 
