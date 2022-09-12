@@ -17,12 +17,12 @@ type EndpointMapKey struct {
 }
 
 type EndpointMapInfo struct {
-	IfIndex uint32
-	LxcID   uint16
-	Flag    uint8
-	_       uint8
-	MAC     uint64
-	NodeMAC uint64
+	IfIndex    uint32
+	LxcIfIndex uint32 // 标记另一半的 ifindex
+	// MAC        uint64
+	// NodeMAC    uint64
+	MAC     [8]byte
+	NodeMAC [8]byte
 }
 
 /********* 存整个集群的 pod ip 以及对应的 node ip *********/

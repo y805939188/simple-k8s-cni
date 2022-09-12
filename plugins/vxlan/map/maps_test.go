@@ -12,6 +12,12 @@ func TestWatcher(t *testing.T) {
 	test.Nil(err)
 	test.NotNil(mm)
 
+	// ip := utils.InetIpToUInt32("10.244.134.23")
+	// v, err := mm.GetLxcMapValue(EndpointMapKey{IP: ip})
+	// test.Nil(err)
+	// fmt.Println(v)
+	// return
+
 	/************ test create ************/
 	lxcMap, err := mm.CreateLxcMap()
 	test.Nil(err)
@@ -29,10 +35,10 @@ func TestWatcher(t *testing.T) {
 	err = mm.SetLxcMap(
 		EndpointMapKey{IP: 1},
 		EndpointMapInfo{
-			IfIndex: 2,
-			LxcID:   3,
-			MAC:     4,
-			NodeMAC: 5,
+			IfIndex:    2,
+			LxcIfIndex: 3,
+			MAC:        [8]byte{4},
+			NodeMAC:    [8]byte{5},
 		},
 	)
 	test.Nil(err)
@@ -56,16 +62,16 @@ func TestWatcher(t *testing.T) {
 		},
 		[]EndpointMapInfo{
 			{
-				IfIndex: 5,
-				LxcID:   5,
-				MAC:     5,
-				NodeMAC: 5,
+				IfIndex:    5,
+				LxcIfIndex: 5,
+				MAC:        [8]byte{5},
+				NodeMAC:    [8]byte{5},
 			},
 			{
-				IfIndex: 6,
-				LxcID:   6,
-				MAC:     6,
-				NodeMAC: 6,
+				IfIndex:    6,
+				LxcIfIndex: 6,
+				MAC:        [8]byte{6},
+				NodeMAC:    [8]byte{6},
 			},
 		},
 	)
@@ -102,10 +108,10 @@ func TestWatcher(t *testing.T) {
 	lxc, err := mm.GetLxcMapValue(EndpointMapKey{IP: 1})
 	test.Nil(err)
 	test.EqualValues(lxc, &EndpointMapInfo{
-		IfIndex: 2,
-		LxcID:   3,
-		MAC:     4,
-		NodeMAC: 5,
+		IfIndex:    2,
+		LxcIfIndex: 3,
+		MAC:        [8]byte{4},
+		NodeMAC:    [8]byte{5},
 	})
 
 	pod, err := mm.GetPodMapValue(PodNodeMapKey{IP: 10})

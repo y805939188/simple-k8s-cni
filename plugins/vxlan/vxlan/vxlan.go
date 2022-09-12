@@ -13,6 +13,7 @@ import (
 	"testcni/ipam"
 	_ipam "testcni/ipam"
 	"testcni/nettools"
+	bpf_map "testcni/plugins/vxlan/map"
 	"testcni/plugins/vxlan/watcher"
 	"testcni/skel"
 	"testcni/utils"
@@ -56,18 +57,23 @@ func startWatchNodeChange(ipam *ipam.IpamService, etcd *etcd.EtcdClient) error {
 	return watcher.StartMapWatcher(ipam, etcd)
 }
 
-func initEveryClient(args *skel.CmdArgs, pluginConfig *cni.PluginConf) (*ipam.IpamService, *etcd.EtcdClient, error) {
+func initEveryClient(args *skel.CmdArgs, pluginConfig *cni.PluginConf) (*ipam.IpamService, *etcd.EtcdClient, *bpf_map.MapsManager, error) {
 	_ipam.Init(pluginConfig.Subnet, "16", "32")
 	ipam, err := _ipam.GetIpamService()
 	if err != nil {
-		return nil, nil, errors.New(fmt.Sprintf("初始化 ipam 客户端失败: %s", err.Error()))
+		return nil, nil, nil, errors.New(fmt.Sprintf("初始化 ipam 客户端失败: %s", err.Error()))
 	}
 	_etcd.Init()
 	etcd, err := _etcd.GetEtcdClient()
 	if err != nil {
-		return nil, nil, errors.New(fmt.Sprintf("初始化 etcd 客户端失败: %s", err.Error()))
+		return nil, nil, nil, errors.New(fmt.Sprintf("初始化 etcd 客户端失败: %s", err.Error()))
 	}
-	return ipam, etcd, nil
+
+	bpfmap, err := bpf_map.GetMapsManager()
+	if err != nil {
+		return nil, nil, nil, errors.New(fmt.Sprintf("初始化 ebpf map 失败: %s", err.Error()))
+	}
+	return ipam, etcd, bpfmap, nil
 }
 
 func createHostVethPair(args *skel.CmdArgs, pluginConfig *cni.PluginConf) (*netlink.Veth, *netlink.Veth, error) {
@@ -146,20 +152,20 @@ func setHostVethIntoHost(ipam *_ipam.IpamService, veth *netlink.Veth, netns ns.N
 	return nil
 }
 
-func setIpIntoNsPair(ipam *_ipam.IpamService, veth *netlink.Veth) error {
+func setIpIntoNsPair(ipam *_ipam.IpamService, veth *netlink.Veth) (string, error) {
 	// 从 ipam 中拿到一个未使用的 ip 地址
 	podIP, err := ipam.Get().UnusedIP()
 	if err != nil {
 		utils.WriteLog("获取 podIP 出错, err: ", err.Error())
-		return err
+		return "", err
 	}
 	podIP = fmt.Sprintf("%s/%s", podIP, "32")
 	err = nettools.SetIpForVeth(veth, podIP)
 	if err != nil {
 		utils.WriteLog("给 ns veth 设置 ip 失败, err: ", err.Error())
-		return err
+		return "", err
 	}
-	return nil
+	return podIP, nil
 }
 
 func setUpVeth(veth *netlink.Veth) error {
@@ -230,6 +236,57 @@ func setUpHostPair(hostns ns.NetNS, veth *netlink.Veth) error {
 	})
 }
 
+func stuff8Byte(b []byte) [8]byte {
+	var res [8]byte
+	if len(b) > 8 {
+		b = b[0:9]
+	}
+
+	for index, _byte := range b {
+		res[index] = _byte
+	}
+	return res
+}
+
+func setVethPairInfoToLxcMap(bpfmap *bpf_map.MapsManager, hostNs ns.NetNS, podIP string, hostVeth, nsVeth *netlink.Veth) error {
+	err := hostNs.Do(func(nn ns.NetNS) error {
+		v, err := netlink.LinkByIndex(hostVeth.Attrs().Index)
+		if err != nil {
+			return err
+		}
+		hostVeth = v.(*netlink.Veth)
+		return nil
+	})
+	if err != nil {
+		return err
+	}
+	netip, _, err := net.ParseCIDR(podIP)
+	if err != nil {
+		return err
+	}
+	podIP = netip.String()
+
+	nsVethPodIp := utils.InetIpToUInt32(podIP)
+	hostVethIndex := uint32(hostVeth.Attrs().Index)
+	hostVethMac := stuff8Byte(([]byte)(hostVeth.Attrs().HardwareAddr))
+	nsVethIndex := uint32(nsVeth.Attrs().Index)
+	nsVethMac := stuff8Byte(([]byte)(nsVeth.Attrs().HardwareAddr))
+
+	_, err = bpfmap.CreateLxcMap()
+	if err != nil {
+		return err
+	}
+	return bpfmap.SetLxcMap(
+		bpf_map.EndpointMapKey{IP: nsVethPodIp},
+		bpf_map.EndpointMapInfo{
+			IfIndex:    nsVethIndex,
+			LxcIfIndex: hostVethIndex,
+			MAC:        nsVethMac,
+			NodeMAC:    hostVethMac,
+		},
+	)
+}
+
 /**
  * pluginConfig:
  * {
@@ -246,7 +303,7 @@ func (vx *VxlanCNI) Bootstrap(args *skel.CmdArgs, pluginConfig *cni.PluginConf) 
 	// return nil, errors.New("tmp error")
 
 	// 0. 先把各种能用的上的客户端初始化咯
-	ipam, _, err := initEveryClient(args, pluginConfig)
+	ipam, _, bpfmap, err := initEveryClient(args, pluginConfig)
 	if err != nil {
 		return nil, err
 	}
@@ -281,9 +338,10 @@ func (vx *VxlanCNI) Bootstrap(args *skel.CmdArgs, pluginConfig *cni.PluginConf) 
 		return nil, err
 	}
 
+	var nsPair, hostPair *netlink.Veth
 	err = (*netns).Do(func(hostNs ns.NetNS) error {
 		// 5. 创建一对儿 veth pair 作为 pod 的 veth
-		nsPair, hostPair, err := createNsVethPair(args, pluginConfig)
+		nsPair, hostPair, err = createNsVethPair(args, pluginConfig)
 		if err != nil {
 			return err
 		}
@@ -294,7 +352,7 @@ func (vx *VxlanCNI) Bootstrap(args *skel.CmdArgs, pluginConfig *cni.PluginConf) 
 		}
 
 		// 7. 给 ns 中的 veth 创建 ip/32, etcd 会自动通知其他 node
-		err = setIpIntoNsPair(ipam, nsPair)
+		podIP, err := setIpIntoNsPair(ipam, nsPair)
 		if err != nil {
 			return err
 		}
@@ -317,13 +375,19 @@ func (vx *VxlanCNI) Bootstrap(args *skel.CmdArgs, pluginConfig *cni.PluginConf) 
 		}
 
 		// 启动 ns 留在 host 上那半拉 veth
-		return setUpHostPair(hostNs, hostPair)
+		err = setUpHostPair(hostNs, hostPair)
+		if err != nil {
+			return err
+		}
+
+		// 9. 将 veth pair 的信息写入到 LXC_MAP_DEFAULT_PATH
+		err = setVethPairInfoToLxcMap(bpfmap, hostNs, podIP, hostPair, nsPair)
+		return err
 	})
 
 	if err != nil {
 		return nil, err
 	}
-	// 9. 将 veth pair 的信息写入到 LXC_MAP_DEFAULT_PATH
 
 	// 10. 将 veth pair 的 ip 与 node ip 的映射写入到 NODE_LOCAL_MAP_DEFAULT_PATH
 
