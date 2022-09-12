@@ -52,8 +52,8 @@ func (hostGW *HostGatewayCNI) Bootstrap(
 		bridgeName = "testcni0"
 	}
 
-	// 这里如果不同节点间通信的方式使用 vxlan 的话, 这里需要变成 1460
-	// 因为 vxlan 设备会给报头中加一个 40 字节的 vxlan 头部
+	// 这里如果不同节点间通信的方式使用 vxlan 的话, 这里需要变成 1450
+	// 因为 vxlan 设备会给报头中加一个 50 字节的 vxlan 头部
 	mtu := 1500
 	// 获取 containerd 传过来的网卡名, 这个网卡名要被插到 net ns 中
 	ifName := args.IfName

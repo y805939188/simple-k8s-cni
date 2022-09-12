@@ -16,6 +16,9 @@ import (
 
 func CreateBridge(brName, gw string, mtu int) (*netlink.Bridge, error) {
 	l, err := netlink.LinkByName(brName)
+	if err != nil {
+		return nil, err
+	}
 
 	br, ok := l.(*netlink.Bridge)
 	if ok && br != nil {
@@ -79,21 +82,25 @@ func SetUpVeth(veth ...*netlink.Veth) error {
 	return nil
 }
 
-func CreateVethPair(ifName string, mtu int) (*netlink.Veth, *netlink.Veth, error) {
+func CreateVethPair(ifName string, mtu int, hostName ...string) (*netlink.Veth, *netlink.Veth, error) {
 	vethPairName := ""
-	for {
-		_vname, err := RandomVethName()
-		vethPairName = _vname
-		if err != nil {
-			utils.WriteLog("生成随机 veth pair 名字失败, err: ", err.Error())
-			return nil, nil, err
-		}
+	if len(hostName) > 0 && hostName[0] != "" {
+		vethPairName = hostName[0]
+	} else {
+		for {
+			_vname, err := RandomVethName()
+			vethPairName = _vname
+			if err != nil {
+				utils.WriteLog("生成随机 veth pair 名字失败, err: ", err.Error())
+				return nil, nil, err
+			}
 
-		_, err = netlink.LinkByName(vethPairName)
-		if err != nil && !os.IsExist(err) {
-			// 上面生成随机名字可能会重名, 所以这里先尝试按照这个名字获取一下
-			// 如果没有这个名字的设备, 那就可以 break 了
-			break
+			_, err = netlink.LinkByName(vethPairName)
+			if err != nil && !os.IsExist(err) {
+				// 上面生成随机名字可能会重名, 所以这里先尝试按照这个名字获取一下
+				// 如果没有这个名字的设备, 那就可以 break 了
+				break
+			}
 		}
 	}
 
@@ -378,7 +385,7 @@ func CreateBridgeAndCreateVethAndSetNetworkDeviceStatusAndSetVethMaster(
 		}
 
 		// 启动之后给这个 netns 设置默认路由 以便让其他网段的包也能从 veth 走到网桥
-		// TODO: 实测后发现还必须得写在这里, 如果写在下面 hostNs.Do 里头会报错目标 network 不可达(why?)
+		// NOTE: 实测后发现还必须得写在这里, 如果写在下面 hostNs.Do 里头会报错目标 network 不可达(why?)
 		gwNetIP, _, err := net.ParseCIDR(gw)
 		if err != nil {
 			utils.WriteLog("转换 gwip 失败, err:", err.Error())

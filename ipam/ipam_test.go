@@ -2,6 +2,7 @@ package ipam
 
 import (
 	"fmt"
+	"net"
 	"os"
 	"strings"
 	"testing"
@@ -21,6 +22,18 @@ func TestIpam(t *testing.T) {
 	// test.Nil(err)
 	// test.Equal(record, "/testcni/ipam/10.244.0.0/16/cni-test-1/10.244.215.0")
 	// return
+	// gw, err := is.Get().Gateway()
+	// test.Nil(err)
+	// fmt.Println(is.CurrentHostNetwork)
+	// fmt.Println(gw)
+	// return
+	gw, err := is.Get().GatewayWithMaskSegment()
+	test.Nil(err)
+	fmt.Println(gw)
+	gwNetIP, _, err := net.ParseCIDR(gw)
+	test.Nil(err)
+	fmt.Println(gwNetIP)
+	return
 
 	test.Equal(is.Subnet, "10.244.0.0")
 	test.Equal(is.MaskSegment, "16")

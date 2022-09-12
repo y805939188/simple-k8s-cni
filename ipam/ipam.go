@@ -199,7 +199,10 @@ var getGet = func() func() *Get {
 		if _get != nil {
 			return _get
 		}
-		_get = &Get{}
+		_get = &Get{
+			cidrCache:   map[string]string{},
+			nodeIpCache: map[string]string{},
+		}
 		_get.etcdClient = getEtcdClient()
 		_get.k8sClient = getLightK8sClient()
 		return _get

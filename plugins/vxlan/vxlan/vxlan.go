@@ -3,15 +3,21 @@ package vxlan
 import (
 	"errors"
 	"fmt"
+	"net"
+	"strconv"
 	"testcni/cni"
 	"testcni/consts"
 	"testcni/etcd"
 	_etcd "testcni/etcd"
 	"testcni/ipam"
 	_ipam "testcni/ipam"
+	"testcni/nettools"
 	"testcni/plugins/vxlan/watcher"
 	"testcni/skel"
 	"testcni/utils"
+
+	"github.com/containernetworking/plugins/pkg/ns"
+	"github.com/vishvananda/netlink"
 )
 
 const MODE = consts.MODE_VXLAN
@@ -49,7 +55,7 @@ func startWatchNodeChange(ipam *ipam.IpamService, etcd *etcd.EtcdClient) error {
 	return watcher.StartMapWatcher(ipam, etcd)
 }
 
-func initEverClient(args *skel.CmdArgs, pluginConfig *cni.PluginConf) (*ipam.IpamService, *etcd.EtcdClient, error) {
+func initEveryClient(args *skel.CmdArgs, pluginConfig *cni.PluginConf) (*ipam.IpamService, *etcd.EtcdClient, error) {
 	_ipam.Init(pluginConfig.Subnet, "16", "32")
 	ipam, err := _ipam.GetIpamService()
 	if err != nil {
@@ -61,6 +67,111 @@ func initEverClient(args *skel.CmdArgs, pluginConfig *cni.PluginConf) (*ipam.Ipa
 		return nil, nil, errors.New(fmt.Sprintln("初始化 etcd 客户端失败: %s", err.Error()))
 	}
 	return ipam, etcd, nil
+}
+
+func createHostVethPair(args *skel.CmdArgs, pluginConfig *cni.PluginConf) (*netlink.Veth, *netlink.Veth, error) {
+	// mtu 表示最大 mac 帧的长度
+	// 默认是 1500
+	// 因为一个 vxlan 的帧 = max(14) + ip(20) + udp(8) + vxlan 头部(8) + 原始报文
+	// 所以一个 vxlan 的外层多了 14 + 20 + 8 + 8 = 50 字节的一个包装
+	// 而 vxlan 设备在解封装的时候要求帧长度不能超过 1500
+	// 如果按照默认的话现在就是 1550 了
+	// 所以这里设置网卡的 mtu 最大是 1450, 也就是原始报文的部分最大是 1450
+
+	return nettools.CreateVethPair("veth_host", 1500, "veth_net")
+}
+
+func createNsVethPair(args *skel.CmdArgs, pluginConfig *cni.PluginConf) (*netlink.Veth, *netlink.Veth, error) {
+	// mtu 表示最大 mac 帧的长度
+	// 默认是 1500
+	// 因为一个 vxlan 的帧 = max(14) + ip(20) + udp(8) + vxlan 头部(8) + 原始报文
+	// 所以一个 vxlan 的外层多了 14 + 20 + 8 + 8 = 50 字节的一个包装
+	// 而 vxlan 设备在解封装的时候要求帧长度不能超过 1500
+	// 如果按照默认的话现在就是 1550 了
+	// 所以这里设置网卡的 mtu 最大是 1450, 也就是原始报文的部分最大是 1450
+	mtu := 1450
+	ifName := args.IfName
+	random := strconv.Itoa(utils.GetRandomNumber(100000))
+	hostName := "ding_lxc_" + random
+	return nettools.CreateVethPair(ifName, mtu, hostName)
+}
+
+func setIpIntoHostPair(ipam *_ipam.IpamService, veth *netlink.Veth) error {
+	// 获取网关地址, 一般就是当前节点所在网段的第一个 ip
+	gw, err := ipam.Get().Gateway()
+	if err != nil {
+		return err
+	}
+	return nettools.SetIpForVeth(veth, gw)
+}
+
+func getNetns(_ns string) (*ns.NetNS, error) {
+	netns, err := ns.GetNS(_ns)
+	if err != nil {
+		utils.WriteLog("获取 ns 失败: ", err.Error())
+		return nil, err
+	}
+	return &netns, nil
+}
+
+func setHostVethIntoHost(ipam *_ipam.IpamService, veth *netlink.Veth, netns ns.NetNS) error {
+	// 把随机起名的 veth 那头放在主机上
+	err := nettools.SetVethNsFd(veth, netns)
+	if err != nil {
+		utils.WriteLog("把 veth 设置到 host 上失败: ", err.Error())
+		return err
+	}
+	return nil
+}
+
+func setIpIntoNsPair(ipam *_ipam.IpamService, veth *netlink.Veth) error {
+	// 从 ipam 中拿到一个未使用的 ip 地址
+	podIP, err := ipam.Get().UnusedIP()
+	if err != nil {
+		utils.WriteLog("获取 podIP 出错, err: ", err.Error())
+		return err
+	}
+	podIP = fmt.Sprintf("%s/%s", podIP, "32")
+	err = nettools.SetIpForVeth(veth, podIP)
+	if err != nil {
+		utils.WriteLog("给 ns veth 设置 ip 失败, err: ", err.Error())
+		return err
+	}
+	return nil
+}
+
+func setupVeth(veth *netlink.Veth) error {
+	return nettools.SetUpVeth(veth)
+}
+
+func setFibTalbeIntoNs(ipam *_ipam.IpamService, veth *netlink.Veth) error {
+	// 获取网关＋网段号
+	gatewayWithMaskSegment, err := ipam.Get().GatewayWithMaskSegment()
+	if err != nil {
+		utils.WriteLog("获取 gatewayWithMaskSegment 出错, err: ", err.Error())
+		return err
+	}
+
+	// 启动之后给这个 netns 设置默认路由 以便让其他网段的包也能从 veth 走到网桥
+	gwIp, gwNet, err := net.ParseCIDR(gatewayWithMaskSegment)
+	defIp, defNet, err := net.ParseCIDR("0.0.0.0/0")
+	if err != nil {
+		utils.WriteLog("创建交换路由失败, err:", err.Error())
+		return err
+	}
+
+	// 设置交换路由, 让流量能从路由表中查询到下一条
+	err = nettools.AddRoute(gwNet, defIp, veth)
+	if err != nil {
+		utils.WriteLog("设置交换路由 gw -> default 失败: ", err.Error())
+		return err
+	}
+	err = nettools.AddRoute(defNet, gwIp, veth)
+	if err != nil {
+		utils.WriteLog("设置交换路由 default -> gw 失败: ", err.Error())
+		return err
+	}
+	return nil
 }
 
 /**
@@ -77,7 +188,7 @@ func (vx *VxlanCNI) Bootstrap(args *skel.CmdArgs, pluginConfig *cni.PluginConf) 
 	utils.WriteLog("进到了 vxlan 模式了")
 
 	// 0. 先把各种能用的上的客户端初始化咯
-	ipam, etcd, err := initEverClient(args, pluginConfig)
+	ipam, etcd, err := initEveryClient(args, pluginConfig)
 	if err != nil {
 		return nil, err
 	}
@@ -89,26 +200,64 @@ func (vx *VxlanCNI) Bootstrap(args *skel.CmdArgs, pluginConfig *cni.PluginConf) 
 	}
 
 	// 2. 创建一对 veth pair 设备 veth_host 和 veth_net 作为默认网关
+	gwPair, _, err := createHostVethPair(args, pluginConfig)
+	if err != nil {
+		return nil, err
+	}
 
 	// 3. 给这对儿网关 veth 设备中的 veth_host 加上 ip/32
+	err = setIpIntoHostPair(ipam, gwPair)
+	if err != nil {
+		return nil, err
+	}
 
-	// 4. 创建一对儿 veth pair 作为 pod 的 veth
+	// 4. 获取 ns
+	netns, err := getNetns(args.Netns)
+	if err != nil {
+		return nil, err
+	}
 
-	// 5. 将 veth pair 设备加入到 kubelet 传来的 ns 下
+	err = (*netns).Do(func(hostNs ns.NetNS) error {
 
-	// 6. 给 ns 中的 veth 创建 ip/32, etcd 会自动通知其他 node
+		// 5. 创建一对儿 veth pair 作为 pod 的 veth
+		nsPair, hostPair, err := createNsVethPair(args, pluginConfig)
+		if err != nil {
+			return err
+		}
+		// 6. 将 veth pair 设备加入到 kubelet 传来的 ns 下
+		err = setHostVethIntoHost(ipam, hostPair, hostNs)
+		if err != nil {
+			return err
+		}
 
-	// 7. 给这个 ns 中创建默认的路由表以及 arp 表, 让其能把流量都走到 ns 外
+		// 7. 给 ns 中的 veth 创建 ip/32, etcd 会自动通知其他 node
+		err = setIpIntoNsPair(ipam, nsPair)
+		if err != nil {
+			return err
+		}
 
-	// 8. 将 veth pair 的信息写入到 LXC_MAP_DEFAULT_PATH
+		// 启动 ns pair
+		err = setupVeth(nsPair)
+		if err != nil {
+			return err
+		}
 
-	// 9. 将 veth pair 的 ip 与 node ip 的映射写入到 NODE_LOCAL_MAP_DEFAULT_PATH
+		// 8. 给这个 ns 中创建默认的路由表以及 arp 表, 让其能把流量都走到 ns 外
+		err = setFibTalbeIntoNs(ipam, nsPair)
+		if err != nil {
+			return err
+		}
+	})
 
-	// 10. 给 veth pair 中留在 host 上的那半拉的 tc 打上 ingress 和 egress
+	// 9. 将 veth pair 的信息写入到 LXC_MAP_DEFAULT_PATH
 
-	// 11. 创建一块儿 vxlan 设备
+	// 10. 将 veth pair 的 ip 与 node ip 的映射写入到 NODE_LOCAL_MAP_DEFAULT_PATH
 
-	// 12. 给这块儿 vxlan 设备的 tc 打上 ingress 和 egress
+	// 11. 给 veth pair 中留在 host 上的那半拉的 tc 打上 ingress 和 egress
+
+	// 12. 创建一块儿 vxlan 设备
+
+	// 13. 给这块儿 vxlan 设备的 tc 打上 ingress 和 egress
 
 	return nil, errors.New("tmp error")
 }
