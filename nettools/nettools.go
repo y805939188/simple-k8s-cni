@@ -290,10 +290,14 @@ func SetOtherHostRouteToCurrentHost(networks []*ipam.Network, currentNetwork *ip
 }
 
 // forked from plugins/pkg/ip/route_linux.go
-func AddRoute(ipn *net.IPNet, gw net.IP, dev netlink.Link) error {
+func AddRoute(ipn *net.IPNet, gw net.IP, dev netlink.Link, scope ...netlink.Scope) error {
+	defaultScope := netlink.SCOPE_UNIVERSE
+	if len(scope) > 0 {
+		defaultScope = scope[0]
+	}
 	return netlink.RouteAdd(&netlink.Route{
 		LinkIndex: dev.Attrs().Index,
-		Scope:     netlink.SCOPE_UNIVERSE,
+		Scope:     defaultScope,
 		Dst:       ipn,
 		Gw:        gw,
 	})

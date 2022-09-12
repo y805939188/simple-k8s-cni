@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net"
 	"strconv"
+	"strings"
 	"testcni/cni"
 	"testcni/consts"
 	"testcni/etcd"
@@ -59,26 +60,35 @@ func initEveryClient(args *skel.CmdArgs, pluginConfig *cni.PluginConf) (*ipam.Ip
 	_ipam.Init(pluginConfig.Subnet, "16", "32")
 	ipam, err := _ipam.GetIpamService()
 	if err != nil {
-		return nil, nil, errors.New(fmt.Sprintln("初始化 ipam 客户端失败: %s", err.Error()))
+		return nil, nil, errors.New(fmt.Sprintf("初始化 ipam 客户端失败: %s", err.Error()))
 	}
 	_etcd.Init()
 	etcd, err := _etcd.GetEtcdClient()
 	if err != nil {
-		return nil, nil, errors.New(fmt.Sprintln("初始化 etcd 客户端失败: %s", err.Error()))
+		return nil, nil, errors.New(fmt.Sprintf("初始化 etcd 客户端失败: %s", err.Error()))
 	}
 	return ipam, etcd, nil
 }
 
 func createHostVethPair(args *skel.CmdArgs, pluginConfig *cni.PluginConf) (*netlink.Veth, *netlink.Veth, error) {
-	// mtu 表示最大 mac 帧的长度
-	// 默认是 1500
-	// 因为一个 vxlan 的帧 = max(14) + ip(20) + udp(8) + vxlan 头部(8) + 原始报文
-	// 所以一个 vxlan 的外层多了 14 + 20 + 8 + 8 = 50 字节的一个包装
-	// 而 vxlan 设备在解封装的时候要求帧长度不能超过 1500
-	// 如果按照默认的话现在就是 1550 了
-	// 所以这里设置网卡的 mtu 最大是 1450, 也就是原始报文的部分最大是 1450
+	hostVeth, _ := netlink.LinkByName("veth_host")
+	netVeth, _ := netlink.LinkByName("veth_net")
 
+	if hostVeth != nil && netVeth != nil {
+		// 如果已经有了就直接跳过
+		return hostVeth.(*netlink.Veth), netVeth.(*netlink.Veth), nil
+	}
 	return nettools.CreateVethPair("veth_host", 1500, "veth_net")
+}
+
+func setUpHostVethPair(veth ...*netlink.Veth) error {
+	for _, v := range veth {
+		err := setUpVeth(v)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func createNsVethPair(args *skel.CmdArgs, pluginConfig *cni.PluginConf) (*netlink.Veth, *netlink.Veth, error) {
@@ -96,13 +106,25 @@ func createNsVethPair(args *skel.CmdArgs, pluginConfig *cni.PluginConf) (*netlin
 	return nettools.CreateVethPair(ifName, mtu, hostName)
 }
 
-func setIpIntoHostPair(ipam *_ipam.IpamService, veth *netlink.Veth) error {
+func setIpIntoHostPair(ipam *_ipam.IpamService, veth *netlink.Veth) (string, error) {
+	dev, err := net.InterfaceByIndex(veth.Index)
+	if err == nil {
+		addrs, err := dev.Addrs()
+		if err == nil && len(addrs) > 0 {
+			str := addrs[0].String()
+			tmpIp := strings.Split(str, "/")
+			if len(tmpIp) == 2 && net.ParseIP(tmpIp[0]).To4() != nil {
+				return str, nil
+			}
+		}
+	}
 	// 获取网关地址, 一般就是当前节点所在网段的第一个 ip
 	gw, err := ipam.Get().Gateway()
 	if err != nil {
-		return err
+		return "", err
 	}
-	return nettools.SetIpForVeth(veth, gw)
+	gw = fmt.Sprintf("%s/%s", gw, "32")
+	return gw, nettools.SetIpForVeth(veth, gw)
 }
 
 func getNetns(_ns string) (*ns.NetNS, error) {
@@ -140,20 +162,17 @@ func setIpIntoNsPair(ipam *_ipam.IpamService, veth *netlink.Veth) error {
 	return nil
 }
 
-func setupVeth(veth *netlink.Veth) error {
+func setUpVeth(veth *netlink.Veth) error {
 	return nettools.SetUpVeth(veth)
 }
 
-func setFibTalbeIntoNs(ipam *_ipam.IpamService, veth *netlink.Veth) error {
-	// 获取网关＋网段号
-	gatewayWithMaskSegment, err := ipam.Get().GatewayWithMaskSegment()
+func setFibTalbeIntoNs(gw string, veth *netlink.Veth) error {
+	// 启动之后给这个 netns 设置默认路由 以便让其他网段的包也能从 veth 走到网桥
+	gwIp, gwNet, err := net.ParseCIDR(gw)
 	if err != nil {
-		utils.WriteLog("获取 gatewayWithMaskSegment 出错, err: ", err.Error())
+		utils.WriteLog("创建交换路由失败, err:", err.Error())
 		return err
 	}
-
-	// 启动之后给这个 netns 设置默认路由 以便让其他网段的包也能从 veth 走到网桥
-	gwIp, gwNet, err := net.ParseCIDR(gatewayWithMaskSegment)
 	defIp, defNet, err := net.ParseCIDR("0.0.0.0/0")
 	if err != nil {
 		utils.WriteLog("创建交换路由失败, err:", err.Error())
@@ -161,11 +180,14 @@ func setFibTalbeIntoNs(ipam *_ipam.IpamService, veth *netlink.Veth) error {
 	}
 
 	// 设置交换路由, 让流量能从路由表中查询到下一条
-	err = nettools.AddRoute(gwNet, defIp, veth)
+	// 注意这里在设置交换路由的时候, 第一条的 gw -> 0.0.0.0 需要是 scope_link
+	err = nettools.AddRoute(gwNet, defIp, veth, netlink.SCOPE_LINK)
 	if err != nil {
 		utils.WriteLog("设置交换路由 gw -> default 失败: ", err.Error())
 		return err
 	}
+	// 然后创建默认的 0.0.0.0 -> gw 时就可以走默认的 scope universe 了
+	// 否则会创建失败
 	err = nettools.AddRoute(defNet, gwIp, veth)
 	if err != nil {
 		utils.WriteLog("设置交换路由 default -> gw 失败: ", err.Error())
@@ -174,14 +196,38 @@ func setFibTalbeIntoNs(ipam *_ipam.IpamService, veth *netlink.Veth) error {
 	return nil
 }
 
-func setArp(ipam *_ipam.IpamService, veth *netlink.Veth, dev string) error {
+func setArp(ipam *_ipam.IpamService, hostns ns.NetNS, veth *netlink.Veth, dev string) error {
 	gw, err := ipam.Get().Gateway()
 	if err != nil {
 		return err
 	}
-	mac := veth.HardwareAddr
-	_mac := mac.String()
-	return nettools.CreateArpEntry(gw, _mac, dev)
+
+	err = hostns.Do(func(nn ns.NetNS) error {
+		// 这里需要重新获取, 因为上边把这个 veth 从 ns 中给挪到了 host 上
+		// 导致 mac 发生了变化
+		v, err := netlink.LinkByIndex(veth.Attrs().Index)
+		if err != nil {
+			return err
+		}
+		veth = v.(*netlink.Veth)
+		mac := veth.LinkAttrs.HardwareAddr
+		_mac := mac.String()
+		return nn.Do(func(hostns ns.NetNS) error {
+			return nettools.CreateArpEntry(gw, _mac, dev)
+		})
+	})
+	return err
+}
+
+func setUpHostPair(hostns ns.NetNS, veth *netlink.Veth) error {
+	return hostns.Do(func(nn ns.NetNS) error {
+		v, err := netlink.LinkByIndex(veth.Attrs().Index)
+		if err != nil {
+			return err
+		}
+		veth = v.(*netlink.Veth)
+		return setUpVeth(veth)
+	})
 }
 
 /**
@@ -197,26 +243,34 @@ func setArp(ipam *_ipam.IpamService, veth *netlink.Veth, dev string) error {
 func (vx *VxlanCNI) Bootstrap(args *skel.CmdArgs, pluginConfig *cni.PluginConf) (*cni.CNIResult, error) {
 	utils.WriteLog("进到了 vxlan 模式了")
 
+	// return nil, errors.New("tmp error")
+
 	// 0. 先把各种能用的上的客户端初始化咯
-	ipam, etcd, err := initEveryClient(args, pluginConfig)
+	ipam, _, err := initEveryClient(args, pluginConfig)
 	if err != nil {
 		return nil, err
 	}
 
-	// 1. 开始监听 etcd 中 pod 和 subnet map 的变化, 注意该行为只能有一次
-	err = startWatchNodeChange(ipam, etcd)
-	if err != nil {
-		return nil, err
-	}
+	// // 1. 开始监听 etcd 中 pod 和 subnet map 的变化, 注意该行为只能有一次
+	// err = startWatchNodeChange(ipam, etcd)
+	// if err != nil {
+	// 	return nil, err
+	// }
 
 	// 2. 创建一对 veth pair 设备 veth_host 和 veth_net 作为默认网关
-	gwPair, _, err := createHostVethPair(args, pluginConfig)
+	gwPair, netPair, err := createHostVethPair(args, pluginConfig)
+	if err != nil {
+		return nil, err
+	}
+
+	// 启动这俩设备
+	err = setUpHostVethPair(gwPair, netPair)
 	if err != nil {
 		return nil, err
 	}
 
 	// 3. 给这对儿网关 veth 设备中的 veth_host 加上 ip/32
-	err = setIpIntoHostPair(ipam, gwPair)
+	gw, err := setIpIntoHostPair(ipam, gwPair)
 	if err != nil {
 		return nil, err
 	}
@@ -228,7 +282,6 @@ func (vx *VxlanCNI) Bootstrap(args *skel.CmdArgs, pluginConfig *cni.PluginConf) 
 	}
 
 	err = (*netns).Do(func(hostNs ns.NetNS) error {
-
 		// 5. 创建一对儿 veth pair 作为 pod 的 veth
 		nsPair, hostPair, err := createNsVethPair(args, pluginConfig)
 		if err != nil {
@@ -247,23 +300,29 @@ func (vx *VxlanCNI) Bootstrap(args *skel.CmdArgs, pluginConfig *cni.PluginConf) 
 		}
 
 		// 启动 ns pair
-		err = setupVeth(nsPair)
+		err = setUpVeth(nsPair)
 		if err != nil {
 			return err
 		}
 
 		// 8. 给这个 ns 中创建默认的路由表以及 arp 表, 让其能把流量都走到 ns 外
-		err = setFibTalbeIntoNs(ipam, nsPair)
+		err = setFibTalbeIntoNs(gw, nsPair)
 		if err != nil {
 			return err
 		}
 
-		err = setArp(ipam, hostPair, args.IfName)
+		err = setArp(ipam, hostNs, hostPair, args.IfName)
 		if err != nil {
 			return err
 		}
+
+		// 启动 ns 留在 host 上那半拉 veth
+		return setUpHostPair(hostNs, hostPair)
 	})
 
+	if err != nil {
+		return nil, err
+	}
 	// 9. 将 veth pair 的信息写入到 LXC_MAP_DEFAULT_PATH
 
 	// 10. 将 veth pair 的 ip 与 node ip 的映射写入到 NODE_LOCAL_MAP_DEFAULT_PATH
