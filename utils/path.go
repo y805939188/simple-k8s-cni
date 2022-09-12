@@ -2,9 +2,18 @@ package utils
 
 import (
 	"io"
+	"io/ioutil"
 	"os"
 	"strings"
 )
+
+func ReadContentFromFile(filepath string) (string, error) {
+	contentByte, err := ioutil.ReadFile(filepath)
+	if err != nil {
+		return "", err
+	}
+	return string(contentByte), nil
+}
 
 func PathExists(path string) bool {
 	_, err := os.Stat(path)

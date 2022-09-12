@@ -78,6 +78,11 @@ func TestIpam(t *testing.T) {
 	test.Nil(err)
 	test.Len(ips, 2)
 
+	paths, err := is.Get().RecordByHost("cni-test-1")
+	test.Nil(err)
+	test.Len(paths, 2)
+	fmt.Println("这里的 paths 是: ", paths)
+
 	/********** test release **********/
 	err = is.Release().IPs(strings.Join(ip, "."))
 	test.Nil(err)

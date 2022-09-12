@@ -9,6 +9,36 @@ import (
 
 type MapsManager struct{}
 
+func (mm *MapsManager) BatchDelLxcMap(keys []EndpointMapKey) (int, error) {
+	m := mm.GetLxcMap()
+	return BatchDelKey(m, keys)
+}
+
+func (mm *MapsManager) BatchDelPodMap(keys []PodNodeMapKey) (int, error) {
+	m := mm.GetPodMap()
+	return BatchDelKey(m, keys)
+}
+
+func (mm *MapsManager) BatchDelNodeLocalMap(keys []LocalNodeMapKey) (int, error) {
+	m := mm.GetNodeLocalMap()
+	return BatchDelKey(m, keys)
+}
+
+func (mm *MapsManager) BatchSetLxcMap(key []EndpointMapKey, value []EndpointMapInfo) (int, error) {
+	m := mm.GetLxcMap()
+	return BatchSetMap(m, key, value)
+}
+
+func (mm *MapsManager) BatchSetPodMap(key []PodNodeMapKey, value []PodNodeMapValue) (int, error) {
+	m := mm.GetPodMap()
+	return BatchSetMap(m, key, value)
+}
+
+func (mm *MapsManager) BatchSetNodeLocalMap(key []LocalNodeMapKey, value []LocalNodeMapValue) (int, error) {
+	m := mm.GetNodeLocalMap()
+	return BatchSetMap(m, key, value)
+}
+
 func (mm *MapsManager) SetLxcMap(key EndpointMapKey, value EndpointMapInfo) error {
 	m := mm.GetLxcMap()
 	return SetMap(m, key, value)
@@ -22,6 +52,21 @@ func (mm *MapsManager) SetPodMap(key PodNodeMapKey, value PodNodeMapValue) error
 func (mm *MapsManager) SetNodeLocalMap(key LocalNodeMapKey, value LocalNodeMapValue) error {
 	m := mm.GetNodeLocalMap()
 	return SetMap(m, key, value)
+}
+
+func (mm *MapsManager) DelLxcMap(key EndpointMapKey) error {
+	m := mm.GetLxcMap()
+	return DelKey(m, key)
+}
+
+func (mm *MapsManager) DelPodMap(key PodNodeMapKey) error {
+	m := mm.GetPodMap()
+	return DelKey(m, key)
+}
+
+func (mm *MapsManager) DelNodeLocalMap(key LocalNodeMapKey) error {
+	m := mm.GetNodeLocalMap()
+	return DelKey(m, key)
 }
 
 func (mm *MapsManager) GetLxcMap() *ebpf.Map {

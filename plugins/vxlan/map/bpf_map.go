@@ -7,6 +7,14 @@ import (
 	"github.com/cilium/ebpf"
 )
 
+func DelKey(m *ebpf.Map, key interface{}) error {
+	return m.Delete(key)
+}
+
+func BatchDelKey(m *ebpf.Map, keys interface{}) (int, error) {
+	return m.BatchDelete(keys, &ebpf.BatchOptions{})
+}
+
 func SetMap(m *ebpf.Map, key, value interface{}) error {
 	// err := m.Put(EndpointKey{IP: 6}, EndpointInfo{
 	// 	IfIndex: 2,
@@ -15,6 +23,16 @@ func SetMap(m *ebpf.Map, key, value interface{}) error {
 	// 	NodeMAC: 5,
 	// })
 	return m.Put(key, value)
+}
+
+func BatchSetMap(m *ebpf.Map, keys, values interface{}) (int, error) {
+	// err := m.Put(EndpointKey{IP: 6}, EndpointInfo{
+	// 	IfIndex: 2,
+	// 	LxcID:   3,
+	// 	MAC:     4,
+	// 	NodeMAC: 5,
+	// })
+	return m.BatchUpdate(keys, values, &ebpf.BatchOptions{})
 }
 
 func GetMapValue(m *ebpf.Map, key, valueOut interface{}) error {

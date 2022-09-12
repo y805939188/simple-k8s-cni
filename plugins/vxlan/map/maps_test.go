@@ -49,6 +49,55 @@ func TestWatcher(t *testing.T) {
 	)
 	test.Nil(err)
 
+	nums, err := mm.BatchSetLxcMap(
+		[]EndpointMapKey{
+			{IP: 3},
+			{IP: 4},
+		},
+		[]EndpointMapInfo{
+			{
+				IfIndex: 5,
+				LxcID:   5,
+				MAC:     5,
+				NodeMAC: 5,
+			},
+			{
+				IfIndex: 6,
+				LxcID:   6,
+				MAC:     6,
+				NodeMAC: 6,
+			},
+		},
+	)
+	test.Nil(err)
+	test.Equal(nums, 2)
+
+	nums, err = mm.BatchSetPodMap(
+		[]PodNodeMapKey{
+			{IP: 20},
+			{IP: 30},
+		},
+		[]PodNodeMapValue{
+			{IP: 21},
+			{IP: 31},
+		},
+	)
+	test.Nil(err)
+	test.Equal(nums, 2)
+
+	nums, err = mm.BatchSetNodeLocalMap(
+		[]LocalNodeMapKey{
+			{IP: 100},
+			{IP: 200},
+		},
+		[]LocalNodeMapValue{
+			{IfIndex: 101},
+			{IfIndex: 201},
+		},
+	)
+	test.Nil(err)
+	test.Equal(nums, 2)
+
 	/************ test get ************/
 	lxc, err := mm.GetLxcMapValue(EndpointMapKey{IP: 1})
 	test.Nil(err)
@@ -66,4 +115,41 @@ func TestWatcher(t *testing.T) {
 	local, err := mm.GetNodeLocalMapValue(LocalNodeMapKey{IP: 666})
 	test.Nil(err)
 	test.EqualValues(local, &LocalNodeMapValue{IfIndex: 777})
+
+	/************ test del ************/
+	err = mm.DelLxcMap(EndpointMapKey{IP: 1})
+	test.Nil(err)
+
+	err = mm.DelPodMap(PodNodeMapKey{IP: 10})
+	test.Nil(err)
+
+	err = mm.DelNodeLocalMap(LocalNodeMapKey{IP: 666})
+	test.Nil(err)
+
+	nums, err = mm.BatchDelLxcMap(
+		[]EndpointMapKey{
+			{IP: 3},
+			{IP: 4},
+		},
+	)
+	test.Nil(err)
+	test.Equal(nums, 2)
+
+	nums, err = mm.BatchDelPodMap(
+		[]PodNodeMapKey{
+			{IP: 20},
+			{IP: 30},
+		},
+	)
+	test.Nil(err)
+	test.Equal(nums, 2)
+
+	nums, err = mm.BatchDelNodeLocalMap(
+		[]LocalNodeMapKey{
+			{IP: 100},
+			{IP: 200},
+		},
+	)
+	test.Nil(err)
+	test.Equal(nums, 2)
 }

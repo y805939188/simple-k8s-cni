@@ -29,6 +29,9 @@ const (
 type Get struct {
 	etcdClient *etcd.EtcdClient
 	k8sClient  *client.LightK8sClient
+	// 有些不会发生改变的东西可以做缓存
+	nodeIpCache map[string]string
+	cidrCache   map[string]string
 }
 type Release struct {
 	etcdClient *etcd.EtcdClient
@@ -165,6 +168,18 @@ func (g *Get) RecordPathByHost(hostname string) (string, error) {
 	return "", errors.New("can not get subnet address")
 }
 
+func (g *Get) RecordByHost(hostname string) ([]string, error) {
+	path, err := g.RecordPathByHost(hostname)
+	if err != nil {
+		return nil, err
+	}
+	str, err := g.etcdClient.Get(path)
+	if err != nil {
+		return nil, err
+	}
+	return strings.Split(str, ";"), nil
+}
+
 var getSet = func() func() *Set {
 	var _set *Set
 	return func() *Set {
@@ -256,7 +271,7 @@ func (s *Set) IPs(ips ...string) error {
 			}
 		}
 	}
-	// s.
+
 	s.etcdClient.Set(getRecordPath(currentNetwork), _tempIPs)
 	// return unlock()
 	return nil
@@ -551,7 +566,9 @@ func (g *Get) HostNetwork() (*Network, error) {
 // 获取当前节点被分配到的网段 + mask
 func (g *Get) CIDR(hostName string) (string, error) {
 	defer unlock()
-
+	if val, ok := g.cidrCache[hostName]; ok {
+		return val, nil
+	}
 	_cidrPath := getEtcdPathWithPrefix("/" + getIpamSubnet() + "/" + getIpamMaskSegment() + "/" + hostName)
 
 	etcd := getEtcdClient()
@@ -574,7 +591,7 @@ func (g *Get) CIDR(hostName string) (string, error) {
 		return "", err
 	}
 	cidr += ("/" + ipam.PodMaskSegment)
-
+	g.cidrCache[hostName] = cidr
 	return cidr, nil
 }
 
@@ -583,12 +600,16 @@ func (g *Get) CIDR(hostName string) (string, error) {
  */
 func (g *Get) NodeIp(hostName string) (string, error) {
 	defer unlock()
+	if val, ok := g.nodeIpCache[hostName]; ok {
+		return val, nil
+	}
 	node, err := g.k8sClient.Get().Node(hostName)
 	if err != nil {
 		return "", err
 	}
 	for _, addr := range node.Status.Addresses {
 		if addr.Type == "InternalIP" {
+			g.nodeIpCache[hostName] = addr.Address
 			return addr.Address, nil
 		}
 	}
@@ -641,6 +662,21 @@ func (g *Get) GatewayWithMaskSegment() (string, error) {
 }
 
 func (g *Get) AllUsedIPs() ([]string, error) {
+	defer unlock()
+	currentNetwork, err := g.etcdClient.Get(getHostPath())
+	if err != nil {
+		return nil, err
+	}
+	allUsedIPs, err := g.etcdClient.Get(getRecordPath(currentNetwork))
+	if err != nil {
+		return nil, err
+	}
+	ips := strings.Split(allUsedIPs, ";")
+	// return ips, unlock()
+	return ips, nil
+}
+
+func (g *Get) AllUsedIPsByHost(hostname string) ([]string, error) {
 	defer unlock()
 	currentNetwork, err := g.etcdClient.Get(getHostPath())
 	if err != nil {
