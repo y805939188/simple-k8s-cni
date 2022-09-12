@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net"
 	"os"
+	"os/exec"
 	"testcni/ipam"
 	"testcni/utils"
 
@@ -13,6 +14,25 @@ import (
 	"github.com/coreos/go-iptables/iptables"
 	"github.com/vishvananda/netlink"
 )
+
+// TODO: trick now!
+func CreateArpEntry(ip, mac, dev string) error {
+	processInfo := exec.Command(
+		"/bin/sh", "-c",
+		fmt.Sprintf("arp -s %s %s -i %s", ip, mac, dev),
+	)
+	_, err := processInfo.Output()
+	return err
+}
+
+func DeleteArpEntry(ip, dev string) error {
+	processInfo := exec.Command(
+		"/bin/sh", "-c",
+		fmt.Sprintf("arp -d %s -i %s", ip, dev),
+	)
+	_, err := processInfo.Output()
+	return err
+}
 
 func CreateBridge(brName, gw string, mtu int) (*netlink.Bridge, error) {
 	l, err := netlink.LinkByName(brName)

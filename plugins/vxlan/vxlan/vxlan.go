@@ -174,6 +174,16 @@ func setFibTalbeIntoNs(ipam *_ipam.IpamService, veth *netlink.Veth) error {
 	return nil
 }
 
+func setArp(ipam *_ipam.IpamService, veth *netlink.Veth, dev string) error {
+	gw, err := ipam.Get().Gateway()
+	if err != nil {
+		return err
+	}
+	mac := veth.HardwareAddr
+	_mac := mac.String()
+	return nettools.CreateArpEntry(gw, _mac, dev)
+}
+
 /**
  * pluginConfig:
  * {
@@ -244,6 +254,11 @@ func (vx *VxlanCNI) Bootstrap(args *skel.CmdArgs, pluginConfig *cni.PluginConf) 
 
 		// 8. 给这个 ns 中创建默认的路由表以及 arp 表, 让其能把流量都走到 ns 外
 		err = setFibTalbeIntoNs(ipam, nsPair)
+		if err != nil {
+			return err
+		}
+
+		err = setArp(ipam, hostPair, args.IfName)
 		if err != nil {
 			return err
 		}
