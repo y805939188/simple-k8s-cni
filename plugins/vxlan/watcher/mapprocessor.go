@@ -1,6 +1,7 @@
 package watcher
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -77,6 +78,11 @@ func InitRecordSyncProcessor(ipam *ipam.IpamService, initData map[string]string)
 		utils.WriteLog("(RecordSyncProcessor) 获取 bpf maps manager 失败: ", err.Error())
 		return nil
 	}
+	_, err = mm.CreatePodMap()
+	if err != nil {
+		utils.WriteLog("(RecordSyncProcessor) 创建 pod map 失败: ", err.Error())
+		return nil
+	}
 	// 获取当前 etcd 中已经存在的 node 和 pod ip 的对应关系
 	prevData := getBatchMapKV(ipam, initData)
 	// 然后转成 keys 和 values 的数据
@@ -89,7 +95,7 @@ func InitRecordSyncProcessor(ipam *ipam.IpamService, initData map[string]string)
 	}
 	utils.WriteLog("(RecordSyncProcessor) 初始化 node-pod maps 成功, 数量: ", strconv.Itoa(res))
 	return func(_type mvccpb.Event_EventType, key, value []byte) {
-		// fmt.Printf("进到了 Processor: %s, %q, %q\n", _type, key, value)
+		utils.WriteLog(fmt.Sprintf("进到了 Processor: %s, %q, %q\n", _type, key, value))
 		/**
 		 * 进到这里, 一定是监听到了其他节点上的网段已经对应的 pod ip 的关系变化
 		 * 比如其他节点添加了或者删除某个 pod, 这里能感知到其变化
@@ -123,7 +129,7 @@ func InitRecordSyncProcessor(ipam *ipam.IpamService, initData map[string]string)
 		_, err = mm.BatchDelPodMap(prevKeys)
 		if err != nil {
 			utils.WriteLog("(RecordSyncProcessor) 批量删除上次 key 失败: ", err.Error())
-			return
+			// return
 		}
 
 		// 然后再把本次的都批量更新到 map
@@ -132,9 +138,6 @@ func InitRecordSyncProcessor(ipam *ipam.IpamService, initData map[string]string)
 			utils.WriteLog("(RecordSyncProcessor) 批量更新 node-pod maps 失败: ", err.Error())
 			return
 		}
-		// utils.WriteLog("(RecordSyncProcessor) 更新 node-pod maps 成功, 数量: ", strconv.Itoa(res))
-
-		// 在最后启动一个 http 服务作为该子进程的健康检查
-		go startHealthServer()
+		utils.WriteLog("(RecordSyncProcessor) 更新 node-pod maps 成功, 数量: ", strconv.Itoa(res))
 	}
 }

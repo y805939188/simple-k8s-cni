@@ -34,4 +34,5 @@ func TestVxlan(t *testing.T) {
 	vxlan := VxlanCNI{}
 	_, err := vxlan.Bootstrap(args, pluginConfig)
 	test.Nil(err)
+	// time.Sleep(10000 * time.Second)
 }

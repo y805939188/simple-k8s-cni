@@ -3,8 +3,11 @@ package etcd
 import (
 	"context"
 	"errors"
+	"fmt"
+	"io/ioutil"
 	"os"
 	"strings"
+	"testcni/helper"
 	"testcni/utils"
 	"time"
 
@@ -98,9 +101,28 @@ func _GetEtcdClient() func() (*EtcdClient, error) {
 		if _client != nil {
 			return _client, nil
 		} else {
+			// curl https://192.168.64.19:6443/openapi/v2 --cacert ./ca.crt --cert ./tmp_ca.crt --key ./tmp.key
 			// ETCDCTL_API=3 etcdctl --endpoints https://192.168.64.19:2379 --cacert /etc/kubernetes/pki/etcd/ca.crt --cert /etc/kubernetes/pki/etcd/healthcheck-client.crt --key /etc/kubernetes/pki/etcd/healthcheck-client.key get / --prefix --keys-only
 
-			etcdEp := os.Getenv("ETCD_ENDPOINT")
+			configPath := helper.GetClientConfigPath()
+			confByte, err := ioutil.ReadFile(configPath)
+			if err != nil {
+				panic(fmt.Sprintf("读取 path: %s 失败: %s", configPath, err.Error()))
+			}
+			master, err := helper.GetLineFromYaml(string(confByte), "server")
+			if err != nil {
+				panic(fmt.Sprintf("在 etcd 初始化时尝试获取 master 节点失败: %s", err.Error()))
+			}
+			etcdEp := ""
+			if master != "" {
+				masteIp := strings.Split(master, ":")
+				if len(masteIp) == 3 {
+					etcdEp = fmt.Sprintf("%s:%s:2379", masteIp[0], masteIp[1])
+				}
+			}
+			if os.Getenv("ETCD_ENDPOINT") != "" {
+				etcdEp = os.Getenv("ETCD_ENDPOINT")
+			}
 			if etcdEp == "" {
 				panic("get etcd endpoint failed from env")
 			}

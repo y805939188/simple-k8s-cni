@@ -9,10 +9,12 @@ import (
 func Parent() {}
 
 func Child(f func()) {
+	WriteLog("即将执行 child")
 	f()
 }
 
 func StartDeamon(f func()) *os.Process {
+	WriteLog("进入了 statr deamon")
 	context := new(daemon.Context)
 	child, _ := context.Reborn()
 	if child != nil {

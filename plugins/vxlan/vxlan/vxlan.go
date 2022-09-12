@@ -209,7 +209,7 @@ func setArp(ipam *_ipam.IpamService, hostns ns.NetNS, veth *netlink.Veth, dev st
 	err = hostns.Do(func(nn ns.NetNS) error {
 		// 这里需要重新获取, 因为上边把这个 veth 从 ns 中给挪到了 host 上
 		// 导致 mac 发生了变化
-		v, err := netlink.LinkByIndex(veth.Attrs().Index)
+		v, err := netlink.LinkByName(veth.Attrs().Name)
 		if err != nil {
 			return err
 		}
@@ -225,7 +225,7 @@ func setArp(ipam *_ipam.IpamService, hostns ns.NetNS, veth *netlink.Veth, dev st
 
 func setUpHostPair(hostns ns.NetNS, veth *netlink.Veth) error {
 	return hostns.Do(func(nn ns.NetNS) error {
-		v, err := netlink.LinkByIndex(veth.Attrs().Index)
+		v, err := netlink.LinkByName(veth.Attrs().Name)
 		if err != nil {
 			return err
 		}
@@ -248,7 +248,7 @@ func stuff8Byte(b []byte) [8]byte {
 
 func setVethPairInfoToLxcMap(bpfmap *bpf_map.MapsManager, hostNs ns.NetNS, podIP string, hostVeth, nsVeth *netlink.Veth) error {
 	err := hostNs.Do(func(nn ns.NetNS) error {
-		v, err := netlink.LinkByIndex(hostVeth.Attrs().Index)
+		v, err := netlink.LinkByName(hostVeth.Attrs().Name)
 		if err != nil {
 			return err
 		}
@@ -301,16 +301,16 @@ func (vx *VxlanCNI) Bootstrap(args *skel.CmdArgs, pluginConfig *cni.PluginConf) 
 	// return nil, errors.New("tmp error")
 
 	// 0. 先把各种能用的上的客户端初始化咯
-	ipam, _, bpfmap, err := initEveryClient(args, pluginConfig)
+	ipam, etcd, bpfmap, err := initEveryClient(args, pluginConfig)
 	if err != nil {
 		return nil, err
 	}
 
-	// // 1. 开始监听 etcd 中 pod 和 subnet map 的变化, 注意该行为只能有一次
-	// err = startWatchNodeChange(ipam, etcd)
-	// if err != nil {
-	// 	return nil, err
-	// }
+	// 1. 开始监听 etcd 中 pod 和 subnet map 的变化, 注意该行为只能有一次
+	err = startWatchNodeChange(ipam, etcd)
+	if err != nil {
+		return nil, err
+	}
 
 	// 2. 创建一对 veth pair 设备 veth_host 和 veth_net 作为默认网关
 	gwPair, netPair, err := createHostVethPair(args, pluginConfig)

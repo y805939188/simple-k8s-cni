@@ -2,6 +2,8 @@ package watcher
 
 import (
 	"fmt"
+	"strconv"
+	"testcni/consts"
 	"testcni/etcd"
 	"testcni/ipam"
 	"testcni/utils"
@@ -14,7 +16,7 @@ func getAllInitPath(ipam *ipam.IpamService) (map[string]string, error) {
 	}
 	maps := map[string]string{}
 	for _, network := range networks {
-		if network.IsCurrentHost {
+		if network.IsCurrentHost || network.CIDR == "" {
 			continue
 		}
 		ips, err := ipam.Get().RecordByHost(network.Hostname)
@@ -49,7 +51,11 @@ func StartMapWatcher(ipam *ipam.IpamService, etcd *etcd.EtcdClient) error {
 
 	child := utils.StartDeamon(func() {
 		watcher.StartWatch()
+		// 在最后启动一个 http 服务作为该子进程的健康检查
+		utils.WriteLog("开始启动健康检查的服务")
+		startHealthServer()
 	})
+	utils.CreateFile(consts.KUBE_TEST_CNI_TMP_DEAMON_DEFAULT_PATH, ([]byte)(strconv.Itoa(child.Pid)), 0766)
 	utils.WriteLog(fmt.Sprintf("启动的守护进程是: %d", child.Pid))
 	return nil
 }

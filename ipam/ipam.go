@@ -638,9 +638,9 @@ func (g *Get) nextUnusedIP() (string, error) {
 	}
 	ips := strings.Split(allUsedIPs, ";")
 	maxIP := utils.GetMaxIP(ips)
+	// TODO: to random
 	// 找到当前最大的 ip 然后 +1 就是下一个未使用的
 	nextIP := utils.InetInt2Ip(utils.InetIP2Int(maxIP) + 1)
-	// return nextIP, unlock()
 	return nextIP, nil
 }
 
