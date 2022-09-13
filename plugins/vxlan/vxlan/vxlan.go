@@ -463,7 +463,7 @@ func (vx *VxlanCNI) Bootstrap(args *skel.CmdArgs, pluginConfig *cni.PluginConf) 
 	}
 
 	// 最后交给外头去打印到标准输出
-	_gw := net.ParseIP(gw)
+	_gw, _, _ := net.ParseCIDR(gw)
 	_, _podIP, _ := net.ParseCIDR(podIP)
 	result := &cni.CNIResult{
 		CNIVersion: pluginConfig.CNIVersion,
