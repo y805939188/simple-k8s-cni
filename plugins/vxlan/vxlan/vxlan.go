@@ -333,6 +333,16 @@ func attachTcBPFIntoVxlan(vxlan *netlink.Vxlan) error {
  *   "subnet": "10.244.0.0"
  * }
  */
+/**
+ * tc qdisc add dev ${pod veth name} clsact
+ * tc qdisc add dev ding_vxlan clsact
+ * clang -g  -O2 -emit-llvm -c vxlan_egress.c -o - | llc -march=bpf -filetype=obj -o vxlan_egress.o
+ * clang -g  -O2 -emit-llvm -c vxlan_ingress.c -o - | llc -march=bpf -filetype=obj -o vxlan_ingress.o
+ * clang -g  -O2 -emit-llvm -c veth_ingress.c -o - | llc -march=bpf -filetype=obj -o veth_ingress.o
+ * tc filter add dev ding_vxlan egress bpf direct-action obj vxlan_egress.o
+ * tc filter add dev ding_vxlan ingress bpf direct-action obj vxlan_ingress.o
+ * tc filter add dev ${pod veth name} ingress bpf direct-action obj veth_ingress.o
+ */
 func (vx *VxlanCNI) Bootstrap(args *skel.CmdArgs, pluginConfig *cni.PluginConf) (*cni.CNIResult, error) {
 	utils.WriteLog("进到了 vxlan 模式了")
 
@@ -342,25 +352,11 @@ func (vx *VxlanCNI) Bootstrap(args *skel.CmdArgs, pluginConfig *cni.PluginConf) 
 		return nil, err
 	}
 
-	// vxlan, err := createVxlan("ding_vxlan")
-	// if err != nil {
-	// 	return nil, err
-	// }
-
-	// // 13. 把 vxlan 加入到 NODE_LOCAL_MAP_DEFAULT_PATH
-	// err = setVxlanInfoToLocalMap(bpfmap, vxlan)
-	// if err != nil {
-	// 	return nil, err
-	// }
-	// return nil, errors.New("tmp")
-
 	// 1. 开始监听 etcd 中 pod 和 subnet map 的变化, 注意该行为只能有一次
 	err = startWatchNodeChange(ipam, etcd)
 	if err != nil {
 		return nil, err
 	}
-
-	return nil, errors.New("tmp error")
 
 	// 2. 创建一对 veth pair 设备 veth_host 和 veth_net 作为默认网关
 	gwPair, netPair, err := createHostVethPair(args, pluginConfig)
@@ -387,6 +383,7 @@ func (vx *VxlanCNI) Bootstrap(args *skel.CmdArgs, pluginConfig *cni.PluginConf) 
 	}
 
 	var nsPair, hostPair *netlink.Veth
+	var podIP string
 	err = (*netns).Do(func(hostNs ns.NetNS) error {
 		// 5. 创建一对儿 veth pair 作为 pod 的 veth
 		nsPair, hostPair, err = createNsVethPair(args, pluginConfig)
@@ -400,7 +397,7 @@ func (vx *VxlanCNI) Bootstrap(args *skel.CmdArgs, pluginConfig *cni.PluginConf) 
 		}
 
 		// 7. 给 ns 中的 veth 创建 ip/32, etcd 会自动通知其他 node
-		podIP, err := setIpIntoNsPair(ipam, nsPair)
+		podIP, err = setIpIntoNsPair(ipam, nsPair)
 		if err != nil {
 			return err
 		}
@@ -441,11 +438,12 @@ func (vx *VxlanCNI) Bootstrap(args *skel.CmdArgs, pluginConfig *cni.PluginConf) 
 		return nil, err
 	}
 
-	// // 11. 给 veth pair 中留在 host 上的那半拉的 tc 打上 ingress
-	// err = attachTcBPFIntoVeth(hostPair)
-	// if err != nil {
-	// 	return nil, err
-	// }
+	// 11. 给 veth pair 中留在 host 上的那半拉的 tc 打上 ingress
+	err = attachTcBPFIntoVeth(hostPair)
+	if err != nil {
+		return nil, err
+	}
+
 	// 12. 创建一块儿 vxlan 设备
 	vxlan, err := createVxlan("ding_vxlan")
 	if err != nil {
@@ -458,15 +456,25 @@ func (vx *VxlanCNI) Bootstrap(args *skel.CmdArgs, pluginConfig *cni.PluginConf) 
 		return nil, err
 	}
 
-	return nil, errors.New("tmp error")
-
 	// 14. 给这块儿 vxlan 设备的 tc 打上 ingress 和 egress
 	err = attachTcBPFIntoVxlan(vxlan)
 	if err != nil {
 		return nil, err
 	}
 
-	return nil, errors.New("tmp error")
+	// 最后交给外头去打印到标准输出
+	_gw := net.ParseIP(gw)
+	_, _podIP, _ := net.ParseCIDR(podIP)
+	result := &cni.CNIResult{
+		CNIVersion: pluginConfig.CNIVersion,
+		IPs: []*cni.IPConfig{
+			{
+				Address: *_podIP,
+				Gateway: _gw,
+			},
+		},
+	}
+	return result, nil
 }
 
 func (hostGW *VxlanCNI) Unmount(

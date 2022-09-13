@@ -82,38 +82,7 @@ int cls_main(struct __sk_buff *skb) {
     ETH_ALEN,
     0
   );
-  // new_dst_mac[0]= 162;
-  // new_dst_mac[1]= 38;
-  // new_dst_mac[2]= 121;
-  // new_dst_mac[3]= 215;
-  // new_dst_mac[4]= 254;
-  // new_dst_mac[5]= 116;
-  // bpf_skb_store_bytes(
-  //   skb,
-  //   offsetof(struct ethhdr, h_dest),
-  //   new_dst_mac,
-  //   ETH_ALEN,
-  //   0
-  // );
-  // __u8 new_src_mac[ETH_ALEN];
-  // new_src_mac[0]= 138;
-  // new_src_mac[1]= 125;
-  // new_src_mac[2]= 180;
-  // new_src_mac[3]= 99;
-  // new_src_mac[4]= 106;
-  // new_src_mac[5]= 173;
-  // bpf_skb_store_bytes(
-  //   skb,
-  //   offsetof(struct ethhdr, h_source),
-  //   new_src_mac,
-  //   ETH_ALEN,
-  //   0
-  // );
-  // return TC_ACT_OK;
-  // 这里如果用 bpf_redirect_peer(4, 0) 的话
-  // 在 ns 中抓包网卡就只能抓到 request 而无法抓到 reply
-  // 不知道是为啥
-  bpf_printk("will send to: %d", ep->lxcIfIndex);
+ 
   return bpf_redirect(ep->lxcIfIndex, 0);
 }
 
