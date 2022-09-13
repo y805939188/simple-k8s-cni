@@ -3,9 +3,41 @@
 ## 相关文章链接
 [深入理解 k8s 的 CNI 网络](https://zhuanlan.zhihu.com/p/450140876)
 </br>
-[从 0 实现一个 CNI 网络插件](https://zhuanlan.zhihu.com/p/450514389)
+[从 0 实现一个 CNI 网络插件](https://zhuanlan.zhihu.com/p/450514389)</br>
+[基于 ebpf 和 vxlan 实现一个 k8s 网络插件（一）](https://zhuanlan.zhihu.com/p/565254116)</br>
+[基于 ebpf 和 vxlan 实现一个 k8s 网络插件（二）](https://zhuanlan.zhihu.com/p/565420113)
 
-## 测试方法
+## vxlan 模式测试方法
+0. 最好有个干净的，没有安装任何网络插件的 k8s 环境
+
+1.
+```js
+// 在 /etc/cni/net.d/ 目录下新建个 .conf 结尾的文件, 输入以下配置项
+{
+  "cniVersion": "0.3.0",
+  "name": "testcni",
+  "type": "testcni",
+  "mode": "vxlan",
+  "subnet": "10.244.0.0"
+}
+```
+
+2.
+```bash
+# 在项目根目录执行
+make build
+```
+3. 此时会生成一个名为 testcni 的二进制文件。同时会产生三个 ebpf 文件。这三个 ebpf 文件会被自动拷贝到 “/opt/testcni/” 目录下。如果不存在这个目录的话可以手动创建一下
+
+4. 把上一步生成的 testcni 拷贝到 “/opt/cni/bin” 目录下
+</br>
+</br>
+</br>
+
+---
+</br>
+
+## host-gw 模式测试方法
 1. 
 ```js
 // 在 /etc/cni/net.d/ 目录下新建个 .conf 结尾的文件, 输入以下配置项
@@ -57,9 +89,6 @@
 </br></br>
 
 ## TODO
-1. 当前是直接把 etcd 地址写死在代码里了, 可更改为动态替换
-2. 有些需要获取集群信息的地方是直接通过 etcd 裸读出来的, 最好改成通过连接 api-server 读
-3. 当前为主机路由模式, 之后有时间研究研究 vxlan 模式
-4. 还没实现 del, 目前需要手动删一些资源以及 etcd 释放
-5. ipam 当前是直接裸读的 etcd, 更好的方法是创建 crd
-6. 当前是直接手动把编译后的二进制干到 /opt/cni/bin 下, 更好的方法应该是通过 daemonset 把二进制和配置拷贝到对应路径
+1. 还没实现 del, 目前需要手动删一些资源以及 etcd 释放
+2. ipam 当前是直接裸读的 etcd, 更好的方法是创建 crd
+3. 当前是直接手动把编译后的二进制干到 /opt/cni/bin 下, 更好的方法应该是通过 daemonset 把二进制和配置拷贝到对应路径

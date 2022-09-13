@@ -1,7 +1,6 @@
 package hostgw
 
 import (
-	"errors"
 	"net"
 	"testcni/cni"
 	"testcni/consts"
@@ -24,8 +23,6 @@ func (hostGW *HostGatewayCNI) Bootstrap(
 	args *skel.CmdArgs,
 	pluginConfig *cni.PluginConf,
 ) (*types.Result, error) {
-	utils.WriteLog("调试: 不知道为什么走到了这里, 这是 BUG!!!")
-	return nil, errors.New("tmp error")
 	// 使用 kubelet(containerd) 传过来的 subnet 地址初始化 ipam
 	ipam.Init(pluginConfig.Subnet)
 	ipamClient, err := ipam.GetIpamService()
