@@ -7,8 +7,6 @@
 #define LOCAL_DEV_VXLAN 1;
 #define LOCAL_DEV_VETH 2;
 
-#define DEFAULT_TUNNEL_ID 13190
-
 struct endpointKey {
   __u32 ip;
 };

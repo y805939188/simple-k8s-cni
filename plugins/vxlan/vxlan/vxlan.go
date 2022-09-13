@@ -308,7 +308,8 @@ func attachTcBPFIntoVeth(veth *netlink.Veth) error {
 }
 
 func createVxlan(name string) (*netlink.Vxlan, error) {
-	return nettools.CreateVxlanAndUp(name, 1500)
+	// return nettools.CreateVxlanAndUp(name, 1500)
+	return nettools.CreateVxlanAndUp2(name, 1500)
 }
 
 func attachTcBPFIntoVxlan(vxlan *netlink.Vxlan) error {
@@ -340,6 +341,18 @@ func (vx *VxlanCNI) Bootstrap(args *skel.CmdArgs, pluginConfig *cni.PluginConf) 
 	if err != nil {
 		return nil, err
 	}
+
+	vxlan, err := createVxlan("ding_vxlan")
+	if err != nil {
+		return nil, err
+	}
+
+	// 13. 把 vxlan 加入到 NODE_LOCAL_MAP_DEFAULT_PATH
+	err = setVxlanInfoToLocalMap(bpfmap, vxlan)
+	if err != nil {
+		return nil, err
+	}
+	return nil, errors.New("tmp")
 
 	// // 1. 开始监听 etcd 中 pod 和 subnet map 的变化, 注意该行为只能有一次
 	// err = startWatchNodeChange(ipam, etcd)
@@ -434,7 +447,7 @@ func (vx *VxlanCNI) Bootstrap(args *skel.CmdArgs, pluginConfig *cni.PluginConf) 
 	// 	return nil, err
 	// }
 	// 12. 创建一块儿 vxlan 设备
-	vxlan, err := createVxlan("ding_vxlan")
+	vxlan, err = createVxlan("ding_vxlan")
 	if err != nil {
 		return nil, err
 	}

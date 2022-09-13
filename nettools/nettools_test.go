@@ -106,7 +106,7 @@ func _nettools(brName, gw, ifName, podIP string, mtu int, netns ns.NetNS) {
 
 func TestNettools(t *testing.T) {
 	test := assert.New(t)
-	vxlan, err := CreateVxlanAndUp("ding_test1", 1500)
+	vxlan, err := CreateVxlanAndUp("ding_vxlan", 1500)
 	test.Nil(err)
 	fmt.Println(vxlan)
 	// err = DelVxlan("ding_test1")

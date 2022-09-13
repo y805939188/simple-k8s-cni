@@ -79,10 +79,6 @@ int cls_main(struct __sk_buff *skb) {
   struct endpointInfo *ep = bpf_map_lookup_elem(&ding_lxc, &epKey);
   if (ep) {
     // 如果能找到说明是要发往本机其他 pod 中的
-    bpf_printk("ifIndex: %d", ep->ifIndex);
-    bpf_printk("lxcIndex: %d", ep->lxcIfIndex);
-    bpf_printk("mac: %d", ep->mac);
-    bpf_printk("nodeMac: %d", ep->nodeMac);
     // 把 mac 地址改成目标 pod 的两对儿 veth 的 mac 地址
     bpf_memcpy(src_mac, ep->nodeMac, ETH_ALEN);
 	  bpf_memcpy(dst_mac, ep->mac, ETH_ALEN);
@@ -90,19 +86,16 @@ int cls_main(struct __sk_buff *skb) {
 	  bpf_skb_store_bytes(skb, offsetof(struct ethhdr, h_dest), src_mac, ETH_ALEN, 0);
     return bpf_redirect_peer(ep->lxcIfIndex, 0);
   }
-  bpf_printk("get value failed from ding_lxc, try to find from ding_ip");
   struct podNodeKey podNodeKey = {};
   podNodeKey.ip = dst_ip;
   struct podNodeValue *podNode = bpf_map_lookup_elem(&ding_ip, &podNodeKey);
   if (podNode) {
     // 进到这里说明该目标 ip 是本集群内的 ip
-    bpf_printk("get value succeed from ding_ip, pod node ip: %d", podNode->ip);
     struct localNodeMapKey localKey = {};
     localKey.type = LOCAL_DEV_VXLAN;
     struct localNodeMapValue *localValue = bpf_map_lookup_elem(&ding_local, &localKey);
     
     if (localValue) {
-      bpf_printk("get value succeed from ding_local, vxlan index: %d", localValue->ifIndex);
       // 转发给 vxlan 设备
       return bpf_redirect(localValue->ifIndex, 0);
     } 

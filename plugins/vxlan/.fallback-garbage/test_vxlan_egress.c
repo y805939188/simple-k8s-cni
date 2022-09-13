@@ -6,19 +6,22 @@
 #include <linux/icmp.h>
 #include <linux/if_arp.h>
 #include <linux/if_ether.h>
+#include <netinet/in.h>
 
 #include "common.h"
 #include "maps.h"
 
-/**
- * 如果 vxlan 设备收到了数据包
- * 说明是要发送到其他 node 中不同网段的 pod 上
- * 1. 在 POD_MAP_DEFAULT_PATH 中查询目标 pod 所在的 node ip
- * 2. 用 bpf_skb_set_tunnel_key 给原始数据包设置外层的 udp 的 target ip
- * 
- */
+#define DEFAULT_TUNNEL_ID 13190
 __section("classifier")
 int cls_main(struct __sk_buff *skb) {
+  /**
+   * 如果 vxlan 设备收到了数据包
+   * 说明是要发送到其他 node 中不同网段的 pod 上
+   * 1. 在 POD_MAP_DEFAULT_PATH 中查询目标 pod 所在的 node ip
+   * 2. 用 bpf_skb_set_tunnel_key 给原始数据包设置外层的 udp 的 target ip
+   * 
+   */
+  bpf_printk("host vxlan_len: %d", skb->data_end - skb->data);
 	void *data = (void *)(long)skb->data;
 	void *data_end = (void *)(long)skb->data_end;
 	if (data + sizeof(struct ethhdr) + sizeof(struct iphdr) > data_end) {

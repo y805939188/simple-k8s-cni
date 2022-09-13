@@ -77,6 +77,45 @@ func CreateVxlanAndUp(name string, mtu int) (*netlink.Vxlan, error) {
 	return vxlan, nil
 }
 
+func CreateVxlanAndUp2(name string, mtu int) (*netlink.Vxlan, error) {
+	l, _ := netlink.LinkByName(name)
+
+	vxlan, ok := l.(*netlink.Vxlan)
+	if ok && vxlan != nil {
+		return vxlan, nil
+	}
+	// if mtu == 0 {
+	// 	mtu = 1500
+	// }
+
+	processInfo := exec.Command(
+		"/bin/sh", "-c",
+		fmt.Sprintf("ip link add name %s type vxlan external", name),
+	)
+	_, err := processInfo.Output()
+	if err != nil {
+		return nil, err
+	}
+
+	l, err = netlink.LinkByName(name)
+	if err != nil {
+		utils.WriteLog("获取 vxlan 失败")
+		return nil, err
+	}
+
+	vxlan, ok = l.(*netlink.Vxlan)
+	if !ok {
+		utils.WriteLog("找到了设备, 但是该设备不是 vxlan")
+		return nil, fmt.Errorf("找到 %q 但该设备不是 vxlan", name)
+	}
+	// 然后还要把这个 vxlan 给 up 起来
+	if err = netlink.LinkSetUp(vxlan); err != nil {
+		utils.WriteLog("启动 vxlan 失败, err: ", err.Error())
+		return nil, fmt.Errorf("启动 vxlan %q 失败, err: %v", name, err)
+	}
+	return vxlan, nil
+}
+
 func DelVxlan(name string) error {
 	l, _ := netlink.LinkByName(name)
 
