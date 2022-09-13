@@ -9,6 +9,19 @@ import (
 
 type MapsManager struct{}
 
+func (mm *MapsManager) DeleteAllPodMap() (int, error) {
+	m := mm.GetPodMap()
+	itor := m.Iterate()
+	keys := []PodNodeMapKey{}
+
+	var key PodNodeMapKey
+	var value PodNodeMapValue
+	for itor.Next(&key, &value) {
+		keys = append(keys, key)
+	}
+	return BatchDelKey(m, keys)
+}
+
 func (mm *MapsManager) BatchDelLxcMap(keys []EndpointMapKey) (int, error) {
 	m := mm.GetLxcMap()
 	return BatchDelKey(m, keys)

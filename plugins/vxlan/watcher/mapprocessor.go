@@ -125,8 +125,8 @@ func InitRecordSyncProcessor(ipam *ipam.IpamService, initData map[string]string)
 			return
 		}
 
-		// 先批量删除 prev map 中的所以东西
-		_, err = mm.BatchDelPodMap(prevKeys)
+		// 先删除当前 pod node map 中的所有
+		_, err = mm.DeleteAllPodMap()
 		if err != nil {
 			utils.WriteLog("(RecordSyncProcessor) 批量删除上次 key 失败: ", err.Error())
 			// return

@@ -235,6 +235,21 @@ func setUpHostPair(hostns ns.NetNS, veth *netlink.Veth) error {
 	})
 }
 
+func setVxlanInfoToLocalMap(bpfmap *bpf_map.MapsManager, vxlan *netlink.Vxlan) error {
+	_, err := bpfmap.CreateNodeLocalMap()
+	if err != nil {
+		return err
+	}
+	return bpfmap.SetNodeLocalMap(
+		bpf_map.LocalNodeMapKey{
+			Type: bpf_map.VXLAN_DEV,
+		},
+		bpf_map.LocalNodeMapValue{
+			IfIndex: uint32(vxlan.Attrs().Index),
+		},
+	)
+}
+
 func stuff8Byte(b []byte) [8]byte {
 	var res [8]byte
 	if len(b) > 8 {
@@ -320,19 +335,19 @@ func attachTcBPFIntoVxlan(vxlan *netlink.Vxlan) error {
 func (vx *VxlanCNI) Bootstrap(args *skel.CmdArgs, pluginConfig *cni.PluginConf) (*cni.CNIResult, error) {
 	utils.WriteLog("进到了 vxlan 模式了")
 
-	// return nil, errors.New("tmp error")
-
 	// 0. 先把各种能用的上的客户端初始化咯
-	ipam, etcd, bpfmap, err := initEveryClient(args, pluginConfig)
+	ipam, _, bpfmap, err := initEveryClient(args, pluginConfig)
 	if err != nil {
 		return nil, err
 	}
 
-	// 1. 开始监听 etcd 中 pod 和 subnet map 的变化, 注意该行为只能有一次
-	err = startWatchNodeChange(ipam, etcd)
-	if err != nil {
-		return nil, err
-	}
+	// // 1. 开始监听 etcd 中 pod 和 subnet map 的变化, 注意该行为只能有一次
+	// err = startWatchNodeChange(ipam, etcd)
+	// if err != nil {
+	// 	return nil, err
+	// }
+
+	// return nil, errors.New("tmp error")
 
 	// 2. 创建一对 veth pair 设备 veth_host 和 veth_net 作为默认网关
 	gwPair, netPair, err := createHostVethPair(args, pluginConfig)
@@ -413,17 +428,26 @@ func (vx *VxlanCNI) Bootstrap(args *skel.CmdArgs, pluginConfig *cni.PluginConf) 
 		return nil, err
 	}
 
-	// 11. 给 veth pair 中留在 host 上的那半拉的 tc 打上 ingress
-	err = attachTcBPFIntoVeth(hostPair)
-	if err != nil {
-		return nil, err
-	}
+	// // 11. 给 veth pair 中留在 host 上的那半拉的 tc 打上 ingress
+	// err = attachTcBPFIntoVeth(hostPair)
+	// if err != nil {
+	// 	return nil, err
+	// }
 	// 12. 创建一块儿 vxlan 设备
 	vxlan, err := createVxlan("ding_vxlan")
 	if err != nil {
 		return nil, err
 	}
-	// 13. 给这块儿 vxlan 设备的 tc 打上 ingress 和 egress
+
+	// 13. 把 vxlan 加入到 NODE_LOCAL_MAP_DEFAULT_PATH
+	err = setVxlanInfoToLocalMap(bpfmap, vxlan)
+	if err != nil {
+		return nil, err
+	}
+
+	return nil, errors.New("tmp error")
+
+	// 14. 给这块儿 vxlan 设备的 tc 打上 ingress 和 egress
 	err = attachTcBPFIntoVxlan(vxlan)
 	if err != nil {
 		return nil, err

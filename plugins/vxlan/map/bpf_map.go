@@ -7,6 +7,20 @@ import (
 	"github.com/cilium/ebpf"
 )
 
+// func DelAllKeys(m *ebpf.Map) (int, error) {
+// 	itor := m.Iterate()
+// 	keys := []interface{}{}
+// 	// values := []interface{}{}
+
+// 	var key interface{}
+// 	var value interface{}
+// 	for itor.Next(&key, &value) {
+// 		keys = append(keys, key)
+// 		// values = append(values, value)
+// 	}
+// 	return BatchDelKey(m, keys)
+// }
+
 func DelKey(m *ebpf.Map, key interface{}) error {
 	return m.Delete(key)
 }

@@ -4,6 +4,9 @@
 
 #include "common.h"
 
+#define LOCAL_DEV_VXLAN 1;
+#define LOCAL_DEV_VETH 2;
+
 struct endpointKey {
   __u32 ip;
 };
@@ -43,3 +46,20 @@ struct {
   __type(value, struct podNodeValue);
   __uint(pinning, LIBBPF_PIN_BY_NAME);
 } ding_ip __section_maps_btf;
+
+struct localNodeMapKey {
+	__u32 type;
+};
+
+struct localNodeMapValue {
+  __u32 ifIndex;
+};
+
+struct {
+	__uint(type, BPF_MAP_TYPE_HASH);
+  __uint(max_entries, 255);
+	__type(key, struct localNodeMapKey);
+  __type(value, struct localNodeMapValue);
+  __uint(pinning, LIBBPF_PIN_BY_NAME);
+} ding_local __section_maps_btf;
+

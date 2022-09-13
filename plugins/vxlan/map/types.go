@@ -2,8 +2,15 @@ package bpf_map
 
 /********* 存本机网络设备的 ip - ifindex *********/
 /********* pin path: NODE_LOCAL_MAP_DEFAULT_PATH *********/
+type LOCAL_DEV_TYPE uint32
+
+const (
+	VXLAN_DEV LOCAL_DEV_TYPE = 1
+	VETH_DEV  LOCAL_DEV_TYPE = 2
+)
+
 type LocalNodeMapKey struct {
-	IP uint32
+	Type LOCAL_DEV_TYPE
 }
 
 type LocalNodeMapValue struct {

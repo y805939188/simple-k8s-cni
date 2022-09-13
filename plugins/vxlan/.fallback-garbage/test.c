@@ -76,6 +76,24 @@ struct {
 } ding_ip __section_maps_btf;
 
 
+
+struct localNodeMapKey {
+	__u32 type;
+};
+
+struct localNodeMapValue {
+  __u32 ifIndex;
+};
+
+struct {
+	__uint(type, BPF_MAP_TYPE_HASH);
+  __uint(max_entries, 255);
+	__type(key, struct localNodeMapKey);
+  __type(value, struct localNodeMapValue);
+  __uint(pinning, LIBBPF_PIN_BY_NAME);
+} ding_local __section_maps_btf;
+
+
 // struct bpf_map_def ding_lxc = {
 //   .type = BPF_MAP_TYPE_HASH,
 //   .key_size = sizeof(struct endpointKey),
@@ -93,7 +111,8 @@ struct {
 //   __uint(pinning, LIBBPF_PIN_BY_NAME);
 // // 加了 SEC(".maps") 的话, clang 在编译时需要加 -g 参数用来生成调试信息
 // } ding_lxc __section_maps_btf;
-
+#define LOCAL_DEV_VXLAN 1;
+#define LOCAL_DEV_VETH 2;
 __section("classifier")
 int cls_main(struct __sk_buff *skb) {
 	void *data = (void *)(long)skb->data;
@@ -137,12 +156,19 @@ int cls_main(struct __sk_buff *skb) {
   podNodeKey.ip = dst_ip;
   struct podNodeValue *podNode = bpf_map_lookup_elem(&ding_ip, &podNodeKey);
   if (podNode) {
+    // 进到这里说明该目标 ip 是本集群内的 ip
     bpf_printk("get value succeed from ding_ip, pod node ip: %d", podNode->ip);
-
+    struct localNodeMapKey localKey = {};
+    localKey.type = LOCAL_DEV_VXLAN;
+    struct localNodeMapValue *localValue = bpf_map_lookup_elem(&ding_local, &localKey);
+    
+    if (localValue) {
+      bpf_printk("get value succeed from ding_local, vxlan index: %d", localValue->ifIndex);
+      // 转发给 vxlan 设备
+      return bpf_redirect(localValue->ifIndex, 0);
+    } 
     return TC_ACT_UNSPEC;
-    // return TC_ACT_OK;
   }
-  
   return TC_ACT_UNSPEC;
 }
 

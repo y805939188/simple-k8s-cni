@@ -13,3 +13,31 @@ StdinData:  {"cniVersion":"0.3.0","mode":"vxlan","name":"testcni","subnet":"10.2
 
 无法创建 vxlan 设备:  ding_test2 err:  file exists 
 无法创建 vxlan 设备:  ding_test2 err:  file exists 
+即将注册 vxlan 模式 cni 
+注册 vxlan 模式 cni 成功 
+进到了 vxlan 模式了 
+(RecordSyncProcessor) 初始化 node-pod maps 成功, 数量:  4 
+进入了 statr deamon 
+启动的守护进程是: 75623 
+即将注册 vxlan 模式 cni 
+注册 vxlan 模式 cni 成功 
+进到了 vxlan 模式了 
+(RecordSyncProcessor) 初始化 node-pod maps 成功, 数量:  4 
+进入了 statr deamon 
+即将执行 child 
+开始启动健康检查的服务 
+进到了 Processor: PUT, "/testcni/ipam/10.244.0.0/16/cni-test-1/10.244.134.0", "10.244.134.25;10.244.134.26:10.244.134.36;10.244.134.37;10.244.134.38"
+ 
+(RecordSyncProcessor) 更新 node-pod maps 成功, 数量:  4 
+进到了 Processor: PUT, "/testcni/ipam/10.244.0.0/16/cni-test-1/10.244.134.0", "10.244.134.25;10.244.134.26"
+ 
+(RecordSyncProcessor) 更新 node-pod maps 成功, 数量:  4 
+进到了 Processor: PUT, "/testcni/ipam/10.244.0.0/16/cni-test-1/10.244.134.0", "10.244.134.25;10.244.134.26;10.244.134.27"
+ 
+(RecordSyncProcessor) 更新 node-pod maps 成功, 数量:  4 
+即将注册 vxlan 模式 cni 
+注册 vxlan 模式 cni 成功 
+进到了 vxlan 模式了 
+即将注册 vxlan 模式 cni 
+注册 vxlan 模式 cni 成功 
+进到了 vxlan 模式了 

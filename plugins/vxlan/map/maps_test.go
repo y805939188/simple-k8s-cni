@@ -1,6 +1,7 @@
 package bpf_map
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -12,6 +13,9 @@ func TestMap(t *testing.T) {
 	test.Nil(err)
 	test.NotNil(mm)
 
+	nums, err := mm.DeleteAllPodMap()
+	test.Nil(err)
+	fmt.Printf("删除掉了 %d 个 keys", nums)
 	// ip := utils.InetIpToUInt32("10.244.134.23")
 	// v, err := mm.GetLxcMapValue(EndpointMapKey{IP: ip})
 	// test.Nil(err)
@@ -50,12 +54,12 @@ func TestMap(t *testing.T) {
 	test.Nil(err)
 
 	err = mm.SetNodeLocalMap(
-		LocalNodeMapKey{IP: 666},
+		LocalNodeMapKey{Type: 666},
 		LocalNodeMapValue{IfIndex: 777},
 	)
 	test.Nil(err)
 
-	nums, err := mm.BatchSetLxcMap(
+	nums, err = mm.BatchSetLxcMap(
 		[]EndpointMapKey{
 			{IP: 3},
 			{IP: 4},
@@ -93,8 +97,8 @@ func TestMap(t *testing.T) {
 
 	nums, err = mm.BatchSetNodeLocalMap(
 		[]LocalNodeMapKey{
-			{IP: 100},
-			{IP: 200},
+			{Type: 100},
+			{Type: 200},
 		},
 		[]LocalNodeMapValue{
 			{IfIndex: 101},
@@ -118,7 +122,7 @@ func TestMap(t *testing.T) {
 	test.Nil(err)
 	test.EqualValues(pod, &PodNodeMapValue{IP: 11})
 
-	local, err := mm.GetNodeLocalMapValue(LocalNodeMapKey{IP: 666})
+	local, err := mm.GetNodeLocalMapValue(LocalNodeMapKey{Type: 666})
 	test.Nil(err)
 	test.EqualValues(local, &LocalNodeMapValue{IfIndex: 777})
 
@@ -129,7 +133,7 @@ func TestMap(t *testing.T) {
 	err = mm.DelPodMap(PodNodeMapKey{IP: 10})
 	test.Nil(err)
 
-	err = mm.DelNodeLocalMap(LocalNodeMapKey{IP: 666})
+	err = mm.DelNodeLocalMap(LocalNodeMapKey{Type: 666})
 	test.Nil(err)
 
 	nums, err = mm.BatchDelLxcMap(
@@ -152,8 +156,8 @@ func TestMap(t *testing.T) {
 
 	nums, err = mm.BatchDelNodeLocalMap(
 		[]LocalNodeMapKey{
-			{IP: 100},
-			{IP: 200},
+			{Type: 100},
+			{Type: 200},
 		},
 	)
 	test.Nil(err)
