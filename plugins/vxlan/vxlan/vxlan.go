@@ -337,30 +337,30 @@ func (vx *VxlanCNI) Bootstrap(args *skel.CmdArgs, pluginConfig *cni.PluginConf) 
 	utils.WriteLog("进到了 vxlan 模式了")
 
 	// 0. 先把各种能用的上的客户端初始化咯
-	ipam, _, bpfmap, err := initEveryClient(args, pluginConfig)
+	ipam, etcd, bpfmap, err := initEveryClient(args, pluginConfig)
 	if err != nil {
 		return nil, err
 	}
 
-	vxlan, err := createVxlan("ding_vxlan")
-	if err != nil {
-		return nil, err
-	}
-
-	// 13. 把 vxlan 加入到 NODE_LOCAL_MAP_DEFAULT_PATH
-	err = setVxlanInfoToLocalMap(bpfmap, vxlan)
-	if err != nil {
-		return nil, err
-	}
-	return nil, errors.New("tmp")
-
-	// // 1. 开始监听 etcd 中 pod 和 subnet map 的变化, 注意该行为只能有一次
-	// err = startWatchNodeChange(ipam, etcd)
+	// vxlan, err := createVxlan("ding_vxlan")
 	// if err != nil {
 	// 	return nil, err
 	// }
 
-	// return nil, errors.New("tmp error")
+	// // 13. 把 vxlan 加入到 NODE_LOCAL_MAP_DEFAULT_PATH
+	// err = setVxlanInfoToLocalMap(bpfmap, vxlan)
+	// if err != nil {
+	// 	return nil, err
+	// }
+	// return nil, errors.New("tmp")
+
+	// 1. 开始监听 etcd 中 pod 和 subnet map 的变化, 注意该行为只能有一次
+	err = startWatchNodeChange(ipam, etcd)
+	if err != nil {
+		return nil, err
+	}
+
+	return nil, errors.New("tmp error")
 
 	// 2. 创建一对 veth pair 设备 veth_host 和 veth_net 作为默认网关
 	gwPair, netPair, err := createHostVethPair(args, pluginConfig)
@@ -447,7 +447,7 @@ func (vx *VxlanCNI) Bootstrap(args *skel.CmdArgs, pluginConfig *cni.PluginConf) 
 	// 	return nil, err
 	// }
 	// 12. 创建一块儿 vxlan 设备
-	vxlan, err = createVxlan("ding_vxlan")
+	vxlan, err := createVxlan("ding_vxlan")
 	if err != nil {
 		return nil, err
 	}

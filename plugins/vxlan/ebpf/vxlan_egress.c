@@ -3,9 +3,9 @@
 #include <bpf/bpf_helpers.h>
 #include <linux/if_ether.h>
 #include <linux/ip.h>
-#include <linux/icmp.h>
 #include <linux/if_arp.h>
 #include <linux/if_ether.h>
+#include <netinet/in.h>
 
 #include "common.h"
 #include "maps.h"

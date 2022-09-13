@@ -47,3 +47,19 @@ StdinData:  {"cniVersion":"0.3.0","mode":"vxlan","name":"testcni","subnet":"10.2
 即将注册 vxlan 模式 cni 
 注册 vxlan 模式 cni 成功 
 进到了 vxlan 模式了 
+即将注册 vxlan 模式 cni 
+注册 vxlan 模式 cni 成功 
+进到了 vxlan 模式了 
+即将注册 vxlan 模式 cni 
+注册 vxlan 模式 cni 成功 
+进到了 vxlan 模式了 
+(RecordSyncProcessor) 初始化 node-pod maps 成功, 数量:  6 
+进入了 statr deamon 
+启动的守护进程是: 659770 
+即将注册 vxlan 模式 cni 
+注册 vxlan 模式 cni 成功 
+进到了 vxlan 模式了 
+(RecordSyncProcessor) 初始化 node-pod maps 成功, 数量:  6 
+进入了 statr deamon 
+即将执行 child 
+开始启动健康检查的服务 
