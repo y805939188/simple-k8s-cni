@@ -12,6 +12,7 @@ import (
 	_ipam "testcni/ipam"
 	"testcni/nettools"
 	bpf_map "testcni/plugins/vxlan/map"
+	"testcni/plugins/vxlan/tc"
 	"testcni/plugins/vxlan/watcher"
 	"testcni/skel"
 	"testcni/utils"
@@ -285,6 +286,27 @@ func setVethPairInfoToLxcMap(bpfmap *bpf_map.MapsManager, hostNs ns.NetNS, podIP
 	)
 }
 
+func attachTcBPFIntoVeth(veth *netlink.Veth) error {
+	name := veth.Attrs().Name
+	vethIngressBPFPath := tc.GetVethIngressPath()
+	return tc.TryAttachBPF(name, tc.INGRESS, vethIngressBPFPath)
+}
+
+func createVxlan(name string) (*netlink.Vxlan, error) {
+	return nettools.CreateVxlanAndUp(name, 1500)
+}
+
+func attachTcBPFIntoVxlan(vxlan *netlink.Vxlan) error {
+	name := vxlan.Attrs().Name
+	vxlanIngressBPFPath := tc.GetVxlanIngressPath()
+	err := tc.TryAttachBPF(name, tc.INGRESS, vxlanIngressBPFPath)
+	if err != nil {
+		return err
+	}
+	vxlanEgressBPFPath := tc.GetVxlanEgressPath()
+	return tc.TryAttachBPF(name, tc.EGRESS, vxlanEgressBPFPath)
+}
+
 /**
  * pluginConfig:
  * {
@@ -391,11 +413,21 @@ func (vx *VxlanCNI) Bootstrap(args *skel.CmdArgs, pluginConfig *cni.PluginConf) 
 		return nil, err
 	}
 
-	// 11. 给 veth pair 中留在 host 上的那半拉的 tc 打上 ingress 和 egress
-
+	// 11. 给 veth pair 中留在 host 上的那半拉的 tc 打上 ingress
+	err = attachTcBPFIntoVeth(hostPair)
+	if err != nil {
+		return nil, err
+	}
 	// 12. 创建一块儿 vxlan 设备
-
+	vxlan, err := createVxlan("ding_vxlan")
+	if err != nil {
+		return nil, err
+	}
 	// 13. 给这块儿 vxlan 设备的 tc 打上 ingress 和 egress
+	err = attachTcBPFIntoVxlan(vxlan)
+	if err != nil {
+		return nil, err
+	}
 
 	return nil, errors.New("tmp error")
 }

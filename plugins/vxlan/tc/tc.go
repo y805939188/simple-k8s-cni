@@ -3,6 +3,7 @@ package tc
 import (
 	"fmt"
 	"os/exec"
+	"strings"
 )
 
 // TODO: 可以尝试换成 go-tc
@@ -34,6 +35,33 @@ func AttachEgressBPFIntoDev(dev string, filepath string) error {
 	return _exec(
 		fmt.Sprintf("tc filter add dev %s egress bpf direct-action obj %s", dev, filepath),
 	)
+}
+
+func ExistClsact(dev string) bool {
+	processInfo := exec.Command(
+		"/bin/sh", "-c",
+		fmt.Sprintf("tc qdisc show dev %s", dev),
+	)
+	out, _ := processInfo.Output()
+	return strings.Contains(string(out), "clsact")
+}
+
+func ExistIngress(dev string) bool {
+	processInfo := exec.Command(
+		"/bin/sh", "-c",
+		fmt.Sprintf("tc filter show dev %s ingress", dev),
+	)
+	out, _ := processInfo.Output()
+	return strings.Contains(string(out), "direct-action")
+}
+
+func ExistEgress(dev string) bool {
+	processInfo := exec.Command(
+		"/bin/sh", "-c",
+		fmt.Sprintf("tc filter show dev %s egress", dev),
+	)
+	out, _ := processInfo.Output()
+	return strings.Contains(string(out), "direct-action")
 }
 
 func ShowBPF(dev string, direct string) (string, error) {
