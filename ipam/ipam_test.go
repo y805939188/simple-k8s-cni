@@ -18,6 +18,7 @@ func TestIpam(t *testing.T) {
 
 	is, err := GetIpamService()
 	test.Nil(err)
+
 	// record, err := is.Get().RecordPathByHost("cni-test-1")
 	// test.Nil(err)
 	// test.Equal(record, "/testcni/ipam/10.244.0.0/16/cni-test-1/10.244.215.0")

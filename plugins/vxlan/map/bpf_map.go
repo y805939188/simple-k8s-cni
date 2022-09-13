@@ -1,7 +1,6 @@
 package bpf_map
 
 import (
-	"fmt"
 	"testcni/utils"
 
 	"github.com/cilium/ebpf"
@@ -62,7 +61,7 @@ func GetMapByPinned(pinPath string, opts ...*ebpf.LoadPinOptions) *ebpf.Map {
 	}
 	m, err := ebpf.LoadPinnedMap(pinPath, options)
 	if err != nil {
-		fmt.Println("GetMapByPinned failed: ", err.Error())
+		utils.WriteLog("GetMapByPinned failed: ", err.Error())
 	}
 	return m
 }

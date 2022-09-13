@@ -10,6 +10,8 @@ import (
 	"testcni/skel"
 	"testcni/utils"
 
+	types "github.com/containernetworking/cni/pkg/types/100"
+	// "github.com/containernetworking/cni/pkg/types"
 	"github.com/containernetworking/plugins/pkg/ns"
 	"github.com/vishvananda/netlink"
 )
@@ -21,7 +23,7 @@ type HostGatewayCNI struct{}
 func (hostGW *HostGatewayCNI) Bootstrap(
 	args *skel.CmdArgs,
 	pluginConfig *cni.PluginConf,
-) (*cni.CNIResult, error) {
+) (*types.Result, error) {
 	utils.WriteLog("调试: 不知道为什么走到了这里, 这是 BUG!!!")
 	return nil, errors.New("tmp error")
 	// 使用 kubelet(containerd) 传过来的 subnet 地址初始化 ipam
@@ -155,9 +157,9 @@ func (hostGW *HostGatewayCNI) Bootstrap(
 
 	_, _podIP, _ := net.ParseCIDR(podIP)
 
-	result := &cni.CNIResult{
+	result := &types.Result{
 		CNIVersion: pluginConfig.CNIVersion,
-		IPs: []*cni.IPConfig{
+		IPs: []*types.IPConfig{
 			{
 				Address: *_podIP,
 				Gateway: _gw,

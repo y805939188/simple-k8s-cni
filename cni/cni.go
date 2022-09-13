@@ -1,11 +1,13 @@
 package cni
 
 import (
-	"encoding/json"
+	// "encoding/json"
 	"errors"
 	"fmt"
-	"net"
+
+	// "net"
 	"testcni/skel"
+	"testcni/utils"
 
 	cniTypes "github.com/containernetworking/cni/pkg/types"
 	types "github.com/containernetworking/cni/pkg/types/100"
@@ -38,37 +40,37 @@ var manager *CNIManager
 
 /************** 和 types/100 那个包同步 ***************/
 
-type Route struct {
-	Dst net.IPNet
-	GW  net.IP
-}
+// type Route struct {
+// 	Dst net.IPNet
+// 	GW  net.IP
+// }
 
-type DNS struct {
-	Nameservers []string `json:"nameservers,omitempty"`
-	Domain      string   `json:"domain,omitempty"`
-	Search      []string `json:"search,omitempty"`
-	Options     []string `json:"options,omitempty"`
-}
+// type DNS struct {
+// 	Nameservers []string `json:"nameservers,omitempty"`
+// 	Domain      string   `json:"domain,omitempty"`
+// 	Search      []string `json:"search,omitempty"`
+// 	Options     []string `json:"options,omitempty"`
+// }
 
-type Interface struct {
-	Name    string `json:"name"`
-	Mac     string `json:"mac,omitempty"`
-	Sandbox string `json:"sandbox,omitempty"`
-}
+// type Interface struct {
+// 	Name    string `json:"name"`
+// 	Mac     string `json:"mac,omitempty"`
+// 	Sandbox string `json:"sandbox,omitempty"`
+// }
 
-type IPConfig struct {
-	Interface *int
-	Address   net.IPNet
-	Gateway   net.IP
-}
+// type IPConfig struct {
+// 	Interface *int
+// 	Address   net.IPNet
+// 	Gateway   net.IP
+// }
 
-type CNIResult struct {
-	CNIVersion string       `json:"cniVersion,omitempty"`
-	Interfaces []*Interface `json:"interfaces,omitempty"`
-	IPs        []*IPConfig  `json:"ips,omitempty"`
-	Routes     []*Route     `json:"routes,omitempty"`
-	DNS        DNS          `json:"dns,omitempty"`
-}
+// type CNIResult struct {
+// 	CNIVersion string       `json:"cniVersion,omitempty"`
+// 	Interfaces []*Interface `json:"interfaces,omitempty"`
+// 	IPs        []*IPConfig  `json:"ips,omitempty"`
+// 	Routes     []*Route     `json:"routes,omitempty"`
+// 	DNS        DNS          `json:"dns,omitempty"`
+// }
 
 /*****************************/
 
@@ -76,7 +78,7 @@ type CNI interface {
 	Bootstrap(
 		args *skel.CmdArgs,
 		pluginConfig *PluginConf,
-	) (*CNIResult, error)
+	) (*types.Result, error)
 	Unmount(
 		args *skel.CmdArgs, // 对于卸载或检查来讲, args 可能不同于启动时
 		pluginConfig *PluginConf,
@@ -229,13 +231,16 @@ func (manager *CNIManager) BootstrapCNI() error {
 	}
 	cniRes, err := cni.Bootstrap(args, configs)
 	if err != nil {
+		utils.WriteLog("出错的位置在 cni.Bootstrap")
 		return err
 	}
-	types100Result, err := transformCNIResultToPrintTypes(cniRes)
-	if err != nil {
-		return err
-	}
-	manager.result = types100Result
+	// types100Result, err := transformCNIResultToPrintTypes(cniRes)
+	// if err != nil {
+	// 	utils.WriteLog("出错的位置在 cni.transformCNIResultToPrintTypes")
+	// 	return err
+	// }
+	// manager.result = types100Result
+	manager.result = cniRes
 	return nil
 }
 
@@ -288,18 +293,18 @@ func GetCNIManager() *CNIManager {
 	return manager
 }
 
-func transformCNIResultToPrintTypes(cniResult *CNIResult) (*types.Result, error) {
-	data, err := json.Marshal(&cniResult)
-	if err != nil {
-		return nil, err
-	}
-	types100Result := &types.Result{}
-	err = json.Unmarshal([]byte(data), types100Result)
-	if err != nil {
-		return nil, err
-	}
-	return types100Result, nil
-}
+// func transformCNIResultToPrintTypes(cniResult *CNIResult) (*types.Result, error) {
+// 	data, err := json.Marshal(&cniResult)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	types100Result := &types.Result{}
+// 	err = json.Unmarshal([]byte(data), types100Result)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	return types100Result, nil
+// }
 
 func init() {
 	manager = &CNIManager{

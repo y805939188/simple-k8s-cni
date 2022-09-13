@@ -629,19 +629,45 @@ func (g *Get) nextUnusedIP() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	if allUsedIPs == "" {
-		// 进到这里说明当前主机还没有使用任何一个 ip
-		// 因此直接使用 currentNetwork 来生成第一个 ip
-		// +2 是因为 currentNetwork 一定是 x.y.z.0 这种最后一位是 0 的格式
-		// 一般 x.y.z.1 默认作为网关, 所以 +2 开始是要分发的 ip 地址
-		return utils.InetInt2Ip(utils.InetIP2Int(currentNetwork) + 2), nil
-	}
+	ipsMap := map[string]bool{}
 	ips := strings.Split(allUsedIPs, ";")
-	maxIP := utils.GetMaxIP(ips)
-	// TODO: to random
-	// 找到当前最大的 ip 然后 +1 就是下一个未使用的
-	nextIP := utils.InetInt2Ip(utils.InetIP2Int(maxIP) + 1)
-	return nextIP, nil
+	for _, ip := range ips {
+		ipsMap[ip] = true
+	}
+
+	gw, err := g.Gateway()
+	if err != nil {
+		return "", err
+	}
+	nextIp := ""
+	gwNum := utils.InetIP2Int(gw)
+	for {
+		n := utils.GetRandomNumber(254)
+		if n == 0 || n == 1 {
+			continue
+		}
+		nextIpNum := gwNum + int64(n)
+		nextIp = utils.InetInt2Ip(nextIpNum)
+		if _, ok := ipsMap[nextIp]; !ok {
+			break
+		}
+	}
+
+	return nextIp, nil
+
+	// if allUsedIPs == "" {
+	// 	// 进到这里说明当前主机还没有使用任何一个 ip
+	// 	// 因此直接使用 currentNetwork 来生成第一个 ip
+	// 	// +2 是因为 currentNetwork 一定是 x.y.z.0 这种最后一位是 0 的格式
+	// 	// 一般 x.y.z.1 默认作为网关, 所以 +2 开始是要分发的 ip 地址
+	// 	return utils.InetInt2Ip(utils.InetIP2Int(currentNetwork) + 2), nil
+	// }
+	// ips = strings.Split(allUsedIPs, ";")
+	// maxIP := utils.GetMaxIP(ips)
+	// // TODO: to random
+	// // 找到当前最大的 ip 然后 +1 就是下一个未使用的
+	// nextIP := utils.InetInt2Ip(utils.InetIP2Int(maxIP) + 1)
+	// return nextIP, nil
 }
 
 func (g *Get) Gateway() (string, error) {

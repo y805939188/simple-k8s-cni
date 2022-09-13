@@ -17,6 +17,8 @@ import (
 	"testcni/skel"
 	"testcni/utils"
 
+	types "github.com/containernetworking/cni/pkg/types/100"
+	// "github.com/containernetworking/cni/pkg/types"
 	"github.com/containernetworking/plugins/pkg/ns"
 	"github.com/vishvananda/netlink"
 )
@@ -343,7 +345,7 @@ func attachTcBPFIntoVxlan(vxlan *netlink.Vxlan) error {
  * tc filter add dev ding_vxlan ingress bpf direct-action obj vxlan_ingress.o
  * tc filter add dev ${pod veth name} ingress bpf direct-action obj veth_ingress.o
  */
-func (vx *VxlanCNI) Bootstrap(args *skel.CmdArgs, pluginConfig *cni.PluginConf) (*cni.CNIResult, error) {
+func (vx *VxlanCNI) Bootstrap(args *skel.CmdArgs, pluginConfig *cni.PluginConf) (*types.Result, error) {
 	utils.WriteLog("进到了 vxlan 模式了")
 
 	// 0. 先把各种能用的上的客户端初始化咯
@@ -465,9 +467,9 @@ func (vx *VxlanCNI) Bootstrap(args *skel.CmdArgs, pluginConfig *cni.PluginConf) 
 	// 最后交给外头去打印到标准输出
 	_gw, _, _ := net.ParseCIDR(gw)
 	_, _podIP, _ := net.ParseCIDR(podIP)
-	result := &cni.CNIResult{
+	result := &types.Result{
 		CNIVersion: pluginConfig.CNIVersion,
-		IPs: []*cni.IPConfig{
+		IPs: []*types.IPConfig{
 			{
 				Address: *_podIP,
 				Gateway: _gw,
