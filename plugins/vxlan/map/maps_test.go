@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestWatcher(t *testing.T) {
+func TestMap(t *testing.T) {
 	test := assert.New(t)
 	mm, err := GetMapsManager()
 	test.Nil(err)

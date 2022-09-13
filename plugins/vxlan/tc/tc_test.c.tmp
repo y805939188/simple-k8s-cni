@@ -1,0 +1,15 @@
+#include <linux/bpf.h>
+#include <linux/pkt_cls.h>
+#include <bpf/bpf_helpers.h>
+
+#ifndef __section
+# define __section(x)  __attribute__((section(x), used))
+#endif
+
+__section("classifier")
+int cls_main(struct __sk_buff *skb) {
+	bpf_printk("come here!");
+  return TC_ACT_OK;
+}
+
+char _license[] SEC("license") = "GPL";

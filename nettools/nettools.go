@@ -34,6 +34,59 @@ func DeleteArpEntry(ip, dev string) error {
 	return err
 }
 
+func CreateVxlanAndUp(name string, mtu int) (*netlink.Vxlan, error) {
+	l, _ := netlink.LinkByName(name)
+
+	vxlan, ok := l.(*netlink.Vxlan)
+	if ok && vxlan != nil {
+		return vxlan, nil
+	}
+	if mtu == 0 {
+		mtu = 1500
+	}
+	vxlan = &netlink.Vxlan{
+		LinkAttrs: netlink.LinkAttrs{
+			Name: name,
+			MTU:  mtu,
+			// EncapType: "external",
+			// OperState: netlink.OperDormant,
+		},
+	}
+	err := netlink.LinkAdd(vxlan)
+	if err != nil {
+		utils.WriteLog("无法创建 vxlan 设备: ", name, "err: ", err.Error())
+		return nil, err
+	}
+
+	l, err = netlink.LinkByName(name)
+	if err != nil {
+		utils.WriteLog("获取 vxlan 失败")
+		return nil, err
+	}
+
+	vxlan, ok = l.(*netlink.Vxlan)
+	if !ok {
+		utils.WriteLog("找到了设备, 但是该设备不是 vxlan")
+		return nil, fmt.Errorf("找到 %q 但该设备不是 vxlan", name)
+	}
+	// 然后还要把这个 vxlan 给 up 起来
+	if err = netlink.LinkSetUp(vxlan); err != nil {
+		utils.WriteLog("启动 vxlan 失败, err: ", err.Error())
+		return nil, fmt.Errorf("启动 vxlan %q 失败, err: %v", name, err)
+	}
+	return vxlan, nil
+}
+
+func DelVxlan(name string) error {
+	l, _ := netlink.LinkByName(name)
+
+	vxlan, ok := l.(*netlink.Vxlan)
+	if !ok || vxlan == nil {
+		return nil
+	}
+	return netlink.LinkDel(l)
+}
+
 func CreateBridge(brName, gw string, mtu int) (*netlink.Bridge, error) {
 	l, err := netlink.LinkByName(brName)
 	if err != nil {

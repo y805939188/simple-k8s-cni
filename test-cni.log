@@ -10,37 +10,6 @@ IfName:  eth0
 Args:  K8S_POD_INFRA_CONTAINER_ID=308102901b7fe9538fcfc71669d505bc09f9def5eb05adeddb73a948bb4b2c8b;K8S_POD_UID=d392609d-6aa2-4757-9745-b85d35e3d326;IgnoreUnknown=1;K8S_POD_NAMESPACE=kube-system;K8S_POD_NAME=coredns-c676cc86f-4kz2t
 Path:  /opt/cni/bin
 StdinData:  {"cniVersion":"0.3.0","mode":"vxlan","name":"testcni","subnet":"10.244.0.0","type":"testcni"} 
-即将注册 vxlan 模式 cni 
-注册 vxlan 模式 cni 成功 
-进到了 vxlan 模式了 
-(RecordSyncProcessor) 初始化 node-pod maps 成功, 数量:  2 
-进入了 statr deamon 
-启动的守护进程是: 44724 
-即将注册 vxlan 模式 cni 
-注册 vxlan 模式 cni 成功 
-进到了 vxlan 模式了 
-(RecordSyncProcessor) 初始化 node-pod maps 成功, 数量:  2 
-进入了 statr deamon 
-即将执行 child 
-开始执行监听 
-开始启动健康检查的服务 
-即将注册 vxlan 模式 cni 
-注册 vxlan 模式 cni 成功 
-进到了 vxlan 模式了 
-(RecordSyncProcessor) 初始化 node-pod maps 成功, 数量:  3 
-进入了 statr deamon 
-启动的守护进程是: 46305 
-即将注册 vxlan 模式 cni 
-注册 vxlan 模式 cni 成功 
-进到了 vxlan 模式了 
-(RecordSyncProcessor) 初始化 node-pod maps 成功, 数量:  3 
-进入了 statr deamon 
-即将执行 child 
-开始启动健康检查的服务 
-进到了 Processor: PUT, "/testcni/ipam/10.244.0.0/16/cni-test-1/10.244.134.0", "10.244.134.25;10.244.134.26:10.244.134.36;10.244.134.37;10.244.134.38"
- 
-(RecordSyncProcessor) 批量删除上次 key 失败:  batch delete: key does not exist 
-(RecordSyncProcessor) 更新 node-pod maps 成功, 数量:  3 
-即将注册 vxlan 模式 cni 
-注册 vxlan 模式 cni 成功 
-进到了 vxlan 模式了 
+
+无法创建 vxlan 设备:  ding_test2 err:  file exists 
+无法创建 vxlan 设备:  ding_test2 err:  file exists 
