@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net"
 	"os"
+	"os/exec"
 	"testcni/ipam"
 	"testcni/utils"
 
@@ -14,8 +15,122 @@ import (
 	"github.com/vishvananda/netlink"
 )
 
+// TODO: trick now!
+func CreateArpEntry(ip, mac, dev string) error {
+	processInfo := exec.Command(
+		"/bin/sh", "-c",
+		fmt.Sprintf("arp -s %s %s -i %s", ip, mac, dev),
+	)
+	_, err := processInfo.Output()
+	return err
+}
+
+func DeleteArpEntry(ip, dev string) error {
+	processInfo := exec.Command(
+		"/bin/sh", "-c",
+		fmt.Sprintf("arp -d %s -i %s", ip, dev),
+	)
+	_, err := processInfo.Output()
+	return err
+}
+
+func CreateVxlanAndUp(name string, mtu int) (*netlink.Vxlan, error) {
+	l, _ := netlink.LinkByName(name)
+
+	vxlan, ok := l.(*netlink.Vxlan)
+	if ok && vxlan != nil {
+		return vxlan, nil
+	}
+	if mtu == 0 {
+		mtu = 1500
+	}
+	vxlan = &netlink.Vxlan{
+		LinkAttrs: netlink.LinkAttrs{
+			Name: name,
+			MTU:  mtu,
+			// EncapType: "external",
+			// OperState: netlink.OperDormant,
+		},
+	}
+	err := netlink.LinkAdd(vxlan)
+	if err != nil {
+		utils.WriteLog("无法创建 vxlan 设备: ", name, "err: ", err.Error())
+		return nil, err
+	}
+
+	l, err = netlink.LinkByName(name)
+	if err != nil {
+		utils.WriteLog("获取 vxlan 失败")
+		return nil, err
+	}
+
+	vxlan, ok = l.(*netlink.Vxlan)
+	if !ok {
+		utils.WriteLog("找到了设备, 但是该设备不是 vxlan")
+		return nil, fmt.Errorf("找到 %q 但该设备不是 vxlan", name)
+	}
+	// 然后还要把这个 vxlan 给 up 起来
+	if err = netlink.LinkSetUp(vxlan); err != nil {
+		utils.WriteLog("启动 vxlan 失败, err: ", err.Error())
+		return nil, fmt.Errorf("启动 vxlan %q 失败, err: %v", name, err)
+	}
+	return vxlan, nil
+}
+
+func CreateVxlanAndUp2(name string, mtu int) (*netlink.Vxlan, error) {
+	l, _ := netlink.LinkByName(name)
+
+	vxlan, ok := l.(*netlink.Vxlan)
+	if ok && vxlan != nil {
+		return vxlan, nil
+	}
+	// if mtu == 0 {
+	// 	mtu = 1500
+	// }
+
+	processInfo := exec.Command(
+		"/bin/sh", "-c",
+		fmt.Sprintf("ip link add name %s type vxlan external", name),
+	)
+	_, err := processInfo.Output()
+	if err != nil {
+		return nil, err
+	}
+
+	l, err = netlink.LinkByName(name)
+	if err != nil {
+		utils.WriteLog("获取 vxlan 失败")
+		return nil, err
+	}
+
+	vxlan, ok = l.(*netlink.Vxlan)
+	if !ok {
+		utils.WriteLog("找到了设备, 但是该设备不是 vxlan")
+		return nil, fmt.Errorf("找到 %q 但该设备不是 vxlan", name)
+	}
+	// 然后还要把这个 vxlan 给 up 起来
+	if err = netlink.LinkSetUp(vxlan); err != nil {
+		utils.WriteLog("启动 vxlan 失败, err: ", err.Error())
+		return nil, fmt.Errorf("启动 vxlan %q 失败, err: %v", name, err)
+	}
+	return vxlan, nil
+}
+
+func DelVxlan(name string) error {
+	l, _ := netlink.LinkByName(name)
+
+	vxlan, ok := l.(*netlink.Vxlan)
+	if !ok || vxlan == nil {
+		return nil
+	}
+	return netlink.LinkDel(l)
+}
+
 func CreateBridge(brName, gw string, mtu int) (*netlink.Bridge, error) {
 	l, err := netlink.LinkByName(brName)
+	if err != nil {
+		return nil, err
+	}
 
 	br, ok := l.(*netlink.Bridge)
 	if ok && br != nil {
@@ -79,21 +194,25 @@ func SetUpVeth(veth ...*netlink.Veth) error {
 	return nil
 }
 
-func CreateVethPair(ifName string, mtu int) (*netlink.Veth, *netlink.Veth, error) {
+func CreateVethPair(ifName string, mtu int, hostName ...string) (*netlink.Veth, *netlink.Veth, error) {
 	vethPairName := ""
-	for {
-		_vname, err := RandomVethName()
-		vethPairName = _vname
-		if err != nil {
-			utils.WriteLog("生成随机 veth pair 名字失败, err: ", err.Error())
-			return nil, nil, err
-		}
+	if len(hostName) > 0 && hostName[0] != "" {
+		vethPairName = hostName[0]
+	} else {
+		for {
+			_vname, err := RandomVethName()
+			vethPairName = _vname
+			if err != nil {
+				utils.WriteLog("生成随机 veth pair 名字失败, err: ", err.Error())
+				return nil, nil, err
+			}
 
-		_, err = netlink.LinkByName(vethPairName)
-		if err != nil && !os.IsExist(err) {
-			// 上面生成随机名字可能会重名, 所以这里先尝试按照这个名字获取一下
-			// 如果没有这个名字的设备, 那就可以 break 了
-			break
+			_, err = netlink.LinkByName(vethPairName)
+			if err != nil && !os.IsExist(err) {
+				// 上面生成随机名字可能会重名, 所以这里先尝试按照这个名字获取一下
+				// 如果没有这个名字的设备, 那就可以 break 了
+				break
+			}
 		}
 	}
 
@@ -263,10 +382,14 @@ func SetOtherHostRouteToCurrentHost(networks []*ipam.Network, currentNetwork *ip
 }
 
 // forked from plugins/pkg/ip/route_linux.go
-func AddRoute(ipn *net.IPNet, gw net.IP, dev netlink.Link) error {
+func AddRoute(ipn *net.IPNet, gw net.IP, dev netlink.Link, scope ...netlink.Scope) error {
+	defaultScope := netlink.SCOPE_UNIVERSE
+	if len(scope) > 0 {
+		defaultScope = scope[0]
+	}
 	return netlink.RouteAdd(&netlink.Route{
 		LinkIndex: dev.Attrs().Index,
-		Scope:     netlink.SCOPE_UNIVERSE,
+		Scope:     defaultScope,
 		Dst:       ipn,
 		Gw:        gw,
 	})
@@ -378,7 +501,7 @@ func CreateBridgeAndCreateVethAndSetNetworkDeviceStatusAndSetVethMaster(
 		}
 
 		// 启动之后给这个 netns 设置默认路由 以便让其他网段的包也能从 veth 走到网桥
-		// TODO: 实测后发现还必须得写在这里, 如果写在下面 hostNs.Do 里头会报错目标 network 不可达(why?)
+		// NOTE: 实测后发现还必须得写在这里, 如果写在下面 hostNs.Do 里头会报错目标 network 不可达(why?)
 		gwNetIP, _, err := net.ParseCIDR(gw)
 		if err != nil {
 			utils.WriteLog("转换 gwip 失败, err:", err.Error())

@@ -1,4 +1,4 @@
-package nettools_test
+package nettools
 
 import (
 	"fmt"
@@ -7,15 +7,15 @@ import (
 	"testing"
 
 	"testcni/ipam"
-	"testcni/nettools"
 
 	"github.com/containernetworking/plugins/pkg/ns"
+	"github.com/stretchr/testify/assert"
 	"github.com/vishvananda/netlink"
 )
 
 func _nettools(brName, gw, ifName, podIP string, mtu int, netns ns.NetNS) {
 	// 先创建网桥
-	br, err := nettools.CreateBridge(brName, gw, mtu)
+	br, err := CreateBridge(brName, gw, mtu)
 	if err != nil {
 		fmt.Println("创建网卡失败, err: ", err.Error())
 		return
@@ -23,28 +23,28 @@ func _nettools(brName, gw, ifName, podIP string, mtu int, netns ns.NetNS) {
 
 	err = netns.Do(func(hostNs ns.NetNS) error {
 		// 创建一对儿 veth 设备
-		containerVeth, hostVeth, err := nettools.CreateVethPair(ifName, mtu)
+		containerVeth, hostVeth, err := CreateVethPair(ifName, mtu)
 		if err != nil {
 			fmt.Println("创建 veth 失败, err: ", err.Error())
 			return err
 		}
 
 		// 放一个到主机上
-		err = nettools.SetVethNsFd(hostVeth, hostNs)
+		err = SetVethNsFd(hostVeth, hostNs)
 		if err != nil {
 			fmt.Println("把 veth 设置到 ns 下失败: ", err.Error())
 			return err
 		}
 
 		// 然后把要被放到 pod 中的塞上 podIP
-		err = nettools.SetIpForVeth(containerVeth, podIP)
+		err = SetIpForVeth(containerVeth, podIP)
 		if err != nil {
 			fmt.Println("给 veth 设置 ip 失败, err: ", err.Error())
 			return err
 		}
 
 		// 然后启动它
-		err = nettools.SetUpVeth(containerVeth)
+		err = SetUpVeth(containerVeth)
 		if err != nil {
 			fmt.Println("启动 veth pair 失败, err: ", err.Error())
 			return err
@@ -57,7 +57,7 @@ func _nettools(brName, gw, ifName, podIP string, mtu int, netns ns.NetNS) {
 			fmt.Println("转换 gwip 失败, err:", err.Error())
 			return err
 		}
-		err = nettools.SetDefaultRouteToVeth(gwNetIP, containerVeth)
+		err = SetDefaultRouteToVeth(gwNetIP, containerVeth)
 		if err != nil {
 			fmt.Println("SetDefaultRouteToVeth 时出错, err: ", err.Error())
 			return err
@@ -72,14 +72,14 @@ func _nettools(brName, gw, ifName, podIP string, mtu int, netns ns.NetNS) {
 				return err
 			}
 			// 启动它
-			err = nettools.SetUpVeth(hostVeth)
+			err = SetUpVeth(hostVeth)
 			if err != nil {
 				fmt.Println("启动 veth pair 失败, err: ", err.Error())
 				return err
 			}
 
 			// 把它塞到网桥上
-			err = nettools.SetVethMaster(hostVeth, br)
+			err = SetVethMaster(hostVeth, br)
 			if err != nil {
 				fmt.Println("挂载 veth 到网桥失败, err: ", err.Error())
 				return err
@@ -88,7 +88,7 @@ func _nettools(brName, gw, ifName, podIP string, mtu int, netns ns.NetNS) {
 			// 都完事儿之后理论上同一台主机下的俩 netns(pod) 就能通信了
 			// 如果无法通信, 有可能是 iptables 被设置了 forward drop
 			// 需要用 iptables 允许网桥做转发
-			err = nettools.SetIptablesForBridgeToForwardAccept(br)
+			err = SetIptablesForBridgeToForwardAccept(br)
 			if err != nil {
 				fmt.Println("set iptables 失败", err.Error())
 			}
@@ -105,6 +105,14 @@ func _nettools(brName, gw, ifName, podIP string, mtu int, netns ns.NetNS) {
 }
 
 func TestNettools(t *testing.T) {
+	test := assert.New(t)
+	vxlan, err := CreateVxlanAndUp("ding_vxlan", 1500)
+	test.Nil(err)
+	fmt.Println(vxlan)
+	// err = DelVxlan("ding_test1")
+	// test.Nil(err)
+	return
+
 	// brName := "testbr0"
 	// cidr := "10.244.1.1/16"
 	// ifName := "eth0"
