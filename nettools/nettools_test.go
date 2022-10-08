@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"testcni/ipam"
+	"testcni/utils"
 
 	"github.com/containernetworking/plugins/pkg/ns"
 	"github.com/stretchr/testify/assert"
@@ -23,7 +24,7 @@ func _nettools(brName, gw, ifName, podIP string, mtu int, netns ns.NetNS) {
 
 	err = netns.Do(func(hostNs ns.NetNS) error {
 		// 创建一对儿 veth 设备
-		containerVeth, hostVeth, err := CreateVethPair(ifName, mtu)
+		containerVeth, hostVeth, err := CreateVethPair(ifName, mtu, "")
 		if err != nil {
 			fmt.Println("创建 veth 失败, err: ", err.Error())
 			return err
@@ -88,7 +89,7 @@ func _nettools(brName, gw, ifName, podIP string, mtu int, netns ns.NetNS) {
 			// 都完事儿之后理论上同一台主机下的俩 netns(pod) 就能通信了
 			// 如果无法通信, 有可能是 iptables 被设置了 forward drop
 			// 需要用 iptables 允许网桥做转发
-			err = SetIptablesForBridgeToForwardAccept(br)
+			err = SetIptablesForToForwardAccept(br)
 			if err != nil {
 				fmt.Println("set iptables 失败", err.Error())
 			}
@@ -109,9 +110,36 @@ func TestNettools(t *testing.T) {
 	vxlan, err := CreateVxlanAndUp("ding_vxlan", 1500)
 	test.Nil(err)
 	fmt.Println(vxlan)
-	// err = DelVxlan("ding_test1")
-	// test.Nil(err)
-	return
+	err = DelVxlan("ding_vxlan")
+	test.Nil(err)
+
+	ipip, err := CreateIPIPDeviceAndUp("tunl0")
+	test.Nil(err)
+	fmt.Println(ipip)
+	test.Equal(ipip.Type(), "ipip")
+	err = DelIPIP("tunl0")
+	test.Nil(err)
+
+	DelVethPair("ding-test")
+	_, hostVeth, err := CreateVethPair("ding-test", 1500)
+	fmt.Println("这里的 hostVeth name 是: ", hostVeth.Name)
+	test.Nil(err)
+	err = SetUpVeth(hostVeth)
+	test.Nil(err)
+	err = SetUpDeviceProxyArpV4(hostVeth)
+	test.Nil(err)
+	str, err := utils.ReadContentFromFile(fmt.Sprintf("/proc/sys/net/ipv4/conf/%s/proxy_arp", hostVeth.Name))
+	test.Nil(err)
+	// 不知道为啥通过命令执行 echo 1 > xxxx 后边会有个 \n 的换行符
+	// 不过啥也不影响
+	test.Equal(str, "1\n")
+	err = SetDownDeviceProxyArpV4(hostVeth)
+	test.Nil(err)
+	str, err = utils.ReadContentFromFile(fmt.Sprintf("/proc/sys/net/ipv4/conf/%s/proxy_arp", hostVeth.Name))
+	test.Nil(err)
+	test.Equal(str, "0\n")
+	err = DelVethPair(hostVeth.Attrs().Name)
+	test.Nil(err)
 
 	// brName := "testbr0"
 	// cidr := "10.244.1.1/16"
