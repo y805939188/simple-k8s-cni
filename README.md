@@ -5,7 +5,53 @@
 </br>
 [从 0 实现一个 CNI 网络插件](https://zhuanlan.zhihu.com/p/450514389)</br>
 [基于 ebpf 和 vxlan 实现一个 k8s 网络插件（一）](https://zhuanlan.zhihu.com/p/565254116)</br>
-[基于 ebpf 和 vxlan 实现一个 k8s 网络插件（二）](https://zhuanlan.zhihu.com/p/565420113)
+[基于 ebpf 和 vxlan 实现一个 k8s 网络插件（二）](https://zhuanlan.zhihu.com/p/565420113))</br>
+[基于 BGP 协议实现 Calico 的 IPIP 网络](https://zhuanlan.zhihu.com/p/571966611)
+
+## IPIP 模式测试方法
+0. 最好有个干净的，没有安装任何网络插件的 k8s 环境
+
+1.
+```js
+// 在 /etc/cni/net.d/ 目录下新建个 .conf 结尾的文件, 输入以下配置项
+{
+  "cniVersion": "0.3.0",
+  "name": "testcni",
+  "type": "testcni",
+  "mode": "ipip",
+  "subnet": "10.244.0.0/16"
+}
+```
+
+2. 
+```bash
+# 在项目根目录执行
+make build_main
+```
+
+3. 此时会生成一个 main
+
+4. 去 https://github.com/projectcalico/bird clone 项目
+
+5. 执行
+```
+# 编译 calico 的 bird
+# 编译完后会在 dist 目录中有个 bird 二进制
+ARCH=<你的计算机架构> ./build.sh
+```
+
+6. 创建 /opt/testcni 目录并把上边那个 bird 二进制拷贝到这里
+
+7. 第三步中生成的 main 二进制拷贝到 /opt/cni/bin/testcni
+```bash
+mv main /opt/cni/bin/testcni
+```
+</br>
+</br>
+</br>
+
+---
+</br>
 
 ## vxlan 模式测试方法
 0. 最好有个干净的，没有安装任何网络插件的 k8s 环境
