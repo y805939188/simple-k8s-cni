@@ -48,7 +48,7 @@ func startWatchNodeChange(ipam *_ipam.IpamService, etcd *_etcd.EtcdClient) error
 			}
 			return nil
 		}
-		// 如果该路径不存在文件的话, 可能是谁手贱给删了, 那就再创建一份儿
+		// 如果该路径不存在文件的话, 可能是谁误删了, 那就再创建一份儿
 		utils.CreateFile(consts.KUBE_TEST_CNI_TMP_DEAMON_DEFAULT_PATH, ([]byte)(pidStr), 0766)
 		return nil
 	}
