@@ -7,6 +7,7 @@ import (
 	"testcni/helper"
 
 	_ "testcni/plugins/hostgw"
+	_ "testcni/plugins/ipip"
 	_ "testcni/plugins/vxlan/vxlan"
 	"testcni/skel"
 	"testcni/utils"
