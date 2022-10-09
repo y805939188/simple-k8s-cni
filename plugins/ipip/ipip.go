@@ -4,10 +4,13 @@ import (
 	"errors"
 	"fmt"
 	"net"
+	"os"
+	"strings"
 	"testcni/cni"
 	"testcni/consts"
 	"testcni/ipam"
 	"testcni/nettools"
+	"testcni/plugins/ipip/bird"
 	"testcni/skel"
 	"testcni/utils"
 
@@ -185,6 +188,24 @@ func setHostNetwork(netns ns.NetNS, hostVeth *netlink.Veth, podIP string) error 
 	})
 }
 
+func setIpForIpip(ipamClient *ipam.IpamService, ipip *netlink.Iptun) (string, error) {
+	ipexist, _ := nettools.DeviceExistIp(ipip)
+	if ipexist != "" {
+		return ipexist, nil
+	}
+	hostname, err := os.Hostname()
+	if err != nil {
+		return "", err
+	}
+	// 先根据 hostname 获取到本节点的 cidr
+	cidr, err := ipamClient.Get().CIDR(hostname)
+	if err != nil {
+		return "", err
+	}
+	// 然后给这个设备添加 ip 地址
+	return cidr, nettools.SetIpForDevice(ipip, cidr)
+}
+
 func (ipip *IpipCNI) Bootstrap(
 	args *skel.CmdArgs,
 	pluginConfig *cni.PluginConf,
@@ -231,36 +252,50 @@ func (ipip *IpipCNI) Bootstrap(
 	}
 
 	// 走到这儿基本上 pod 内部就配置完了
+	// 接下来要创建 ipip tunnel 设备
+	iptunl, err := nettools.CreateIPIPDeviceAndUp("tunl0")
+	if err != nil {
+		return nil, err
+	}
 
-	// // 2. 根据 subnet 网段来得到网关, 表示所有的节点上的 pod 的 ip 都在这个网关范围内
-	// gateway, err := ipamClient.Get().Gateway()
-	// if err != nil {
-	// 	utils.WriteLog("获取 gateway 出错, err: ", err.Error())
-	// 	return nil, err
-	// }
+	// 设置 ipip tunnel 的 forwarding 为 1
+	err = nettools.SetUpDeviceForwarding(iptunl)
+	if err != nil {
+		return nil, err
+	}
 
-	// // 3. 获取网关＋网段号
-	// gatewayWithMaskSegment, err := ipamClient.Get().GatewayWithMaskSegment()
-	// if err != nil {
-	// 	utils.WriteLog("获取 gatewayWithMaskSegment 出错, err: ", err.Error())
-	// 	return nil, err
-	// }
+	// 给 tunnel 设备设置 ip
+	tunlCIDR, err := setIpForIpip(ipamClient, iptunl)
+	if err != nil {
+		return nil, err
+	}
 
-	return nil, errors.New("tmp error")
-	// _gw := net.ParseIP(gateway)
+	// 创建 bgp 协议需要的 bird config
+	err = bird.GenConfigFile(ipamClient)
+	if err != nil {
+		return nil, err
+	}
 
-	// _, _podIP, _ := net.ParseCIDR(podIP)
+	// 启动 bird
+	_, err = bird.StartBirdDaemon(consts.KUBE_TEST_CNI_DEFAULT_BIRD_CONFIG_PATH)
+	if err != nil {
+		return nil, err
+	}
 
-	// result := &types.Result{
-	// 	CNIVersion: pluginConfig.CNIVersion,
-	// 	IPs: []*types.IPConfig{
-	// 		{
-	// 			Address: *_podIP,
-	// 			Gateway: _gw,
-	// 		},
-	// 	},
-	// }
-	// return result, nil
+	// 获取网关地址和 podIP 准备返回给外边
+	tunlIP := strings.Split(tunlCIDR, "/")[0]
+	_gw := net.ParseIP(tunlIP)
+	_, _podIP, _ := net.ParseCIDR(podIP)
+	result := &types.Result{
+		CNIVersion: pluginConfig.CNIVersion,
+		IPs: []*types.IPConfig{
+			{
+				Address: *_podIP,
+				Gateway: _gw,
+			},
+		},
+	}
+	return result, nil
 }
 
 func (ipip *IpipCNI) Unmount(

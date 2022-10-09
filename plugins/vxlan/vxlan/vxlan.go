@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net"
 	"strconv"
-	"strings"
 	"testcni/cni"
 	"testcni/consts"
 	_etcd "testcni/etcd"
@@ -114,16 +113,9 @@ func createNsVethPair(args *skel.CmdArgs, pluginConfig *cni.PluginConf) (*netlin
 }
 
 func setIpIntoHostPair(ipam *_ipam.IpamService, veth *netlink.Veth) (string, error) {
-	dev, err := net.InterfaceByIndex(veth.Index)
-	if err == nil {
-		addrs, err := dev.Addrs()
-		if err == nil && len(addrs) > 0 {
-			str := addrs[0].String()
-			tmpIp := strings.Split(str, "/")
-			if len(tmpIp) == 2 && net.ParseIP(tmpIp[0]).To4() != nil {
-				return str, nil
-			}
-		}
+	ipexist, _ := nettools.DeviceExistIp(veth)
+	if ipexist != "" {
+		return ipexist, nil
 	}
 	// 获取网关地址, 一般就是当前节点所在网段的第一个 ip
 	gw, err := ipam.Get().Gateway()

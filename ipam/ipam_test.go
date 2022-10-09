@@ -18,6 +18,9 @@ func TestIpam(t *testing.T) {
 
 	is, err := GetIpamService()
 	test.Nil(err)
+	otherIps, err := is.Get().AllOtherHostIP()
+	test.Nil(err)
+	fmt.Println("其他节点的 ip 们是: ", otherIps)
 
 	// record, err := is.Get().RecordPathByHost("cni-test-1")
 	// test.Nil(err)

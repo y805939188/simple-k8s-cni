@@ -168,6 +168,14 @@ func (g *Get) RecordPathByHost(hostname string) (string, error) {
 	return "", errors.New("can not get subnet address")
 }
 
+func (g *Get) CurrentSubnet() (string, error) {
+	ipam, err := GetIpamService()
+	if err != nil {
+		return "", err
+	}
+	return fmt.Sprintf("%s/%s", ipam.Subnet, ipam.MaskSegment), nil
+}
+
 func (g *Get) RecordByHost(hostname string) ([]string, error) {
 	path, err := g.RecordPathByHost(hostname)
 	if err != nil {
@@ -506,6 +514,44 @@ func (g *Get) AllOtherHostNetwork() ([]*Network, error) {
 			continue
 		}
 		result = append(result, network)
+	}
+	return result, nil
+}
+
+/**
+ * 获取集群中除了本机以外的全部节点的 ip
+ */
+func (g *Get) AllOtherHostIP() (map[string]string, error) {
+	hostname, err := os.Hostname()
+	if err != nil {
+		return nil, err
+	}
+	nodes, err := g.k8sClient.Get().Nodes()
+	if err != nil {
+		return nil, err
+	}
+
+	result := make(map[string]string, len(nodes.Items)-1)
+	for _, node := range nodes.Items {
+		ip := ""
+		_hostname := ""
+	iternal:
+		for _, addr := range node.Status.Addresses {
+			if addr.Type == "Hostname" {
+				if addr.Address == hostname {
+					ip = ""
+					_hostname = ""
+					break iternal
+				}
+				_hostname = addr.Address
+			}
+			if addr.Type == "InternalIP" {
+				ip = addr.Address
+			}
+		}
+		if ip != "" {
+			result[_hostname] = ip
+		}
 	}
 	return result, nil
 }

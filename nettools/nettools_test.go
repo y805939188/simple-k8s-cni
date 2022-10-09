@@ -107,6 +107,14 @@ func _nettools(brName, gw, ifName, podIP string, mtu int, netns ns.NetNS) {
 
 func TestNettools(t *testing.T) {
 	test := assert.New(t)
+
+	ipam.Init("10.244.0.0")
+	is, err := ipam.GetIpamService()
+	if err != nil {
+		fmt.Println("ipam 初始化失败: ", err.Error())
+		return
+	}
+
 	vxlan, err := CreateVxlanAndUp("ding_vxlan", 1500)
 	test.Nil(err)
 	fmt.Println(vxlan)
@@ -164,23 +172,12 @@ func TestNettools(t *testing.T) {
 	// }
 	// _nettools(brName, cidr, ifName, podIP, mtu, netns)
 
-	// 目前同一台主机上的 pod 可以 ping 通了
-	// 接下来要让不同节点上的 pod 互相通信了
-	/**
-	 * 手动操作
-	 * 	1. 主机上添加路由规则: ip route add 10.244.2.0/24 via 192.168.98.144 dev ens33
-	 *  2. 对方主机也添加
-	 *  3. 将双方主机上的网卡添加进网桥: brctl addif testbr0 ens33
-	 * 以上手动操作可成功
-	 * TODO: 接下来要给它转化成代码
-	 */
-
-	ipam.Init("10.244.0.0", "16")
-	is, err := ipam.GetIpamService()
-	if err != nil {
-		fmt.Println("ipam 初始化失败: ", err.Error())
-		return
-	}
+	// ipam.Init("10.244.0.0", "16")
+	// is, err := ipam.GetIpamService()
+	// if err != nil {
+	// 	fmt.Println("ipam 初始化失败: ", err.Error())
+	// 	return
+	// }
 
 	fmt.Println("成功: ", is.MaskIP)
 	//  test.Equal(is.MaskIP, "255.255.0.0")

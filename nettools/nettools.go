@@ -7,6 +7,7 @@ import (
 	"net"
 	"os"
 	"os/exec"
+	"strings"
 	"syscall"
 	"testcni/ipam"
 	"testcni/utils"
@@ -368,21 +369,38 @@ func DelVethPair(ifName string) error {
 	return delInterfaceByName(ifName)
 }
 
-func SetIpForVeth(veth *netlink.Veth, podIP string) error {
-	// 给 veth1 也就是 pod(net ns) 里的设备添加上 podIP
-	ipaddr, ipnet, err := net.ParseCIDR(podIP)
+func SetIpForDevice(link netlink.Link, ip string) error {
+	ipaddr, ipnet, err := net.ParseCIDR(ip)
 	if err != nil {
-		utils.WriteLog("转换 podIP 为 net 类型失败: ", podIP, " err: ", err.Error())
+		utils.WriteLog("转换 podIP 为 net 类型失败: ", ip, " err: ", err.Error())
 		return err
 	}
 	ipnet.IP = ipaddr
-	err = netlink.AddrAdd(veth, &netlink.Addr{IPNet: ipnet})
+	err = netlink.AddrAdd(link, &netlink.Addr{IPNet: ipnet})
 	if err != nil {
-		utils.WriteLog("给 veth 添加 podIP 失败, podIP 是: ", podIP, " err: ", err.Error())
+		utils.WriteLog("给 veth 添加 podIP 失败, podIP 是: ", ip, " err: ", err.Error())
 		return err
 	}
-
 	return nil
+}
+
+func DeviceExistIp(link netlink.Link) (string, error) {
+	dev, err := net.InterfaceByIndex(link.Attrs().Index)
+	if err == nil {
+		addrs, err := dev.Addrs()
+		if err == nil && len(addrs) > 0 {
+			str := addrs[0].String()
+			tmpIp := strings.Split(str, "/")
+			if len(tmpIp) == 2 && net.ParseIP(tmpIp[0]).To4() != nil {
+				return str, nil
+			}
+		}
+	}
+	return "", nil
+}
+
+func SetIpForVeth(veth *netlink.Veth, podIP string) error {
+	return SetIpForDevice(veth, podIP)
 }
 
 func SetVethToBridge(veth *netlink.Veth, br *netlink.Bridge) error {

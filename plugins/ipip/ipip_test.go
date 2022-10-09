@@ -47,7 +47,7 @@ func TestIPIP(t *testing.T) {
 	}
 
 	pluginConfig := &cni.PluginConf{
-		Subnet: "10.244.0.0",
+		Subnet: "10.244.0.0/16",
 		Mode:   "ipip",
 	}
 	pluginConfig.CNIVersion = "0.3.0"
@@ -57,8 +57,8 @@ func TestIPIP(t *testing.T) {
 	ipip := IpipCNI{}
 	_, err = ipip.Bootstrap(args, pluginConfig)
 	test.Nil(err)
-	err = TmpDeleteNS("ns1")
-	test.Nil(err)
-	nsexist = utils.FileIsExisted("/var/run/netns/ns1")
-	test.False(nsexist)
+	// err = TmpDeleteNS("ns1")
+	// test.Nil(err)
+	// nsexist = utils.FileIsExisted("/var/run/netns/ns1")
+	// test.False(nsexist)
 }
