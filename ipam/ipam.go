@@ -72,6 +72,13 @@ type IpamService struct {
 	*operator
 }
 
+type IPAMOptions struct {
+	MaskSegment      string
+	PodIpMaskSegment string
+	RangeStart       string
+	RangeEnd         string
+}
+
 var _lock sync.Mutex
 var _isLocking bool
 
@@ -134,8 +141,20 @@ func getRecordPath(hostNetwork string) string {
 	return getHostPath() + "/" + hostNetwork
 }
 
+func getIpRangesPath(network string) string {
+	return getHostPath() + "/" + network + "/range"
+}
+
 func getIPsPoolPath(subnet, mask string) string {
 	return getEtcdPathWithPrefix("/" + subnet + "/" + mask + "/" + "pool")
+}
+
+func (g *Get) MaskSegment() (string, error) {
+	ipam, err := GetIpamService()
+	if err != nil {
+		return "", err
+	}
+	return ipam.MaskSegment, nil
 }
 
 func (g *Get) HostSubnetMapPath() (string, error) {
@@ -283,13 +302,11 @@ func (s *Set) IPs(ips ...string) error {
 		}
 	}
 
-	s.etcdClient.Set(getRecordPath(currentNetwork), _tempIPs)
-	// return unlock()
-	return nil
+	return s.etcdClient.Set(getRecordPath(currentNetwork), _tempIPs)
 }
 
 // 根据主机名获取一个当前主机可用的网段
-func (is *IpamService) networkInit(hostPath, poolPath string) (string, error) {
+func (is *IpamService) networkInit(hostPath, poolPath string, ranges ...string) (string, error) {
 	lock()
 	defer unlock()
 	network, err := is.EtcdClient.Get(hostPath)
@@ -323,6 +340,32 @@ func (is *IpamService) networkInit(hostPath, poolPath string) (string, error) {
 	err = is.EtcdClient.Set(hostPath, currentHostNetwork)
 	if err != nil {
 		return "", err
+	}
+
+	// 如果传了 ip 地址的 range 的话就创建一个 range 目录
+	start := ""
+	end := ""
+	switch len(ranges) {
+	case 1:
+		start = ranges[0]
+	case 2:
+		start = ranges[0]
+		end = ranges[1]
+	}
+
+	if start != "" && end != "" {
+		ranges := utils.GenIpRange(start, end)
+		if ranges != nil {
+			currentIpRanges := strings.Join(utils.GenIpRange(start, end), ";")
+			err = is.EtcdClient.Set(fmt.Sprintf(
+				"%s/%s/range",
+				hostPath,
+				currentHostNetwork,
+			), currentIpRanges)
+			if err != nil {
+				return "", err
+			}
+		}
 	}
 
 	return currentHostNetwork, nil
@@ -412,6 +455,10 @@ func (is *IpamService) ipsPoolInit(poolPath string) error {
 			break
 		}
 	}
+	/**
+	 * FIXME: 对于子网网段的创建, 其实可以不完全是 8 的倍数
+	 * 比如 10.244.0.0/26 这种其实也可以
+	 */
 	// 创建出 255 个备用的网段
 	// 每个节点从这些网段中选择一个还没有使用过的
 	_tempIpStr := ""
@@ -675,10 +722,35 @@ func (g *Get) nextUnusedIP() (string, error) {
 	if err != nil {
 		return "", err
 	}
+
 	ipsMap := map[string]bool{}
 	ips := strings.Split(allUsedIPs, ";")
 	for _, ip := range ips {
 		ipsMap[ip] = true
+	}
+	a := getIpRangesPath(currentNetwork)
+	fmt.Println(a)
+	if rangesPathExist, err := g.etcdClient.GetKey(getIpRangesPath(currentNetwork)); rangesPathExist != "" && err == nil {
+		if rangesIPs, err := g.etcdClient.Get(getIpRangesPath(currentNetwork)); err == nil {
+			rangeIpsArr := strings.Split(rangesIPs, ";")
+			if len(rangeIpsArr) == 0 {
+				return "", errors.New("all of the ips are used")
+			}
+			nextIp := ""
+			for {
+				nextIp = ""
+				for i, ip := range rangeIpsArr {
+					if utils.GetRandomNumber(i+1) == 0 {
+						nextIp = ip
+					}
+				}
+				if _, ok := ipsMap[nextIp]; !ok {
+					break
+				}
+			}
+
+			return nextIp, nil
+		}
 	}
 
 	gw, err := g.Gateway()
@@ -700,20 +772,6 @@ func (g *Get) nextUnusedIP() (string, error) {
 	}
 
 	return nextIp, nil
-
-	// if allUsedIPs == "" {
-	// 	// 进到这里说明当前主机还没有使用任何一个 ip
-	// 	// 因此直接使用 currentNetwork 来生成第一个 ip
-	// 	// +2 是因为 currentNetwork 一定是 x.y.z.0 这种最后一位是 0 的格式
-	// 	// 一般 x.y.z.1 默认作为网关, 所以 +2 开始是要分发的 ip 地址
-	// 	return utils.InetInt2Ip(utils.InetIP2Int(currentNetwork) + 2), nil
-	// }
-	// ips = strings.Split(allUsedIPs, ";")
-	// maxIP := utils.GetMaxIP(ips)
-	// // TODO: to random
-	// // 找到当前最大的 ip 然后 +1 就是下一个未使用的
-	// nextIP := utils.InetInt2Ip(utils.InetIP2Int(maxIP) + 1)
-	// return nextIP, nil
 }
 
 func (g *Get) Gateway() (string, error) {
@@ -746,9 +804,7 @@ func (g *Get) AllUsedIPs() ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	ips := strings.Split(allUsedIPs, ";")
-	// return ips, unlock()
-	return ips, nil
+	return strings.Split(allUsedIPs, ";"), nil
 }
 
 func (g *Get) AllUsedIPsByHost(hostname string) ([]string, error) {
@@ -761,9 +817,7 @@ func (g *Get) AllUsedIPsByHost(hostname string) ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	ips := strings.Split(allUsedIPs, ";")
-	// return ips, unlock()
-	return ips, nil
+	return strings.Split(allUsedIPs, ";"), nil
 }
 
 func (g *Get) UnusedIP() (string, error) {
@@ -819,12 +873,7 @@ func (r *Release) IPs(ips ...string) error {
 		}
 	}
 	newIPsString := strings.Join(_newIPs, ";")
-	err = r.etcdClient.Set(getRecordPath(currentNetwork), newIPsString)
-	if err != nil {
-		return err
-	}
-	// return unlock()
-	return nil
+	return r.etcdClient.Set(getRecordPath(currentNetwork), newIPsString)
 }
 
 func (r *Release) Pool() error {
@@ -834,12 +883,7 @@ func (r *Release) Pool() error {
 		return err
 	}
 
-	err = r.etcdClient.Set(currentNetwork, "")
-	if err != nil {
-		return err
-	}
-	// return unlock()
-	return nil
+	return r.etcdClient.Set(currentNetwork, "")
 }
 
 func (o *operator) Get() *Get {
@@ -881,7 +925,7 @@ func getMaskIpFromNum(numStr string) string {
 
 var __GetIpamService func() (*IpamService, error)
 
-func _GetIpamService(subnet string, maskSegment ...string) func() (*IpamService, error) {
+func _GetIpamService(subnet string, options *IPAMOptions) func() (*IpamService, error) {
 
 	return func() (*IpamService, error) {
 		var _ipam *IpamService
@@ -892,12 +936,21 @@ func _GetIpamService(subnet string, maskSegment ...string) func() (*IpamService,
 			_subnet := subnet
 			var _maskSegment string = consts.DEFAULT_MASK_NUM
 			var _podIpMaskSegment string = consts.DEFAULT_MASK_NUM
-
-			if len(maskSegment) > 0 {
-				_maskSegment = maskSegment[0]
-			}
-			if len(maskSegment) > 1 {
-				_podIpMaskSegment = maskSegment[1]
+			var _rangeStart string = ""
+			var _rangeEnd string = ""
+			if options != nil {
+				if options.MaskSegment != "" {
+					_maskSegment = options.MaskSegment
+				}
+				if options.PodIpMaskSegment != "" {
+					_podIpMaskSegment = options.PodIpMaskSegment
+				}
+				if options.RangeStart != "" {
+					_rangeStart = options.RangeStart
+				}
+				if options.RangeEnd != "" {
+					_rangeEnd = options.RangeEnd
+				}
 			}
 
 			// 配置文件中传参数的时候可能直接传了个子网掩码
@@ -939,11 +992,17 @@ func _GetIpamService(subnet string, maskSegment ...string) func() (*IpamService,
 				return nil, err
 			}
 			hostPath := getEtcdPathWithPrefix("/" + _ipam.Subnet + "/" + _ipam.MaskSegment + "/" + hostname)
-			currentHostNetwork, err := _ipam.networkInit(hostPath, poolPath)
+			currentHostNetwork, err := _ipam.networkInit(
+				hostPath,
+				poolPath,
+				_rangeStart,
+				_rangeEnd,
+			)
 			if err != nil {
 				return nil, err
 			}
 
+			// 初始化一个 map 的地址给 ebpf 用
 			err = _ipam.subnetMapInit(
 				_subnet,
 				_maskSegment,
@@ -973,12 +1032,13 @@ func GetIpamService() (*IpamService, error) {
 }
 
 func (is *IpamService) clear() error {
+	__GetIpamService = nil
 	return is.EtcdClient.Del("/"+prefix, oriEtcd.WithPrefix())
 }
 
-func Init(subnet string, maskSegment ...string) func() error {
+func Init(subnet string, options *IPAMOptions) func() error {
 	if __GetIpamService == nil {
-		__GetIpamService = _GetIpamService(subnet, maskSegment...)
+		__GetIpamService = _GetIpamService(subnet, options)
 	}
 	is, err := GetIpamService()
 	if err != nil {

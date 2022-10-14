@@ -8,6 +8,7 @@ import (
 	"testcni/cni"
 	"testcni/consts"
 	_etcd "testcni/etcd"
+	"testcni/ipam"
 	_ipam "testcni/ipam"
 	"testcni/nettools"
 	bpf_map "testcni/plugins/vxlan/map"
@@ -58,7 +59,10 @@ func startWatchNodeChange(ipam *_ipam.IpamService, etcd *_etcd.EtcdClient) error
 }
 
 func initEveryClient(args *skel.CmdArgs, pluginConfig *cni.PluginConf) (*_ipam.IpamService, *_etcd.EtcdClient, *bpf_map.MapsManager, error) {
-	_ipam.Init(pluginConfig.Subnet, "16", "32")
+	_ipam.Init(pluginConfig.Subnet, &ipam.IPAMOptions{
+		MaskSegment:      "16",
+		PodIpMaskSegment: "32",
+	})
 	ipam, err := _ipam.GetIpamService()
 	if err != nil {
 		return nil, nil, nil, errors.New(fmt.Sprintf("初始化 ipam 客户端失败: %s", err.Error()))
@@ -123,7 +127,7 @@ func setIpIntoHostPair(ipam *_ipam.IpamService, veth *netlink.Veth) (string, err
 		return "", err
 	}
 	gw = fmt.Sprintf("%s/%s", gw, "32")
-	return gw, nettools.SetIpForVeth(veth, gw)
+	return gw, nettools.SetIpForVxlan(veth.Name, gw)
 }
 
 func getNetns(_ns string) (*ns.NetNS, error) {
@@ -153,7 +157,7 @@ func setIpIntoNsPair(ipam *_ipam.IpamService, veth *netlink.Veth) (string, error
 		return "", err
 	}
 	podIP = fmt.Sprintf("%s/%s", podIP, "32")
-	err = nettools.SetIpForVeth(veth, podIP)
+	err = nettools.SetIpForVxlan(veth.Name, podIP)
 	if err != nil {
 		utils.WriteLog("给 ns veth 设置 ip 失败, err: ", err.Error())
 		return "", err

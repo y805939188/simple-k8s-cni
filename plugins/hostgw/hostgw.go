@@ -24,7 +24,7 @@ func (hostGW *HostGatewayCNI) Bootstrap(
 	pluginConfig *cni.PluginConf,
 ) (*types.Result, error) {
 	// 使用 kubelet(containerd) 传过来的 subnet 地址初始化 ipam
-	ipam.Init(pluginConfig.Subnet)
+	ipam.Init(pluginConfig.Subnet, nil)
 	ipamClient, err := ipam.GetIpamService()
 	if err != nil {
 		utils.WriteLog("创建 ipam 客户端出错, err: ", err.Error())

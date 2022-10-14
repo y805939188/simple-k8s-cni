@@ -14,7 +14,10 @@ import (
 
 func TestWatcher(t *testing.T) {
 	test := assert.New(t)
-	clear := ipam.Init("10.244.0.0", "16", "32")
+	clear := ipam.Init("10.244.0.0", &ipam.IPAMOptions{
+		MaskSegment:      "16",
+		PodIpMaskSegment: "32",
+	})
 	// ipam.Init("10.244.0.0", "16", "32")
 	etcd.Init()
 	i, err := ipam.GetIpamService()

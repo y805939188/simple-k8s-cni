@@ -25,7 +25,7 @@ const DEFAULT_POST_GW = "169.254.1.1/32"
 type IpipCNI struct{}
 
 func initEveryClient(args *skel.CmdArgs, pluginConfig *cni.PluginConf) (*ipam.IpamService, error) {
-	ipam.Init(pluginConfig.Subnet)
+	ipam.Init(pluginConfig.Subnet, nil)
 	ipam, err := ipam.GetIpamService()
 	if err != nil {
 		return nil, errors.New(fmt.Sprintf("初始化 ipam 客户端失败: %s", err.Error()))
@@ -137,7 +137,7 @@ func setPodNetwork(netns ns.NetNS, ifname string, podIP string) (*netlink.Veth, 
 		}
 
 		// 然后把要被放到 pod 中的那头 veth 塞上 podIP
-		err = nettools.SetIpForVeth(containerVeth, podIP)
+		err = nettools.SetIpForVeth(containerVeth.Name, podIP)
 		if err != nil {
 			utils.WriteLog("给 veth 设置 ip 失败, err: ", err.Error())
 			return err
@@ -203,7 +203,7 @@ func setIpForIpip(ipamClient *ipam.IpamService, ipip *netlink.Iptun) (string, er
 		return "", err
 	}
 	// 然后给这个设备添加 ip 地址
-	return cidr, nettools.SetIpForDevice(ipip, cidr)
+	return cidr, nettools.SetIpForIPIPDeivce(ipip.Name, cidr)
 }
 
 func (ipip *IpipCNI) Bootstrap(

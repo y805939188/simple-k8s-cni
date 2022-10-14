@@ -11,7 +11,7 @@ import (
 
 func TestBird(t *testing.T) {
 	test := assert.New(t)
-	ipam.Init("10.244.0.0/16")
+	ipam.Init("10.244.0.0/16", nil)
 	is, err := ipam.GetIpamService()
 	if err != nil {
 		fmt.Println("ipam 初始化失败: ", err.Error())

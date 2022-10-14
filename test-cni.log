@@ -1,0 +1,487 @@
+即将注册 vxlan 模式 cni 
+注册 vxlan 模式 cni 成功 
+进入到了 pluginMain 并且没有 err, cmd 是:  DEL 
+进入到 cmdDel 
+这里的 CmdArgs 是:  ContainerID:  509ab9989d13e1c74610eeb0fe97dd6d70fd2cb447be20b0848f0a343cde7b69 Netns:   IfName:  eth0 Args:  IgnoreUnknown=1;K8S_POD_NAMESPACE=default;K8S_POD_NAME=busybox-765df4b8d8-c8zbc;K8S_POD_INFRA_CONTAINER_ID=509ab9989d13e1c74610eeb0fe97dd6d70fd2cb447be20b0848f0a343cde7b69;K8S_POD_UID=ed0fb93f-a3b3-4ab7-97c3-201913195d7d Path:  /opt/cni/bin StdinData:  {"cniVersion":"0.3.0","mode":"ipip","name":"testcni","subnet":"10.244.0.0/16","type":"testcni"} 
+这里的结果是: pluginConfig.Bridge  
+这里的结果是: pluginConfig.CNIVersion 0.3.0 
+这里的结果是: pluginConfig.Name testcni 
+这里的结果是: pluginConfig.Subnet 10.244.0.0/16 
+这里的结果是: pluginConfig.Type testcni 
+这里的结果是: pluginConfig.Mode ipip 
+即将注册 vxlan 模式 cni 
+注册 vxlan 模式 cni 成功 
+进入到了 pluginMain 并且没有 err, cmd 是:  DEL 
+进入到 cmdDel 
+这里的 CmdArgs 是:  ContainerID:  509ab9989d13e1c74610eeb0fe97dd6d70fd2cb447be20b0848f0a343cde7b69 Netns:   IfName:  eth0 Args:  K8S_POD_UID=ed0fb93f-a3b3-4ab7-97c3-201913195d7d;IgnoreUnknown=1;K8S_POD_NAMESPACE=default;K8S_POD_NAME=busybox-765df4b8d8-c8zbc;K8S_POD_INFRA_CONTAINER_ID=509ab9989d13e1c74610eeb0fe97dd6d70fd2cb447be20b0848f0a343cde7b69 Path:  /opt/cni/bin StdinData:  {"cniVersion":"0.3.0","mode":"ipip","name":"testcni","subnet":"10.244.0.0/16","type":"testcni"} 
+这里的结果是: pluginConfig.Bridge  
+这里的结果是: pluginConfig.CNIVersion 0.3.0 
+这里的结果是: pluginConfig.Name testcni 
+这里的结果是: pluginConfig.Subnet 10.244.0.0/16 
+这里的结果是: pluginConfig.Type testcni 
+这里的结果是: pluginConfig.Mode ipip 
+即将注册 vxlan 模式 cni 
+注册 vxlan 模式 cni 成功 
+进入到了 pluginMain 并且没有 err, cmd 是:  DEL 
+进入到 cmdDel 
+这里的 CmdArgs 是:  ContainerID:  509ab9989d13e1c74610eeb0fe97dd6d70fd2cb447be20b0848f0a343cde7b69 Netns:   IfName:  eth0 Args:  K8S_POD_UID=ed0fb93f-a3b3-4ab7-97c3-201913195d7d;IgnoreUnknown=1;K8S_POD_NAMESPACE=default;K8S_POD_NAME=busybox-765df4b8d8-c8zbc;K8S_POD_INFRA_CONTAINER_ID=509ab9989d13e1c74610eeb0fe97dd6d70fd2cb447be20b0848f0a343cde7b69 Path:  /opt/cni/bin StdinData:  {"cniVersion":"0.3.0","mode":"ipip","name":"testcni","subnet":"10.244.0.0/16","type":"testcni"} 
+这里的结果是: pluginConfig.Bridge  
+这里的结果是: pluginConfig.CNIVersion 0.3.0 
+这里的结果是: pluginConfig.Name testcni 
+这里的结果是: pluginConfig.Subnet 10.244.0.0/16 
+这里的结果是: pluginConfig.Type testcni 
+这里的结果是: pluginConfig.Mode ipip 
+即将注册 vxlan 模式 cni 
+注册 vxlan 模式 cni 成功 
+进入到了 pluginMain 并且没有 err, cmd 是:  DEL 
+进入到 cmdDel 
+这里的 CmdArgs 是:  ContainerID:  509ab9989d13e1c74610eeb0fe97dd6d70fd2cb447be20b0848f0a343cde7b69 Netns:   IfName:  eth0 Args:  K8S_POD_NAMESPACE=default;K8S_POD_NAME=busybox-765df4b8d8-c8zbc;K8S_POD_INFRA_CONTAINER_ID=509ab9989d13e1c74610eeb0fe97dd6d70fd2cb447be20b0848f0a343cde7b69;K8S_POD_UID=ed0fb93f-a3b3-4ab7-97c3-201913195d7d;IgnoreUnknown=1 Path:  /opt/cni/bin StdinData:  {"cniVersion":"0.3.0","mode":"ipip","name":"testcni","subnet":"10.244.0.0/16","type":"testcni"} 
+这里的结果是: pluginConfig.Bridge  
+这里的结果是: pluginConfig.CNIVersion 0.3.0 
+这里的结果是: pluginConfig.Name testcni 
+这里的结果是: pluginConfig.Subnet 10.244.0.0/16 
+这里的结果是: pluginConfig.Type testcni 
+这里的结果是: pluginConfig.Mode ipip 
+即将注册 vxlan 模式 cni 
+注册 vxlan 模式 cni 成功 
+进入到了 pluginMain 并且没有 err, cmd 是:  DEL 
+进入到 cmdDel 
+这里的 CmdArgs 是:  ContainerID:  509ab9989d13e1c74610eeb0fe97dd6d70fd2cb447be20b0848f0a343cde7b69 Netns:   IfName:  eth0 Args:  K8S_POD_INFRA_CONTAINER_ID=509ab9989d13e1c74610eeb0fe97dd6d70fd2cb447be20b0848f0a343cde7b69;K8S_POD_UID=ed0fb93f-a3b3-4ab7-97c3-201913195d7d;IgnoreUnknown=1;K8S_POD_NAMESPACE=default;K8S_POD_NAME=busybox-765df4b8d8-c8zbc Path:  /opt/cni/bin StdinData:  {"cniVersion":"0.3.0","mode":"ipip","name":"testcni","subnet":"10.244.0.0/16","type":"testcni"} 
+这里的结果是: pluginConfig.Bridge  
+这里的结果是: pluginConfig.CNIVersion 0.3.0 
+这里的结果是: pluginConfig.Name testcni 
+这里的结果是: pluginConfig.Subnet 10.244.0.0/16 
+这里的结果是: pluginConfig.Type testcni 
+这里的结果是: pluginConfig.Mode ipip 
+即将注册 vxlan 模式 cni 
+注册 vxlan 模式 cni 成功 
+进入到了 pluginMain 并且没有 err, cmd 是:  DEL 
+进入到 cmdDel 
+这里的 CmdArgs 是:  ContainerID:  509ab9989d13e1c74610eeb0fe97dd6d70fd2cb447be20b0848f0a343cde7b69 Netns:   IfName:  eth0 Args:  IgnoreUnknown=1;K8S_POD_NAMESPACE=default;K8S_POD_NAME=busybox-765df4b8d8-c8zbc;K8S_POD_INFRA_CONTAINER_ID=509ab9989d13e1c74610eeb0fe97dd6d70fd2cb447be20b0848f0a343cde7b69;K8S_POD_UID=ed0fb93f-a3b3-4ab7-97c3-201913195d7d Path:  /opt/cni/bin StdinData:  {"cniVersion":"0.3.0","mode":"ipip","name":"testcni","subnet":"10.244.0.0/16","type":"testcni"} 
+这里的结果是: pluginConfig.Bridge  
+这里的结果是: pluginConfig.CNIVersion 0.3.0 
+这里的结果是: pluginConfig.Name testcni 
+这里的结果是: pluginConfig.Subnet 10.244.0.0/16 
+这里的结果是: pluginConfig.Type testcni 
+这里的结果是: pluginConfig.Mode ipip 
+即将注册 vxlan 模式 cni 
+注册 vxlan 模式 cni 成功 
+进入到了 pluginMain 并且没有 err, cmd 是:  DEL 
+进入到 cmdDel 
+这里的 CmdArgs 是:  ContainerID:  509ab9989d13e1c74610eeb0fe97dd6d70fd2cb447be20b0848f0a343cde7b69 Netns:   IfName:  eth0 Args:  IgnoreUnknown=1;K8S_POD_NAMESPACE=default;K8S_POD_NAME=busybox-765df4b8d8-c8zbc;K8S_POD_INFRA_CONTAINER_ID=509ab9989d13e1c74610eeb0fe97dd6d70fd2cb447be20b0848f0a343cde7b69;K8S_POD_UID=ed0fb93f-a3b3-4ab7-97c3-201913195d7d Path:  /opt/cni/bin StdinData:  {"cniVersion":"0.3.0","mode":"ipip","name":"testcni","subnet":"10.244.0.0/16","type":"testcni"} 
+这里的结果是: pluginConfig.Bridge  
+这里的结果是: pluginConfig.CNIVersion 0.3.0 
+这里的结果是: pluginConfig.Name testcni 
+这里的结果是: pluginConfig.Subnet 10.244.0.0/16 
+这里的结果是: pluginConfig.Type testcni 
+这里的结果是: pluginConfig.Mode ipip 
+即将注册 vxlan 模式 cni 
+注册 vxlan 模式 cni 成功 
+进入到了 pluginMain 并且没有 err, cmd 是:  DEL 
+进入到 cmdDel 
+这里的 CmdArgs 是:  ContainerID:  509ab9989d13e1c74610eeb0fe97dd6d70fd2cb447be20b0848f0a343cde7b69 Netns:   IfName:  eth0 Args:  K8S_POD_UID=ed0fb93f-a3b3-4ab7-97c3-201913195d7d;IgnoreUnknown=1;K8S_POD_NAMESPACE=default;K8S_POD_NAME=busybox-765df4b8d8-c8zbc;K8S_POD_INFRA_CONTAINER_ID=509ab9989d13e1c74610eeb0fe97dd6d70fd2cb447be20b0848f0a343cde7b69 Path:  /opt/cni/bin StdinData:  {"cniVersion":"0.3.0","mode":"ipip","name":"testcni","subnet":"10.244.0.0/16","type":"testcni"} 
+这里的结果是: pluginConfig.Bridge  
+这里的结果是: pluginConfig.CNIVersion 0.3.0 
+这里的结果是: pluginConfig.Name testcni 
+这里的结果是: pluginConfig.Subnet 10.244.0.0/16 
+这里的结果是: pluginConfig.Type testcni 
+这里的结果是: pluginConfig.Mode ipip 
+即将注册 vxlan 模式 cni 
+注册 vxlan 模式 cni 成功 
+进入到了 pluginMain 并且没有 err, cmd 是:  DEL 
+进入到 cmdDel 
+这里的 CmdArgs 是:  ContainerID:  509ab9989d13e1c74610eeb0fe97dd6d70fd2cb447be20b0848f0a343cde7b69 Netns:   IfName:  eth0 Args:  K8S_POD_UID=ed0fb93f-a3b3-4ab7-97c3-201913195d7d;IgnoreUnknown=1;K8S_POD_NAMESPACE=default;K8S_POD_NAME=busybox-765df4b8d8-c8zbc;K8S_POD_INFRA_CONTAINER_ID=509ab9989d13e1c74610eeb0fe97dd6d70fd2cb447be20b0848f0a343cde7b69 Path:  /opt/cni/bin StdinData:  {"cniVersion":"0.3.0","mode":"ipip","name":"testcni","subnet":"10.244.0.0/16","type":"testcni"} 
+这里的结果是: pluginConfig.Bridge  
+这里的结果是: pluginConfig.CNIVersion 0.3.0 
+这里的结果是: pluginConfig.Name testcni 
+这里的结果是: pluginConfig.Subnet 10.244.0.0/16 
+这里的结果是: pluginConfig.Type testcni 
+这里的结果是: pluginConfig.Mode ipip 
+即将注册 vxlan 模式 cni 
+注册 vxlan 模式 cni 成功 
+进入到了 pluginMain 并且没有 err, cmd 是:  DEL 
+进入到 cmdDel 
+这里的 CmdArgs 是:  ContainerID:  509ab9989d13e1c74610eeb0fe97dd6d70fd2cb447be20b0848f0a343cde7b69 Netns:   IfName:  eth0 Args:  K8S_POD_UID=ed0fb93f-a3b3-4ab7-97c3-201913195d7d;IgnoreUnknown=1;K8S_POD_NAMESPACE=default;K8S_POD_NAME=busybox-765df4b8d8-c8zbc;K8S_POD_INFRA_CONTAINER_ID=509ab9989d13e1c74610eeb0fe97dd6d70fd2cb447be20b0848f0a343cde7b69 Path:  /opt/cni/bin StdinData:  {"cniVersion":"0.3.0","mode":"ipip","name":"testcni","subnet":"10.244.0.0/16","type":"testcni"} 
+这里的结果是: pluginConfig.Bridge  
+这里的结果是: pluginConfig.CNIVersion 0.3.0 
+这里的结果是: pluginConfig.Name testcni 
+这里的结果是: pluginConfig.Subnet 10.244.0.0/16 
+这里的结果是: pluginConfig.Type testcni 
+这里的结果是: pluginConfig.Mode ipip 
+即将注册 vxlan 模式 cni 
+注册 vxlan 模式 cni 成功 
+进入到了 pluginMain 并且没有 err, cmd 是:  DEL 
+进入到 cmdDel 
+这里的 CmdArgs 是:  ContainerID:  509ab9989d13e1c74610eeb0fe97dd6d70fd2cb447be20b0848f0a343cde7b69 Netns:   IfName:  eth0 Args:  K8S_POD_INFRA_CONTAINER_ID=509ab9989d13e1c74610eeb0fe97dd6d70fd2cb447be20b0848f0a343cde7b69;K8S_POD_UID=ed0fb93f-a3b3-4ab7-97c3-201913195d7d;IgnoreUnknown=1;K8S_POD_NAMESPACE=default;K8S_POD_NAME=busybox-765df4b8d8-c8zbc Path:  /opt/cni/bin StdinData:  {"cniVersion":"0.3.0","mode":"ipip","name":"testcni","subnet":"10.244.0.0/16","type":"testcni"} 
+这里的结果是: pluginConfig.Bridge  
+这里的结果是: pluginConfig.CNIVersion 0.3.0 
+这里的结果是: pluginConfig.Name testcni 
+这里的结果是: pluginConfig.Subnet 10.244.0.0/16 
+这里的结果是: pluginConfig.Type testcni 
+这里的结果是: pluginConfig.Mode ipip 
+即将注册 vxlan 模式 cni 
+注册 vxlan 模式 cni 成功 
+进入到了 pluginMain 并且没有 err, cmd 是:  DEL 
+进入到 cmdDel 
+这里的 CmdArgs 是:  ContainerID:  509ab9989d13e1c74610eeb0fe97dd6d70fd2cb447be20b0848f0a343cde7b69 Netns:   IfName:  eth0 Args:  IgnoreUnknown=1;K8S_POD_NAMESPACE=default;K8S_POD_NAME=busybox-765df4b8d8-c8zbc;K8S_POD_INFRA_CONTAINER_ID=509ab9989d13e1c74610eeb0fe97dd6d70fd2cb447be20b0848f0a343cde7b69;K8S_POD_UID=ed0fb93f-a3b3-4ab7-97c3-201913195d7d Path:  /opt/cni/bin StdinData:  {"cniVersion":"0.3.0","mode":"ipip","name":"testcni","subnet":"10.244.0.0/16","type":"testcni"} 
+这里的结果是: pluginConfig.Bridge  
+这里的结果是: pluginConfig.CNIVersion 0.3.0 
+这里的结果是: pluginConfig.Name testcni 
+这里的结果是: pluginConfig.Subnet 10.244.0.0/16 
+这里的结果是: pluginConfig.Type testcni 
+这里的结果是: pluginConfig.Mode ipip 
+即将注册 vxlan 模式 cni 
+注册 vxlan 模式 cni 成功 
+进入到了 pluginMain 并且没有 err, cmd 是:  DEL 
+进入到 cmdDel 
+这里的 CmdArgs 是:  ContainerID:  509ab9989d13e1c74610eeb0fe97dd6d70fd2cb447be20b0848f0a343cde7b69 Netns:   IfName:  eth0 Args:  IgnoreUnknown=1;K8S_POD_NAMESPACE=default;K8S_POD_NAME=busybox-765df4b8d8-c8zbc;K8S_POD_INFRA_CONTAINER_ID=509ab9989d13e1c74610eeb0fe97dd6d70fd2cb447be20b0848f0a343cde7b69;K8S_POD_UID=ed0fb93f-a3b3-4ab7-97c3-201913195d7d Path:  /opt/cni/bin StdinData:  {"cniVersion":"0.3.0","mode":"ipip","name":"testcni","subnet":"10.244.0.0/16","type":"testcni"} 
+这里的结果是: pluginConfig.Bridge  
+这里的结果是: pluginConfig.CNIVersion 0.3.0 
+这里的结果是: pluginConfig.Name testcni 
+这里的结果是: pluginConfig.Subnet 10.244.0.0/16 
+这里的结果是: pluginConfig.Type testcni 
+这里的结果是: pluginConfig.Mode ipip 
+即将注册 vxlan 模式 cni 
+注册 vxlan 模式 cni 成功 
+进入到了 pluginMain 并且没有 err, cmd 是:  DEL 
+进入到 cmdDel 
+这里的 CmdArgs 是:  ContainerID:  509ab9989d13e1c74610eeb0fe97dd6d70fd2cb447be20b0848f0a343cde7b69 Netns:   IfName:  eth0 Args:  K8S_POD_NAME=busybox-765df4b8d8-c8zbc;K8S_POD_INFRA_CONTAINER_ID=509ab9989d13e1c74610eeb0fe97dd6d70fd2cb447be20b0848f0a343cde7b69;K8S_POD_UID=ed0fb93f-a3b3-4ab7-97c3-201913195d7d;IgnoreUnknown=1;K8S_POD_NAMESPACE=default Path:  /opt/cni/bin StdinData:  {"cniVersion":"0.3.0","mode":"ipip","name":"testcni","subnet":"10.244.0.0/16","type":"testcni"} 
+这里的结果是: pluginConfig.Bridge  
+这里的结果是: pluginConfig.CNIVersion 0.3.0 
+这里的结果是: pluginConfig.Name testcni 
+这里的结果是: pluginConfig.Subnet 10.244.0.0/16 
+这里的结果是: pluginConfig.Type testcni 
+这里的结果是: pluginConfig.Mode ipip 
+即将注册 vxlan 模式 cni 
+注册 vxlan 模式 cni 成功 
+进入到了 pluginMain 并且没有 err, cmd 是:  DEL 
+进入到 cmdDel 
+这里的 CmdArgs 是:  ContainerID:  509ab9989d13e1c74610eeb0fe97dd6d70fd2cb447be20b0848f0a343cde7b69 Netns:   IfName:  eth0 Args:  IgnoreUnknown=1;K8S_POD_NAMESPACE=default;K8S_POD_NAME=busybox-765df4b8d8-c8zbc;K8S_POD_INFRA_CONTAINER_ID=509ab9989d13e1c74610eeb0fe97dd6d70fd2cb447be20b0848f0a343cde7b69;K8S_POD_UID=ed0fb93f-a3b3-4ab7-97c3-201913195d7d Path:  /opt/cni/bin StdinData:  {"cniVersion":"0.3.0","mode":"ipip","name":"testcni","subnet":"10.244.0.0/16","type":"testcni"} 
+这里的结果是: pluginConfig.Bridge  
+这里的结果是: pluginConfig.CNIVersion 0.3.0 
+这里的结果是: pluginConfig.Name testcni 
+这里的结果是: pluginConfig.Subnet 10.244.0.0/16 
+这里的结果是: pluginConfig.Type testcni 
+这里的结果是: pluginConfig.Mode ipip 
+即将注册 vxlan 模式 cni 
+注册 vxlan 模式 cni 成功 
+进入到了 pluginMain 并且没有 err, cmd 是:  DEL 
+进入到 cmdDel 
+这里的 CmdArgs 是:  ContainerID:  509ab9989d13e1c74610eeb0fe97dd6d70fd2cb447be20b0848f0a343cde7b69 Netns:   IfName:  eth0 Args:  K8S_POD_UID=ed0fb93f-a3b3-4ab7-97c3-201913195d7d;IgnoreUnknown=1;K8S_POD_NAMESPACE=default;K8S_POD_NAME=busybox-765df4b8d8-c8zbc;K8S_POD_INFRA_CONTAINER_ID=509ab9989d13e1c74610eeb0fe97dd6d70fd2cb447be20b0848f0a343cde7b69 Path:  /opt/cni/bin StdinData:  {"cniVersion":"0.3.0","mode":"ipip","name":"testcni","subnet":"10.244.0.0/16","type":"testcni"} 
+这里的结果是: pluginConfig.Bridge  
+这里的结果是: pluginConfig.CNIVersion 0.3.0 
+这里的结果是: pluginConfig.Name testcni 
+这里的结果是: pluginConfig.Subnet 10.244.0.0/16 
+这里的结果是: pluginConfig.Type testcni 
+这里的结果是: pluginConfig.Mode ipip 
+即将注册 vxlan 模式 cni 
+注册 vxlan 模式 cni 成功 
+进入到了 pluginMain 并且没有 err, cmd 是:  DEL 
+进入到 cmdDel 
+这里的 CmdArgs 是:  ContainerID:  509ab9989d13e1c74610eeb0fe97dd6d70fd2cb447be20b0848f0a343cde7b69 Netns:   IfName:  eth0 Args:  K8S_POD_INFRA_CONTAINER_ID=509ab9989d13e1c74610eeb0fe97dd6d70fd2cb447be20b0848f0a343cde7b69;K8S_POD_UID=ed0fb93f-a3b3-4ab7-97c3-201913195d7d;IgnoreUnknown=1;K8S_POD_NAMESPACE=default;K8S_POD_NAME=busybox-765df4b8d8-c8zbc Path:  /opt/cni/bin StdinData:  {"cniVersion":"0.3.0","mode":"ipip","name":"testcni","subnet":"10.244.0.0/16","type":"testcni"} 
+这里的结果是: pluginConfig.Bridge  
+这里的结果是: pluginConfig.CNIVersion 0.3.0 
+这里的结果是: pluginConfig.Name testcni 
+这里的结果是: pluginConfig.Subnet 10.244.0.0/16 
+这里的结果是: pluginConfig.Type testcni 
+这里的结果是: pluginConfig.Mode ipip 
+即将注册 vxlan 模式 cni 
+注册 vxlan 模式 cni 成功 
+进入到了 pluginMain 并且没有 err, cmd 是:  DEL 
+进入到 cmdDel 
+这里的 CmdArgs 是:  ContainerID:  509ab9989d13e1c74610eeb0fe97dd6d70fd2cb447be20b0848f0a343cde7b69 Netns:   IfName:  eth0 Args:  K8S_POD_NAMESPACE=default;K8S_POD_NAME=busybox-765df4b8d8-c8zbc;K8S_POD_INFRA_CONTAINER_ID=509ab9989d13e1c74610eeb0fe97dd6d70fd2cb447be20b0848f0a343cde7b69;K8S_POD_UID=ed0fb93f-a3b3-4ab7-97c3-201913195d7d;IgnoreUnknown=1 Path:  /opt/cni/bin StdinData:  {"cniVersion":"0.3.0","mode":"ipip","name":"testcni","subnet":"10.244.0.0/16","type":"testcni"} 
+这里的结果是: pluginConfig.Bridge  
+这里的结果是: pluginConfig.CNIVersion 0.3.0 
+这里的结果是: pluginConfig.Name testcni 
+这里的结果是: pluginConfig.Subnet 10.244.0.0/16 
+这里的结果是: pluginConfig.Type testcni 
+这里的结果是: pluginConfig.Mode ipip 
+即将注册 vxlan 模式 cni 
+注册 vxlan 模式 cni 成功 
+进入到了 pluginMain 并且没有 err, cmd 是:  DEL 
+进入到 cmdDel 
+这里的 CmdArgs 是:  ContainerID:  509ab9989d13e1c74610eeb0fe97dd6d70fd2cb447be20b0848f0a343cde7b69 Netns:   IfName:  eth0 Args:  K8S_POD_UID=ed0fb93f-a3b3-4ab7-97c3-201913195d7d;IgnoreUnknown=1;K8S_POD_NAMESPACE=default;K8S_POD_NAME=busybox-765df4b8d8-c8zbc;K8S_POD_INFRA_CONTAINER_ID=509ab9989d13e1c74610eeb0fe97dd6d70fd2cb447be20b0848f0a343cde7b69 Path:  /opt/cni/bin StdinData:  {"cniVersion":"0.3.0","mode":"ipip","name":"testcni","subnet":"10.244.0.0/16","type":"testcni"} 
+这里的结果是: pluginConfig.Bridge  
+这里的结果是: pluginConfig.CNIVersion 0.3.0 
+这里的结果是: pluginConfig.Name testcni 
+这里的结果是: pluginConfig.Subnet 10.244.0.0/16 
+这里的结果是: pluginConfig.Type testcni 
+这里的结果是: pluginConfig.Mode ipip 
+即将注册 vxlan 模式 cni 
+注册 vxlan 模式 cni 成功 
+进入到了 pluginMain 并且没有 err, cmd 是:  DEL 
+进入到 cmdDel 
+这里的 CmdArgs 是:  ContainerID:  509ab9989d13e1c74610eeb0fe97dd6d70fd2cb447be20b0848f0a343cde7b69 Netns:   IfName:  eth0 Args:  IgnoreUnknown=1;K8S_POD_NAMESPACE=default;K8S_POD_NAME=busybox-765df4b8d8-c8zbc;K8S_POD_INFRA_CONTAINER_ID=509ab9989d13e1c74610eeb0fe97dd6d70fd2cb447be20b0848f0a343cde7b69;K8S_POD_UID=ed0fb93f-a3b3-4ab7-97c3-201913195d7d Path:  /opt/cni/bin StdinData:  {"cniVersion":"0.3.0","mode":"ipip","name":"testcni","subnet":"10.244.0.0/16","type":"testcni"} 
+这里的结果是: pluginConfig.Bridge  
+这里的结果是: pluginConfig.CNIVersion 0.3.0 
+这里的结果是: pluginConfig.Name testcni 
+这里的结果是: pluginConfig.Subnet 10.244.0.0/16 
+这里的结果是: pluginConfig.Type testcni 
+这里的结果是: pluginConfig.Mode ipip 
+即将注册 vxlan 模式 cni 
+注册 vxlan 模式 cni 成功 
+进入到了 pluginMain 并且没有 err, cmd 是:  DEL 
+进入到 cmdDel 
+这里的 CmdArgs 是:  ContainerID:  509ab9989d13e1c74610eeb0fe97dd6d70fd2cb447be20b0848f0a343cde7b69 Netns:   IfName:  eth0 Args:  K8S_POD_UID=ed0fb93f-a3b3-4ab7-97c3-201913195d7d;IgnoreUnknown=1;K8S_POD_NAMESPACE=default;K8S_POD_NAME=busybox-765df4b8d8-c8zbc;K8S_POD_INFRA_CONTAINER_ID=509ab9989d13e1c74610eeb0fe97dd6d70fd2cb447be20b0848f0a343cde7b69 Path:  /opt/cni/bin StdinData:  {"cniVersion":"0.3.0","mode":"ipip","name":"testcni","subnet":"10.244.0.0/16","type":"testcni"} 
+这里的结果是: pluginConfig.Bridge  
+这里的结果是: pluginConfig.CNIVersion 0.3.0 
+这里的结果是: pluginConfig.Name testcni 
+这里的结果是: pluginConfig.Subnet 10.244.0.0/16 
+这里的结果是: pluginConfig.Type testcni 
+这里的结果是: pluginConfig.Mode ipip 
+即将注册 vxlan 模式 cni 
+注册 vxlan 模式 cni 成功 
+进入到了 pluginMain 并且没有 err, cmd 是:  DEL 
+进入到 cmdDel 
+这里的 CmdArgs 是:  ContainerID:  509ab9989d13e1c74610eeb0fe97dd6d70fd2cb447be20b0848f0a343cde7b69 Netns:   IfName:  eth0 Args:  K8S_POD_UID=ed0fb93f-a3b3-4ab7-97c3-201913195d7d;IgnoreUnknown=1;K8S_POD_NAMESPACE=default;K8S_POD_NAME=busybox-765df4b8d8-c8zbc;K8S_POD_INFRA_CONTAINER_ID=509ab9989d13e1c74610eeb0fe97dd6d70fd2cb447be20b0848f0a343cde7b69 Path:  /opt/cni/bin StdinData:  {"cniVersion":"0.3.0","mode":"ipip","name":"testcni","subnet":"10.244.0.0/16","type":"testcni"} 
+这里的结果是: pluginConfig.Bridge  
+这里的结果是: pluginConfig.CNIVersion 0.3.0 
+这里的结果是: pluginConfig.Name testcni 
+这里的结果是: pluginConfig.Subnet 10.244.0.0/16 
+这里的结果是: pluginConfig.Type testcni 
+这里的结果是: pluginConfig.Mode ipip 
+即将注册 vxlan 模式 cni 
+注册 vxlan 模式 cni 成功 
+进入到了 pluginMain 并且没有 err, cmd 是:  DEL 
+进入到 cmdDel 
+这里的 CmdArgs 是:  ContainerID:  509ab9989d13e1c74610eeb0fe97dd6d70fd2cb447be20b0848f0a343cde7b69 Netns:   IfName:  eth0 Args:  K8S_POD_NAMESPACE=default;K8S_POD_NAME=busybox-765df4b8d8-c8zbc;K8S_POD_INFRA_CONTAINER_ID=509ab9989d13e1c74610eeb0fe97dd6d70fd2cb447be20b0848f0a343cde7b69;K8S_POD_UID=ed0fb93f-a3b3-4ab7-97c3-201913195d7d;IgnoreUnknown=1 Path:  /opt/cni/bin StdinData:  {"cniVersion":"0.3.0","mode":"ipip","name":"testcni","subnet":"10.244.0.0/16","type":"testcni"} 
+这里的结果是: pluginConfig.Bridge  
+这里的结果是: pluginConfig.CNIVersion 0.3.0 
+这里的结果是: pluginConfig.Name testcni 
+这里的结果是: pluginConfig.Subnet 10.244.0.0/16 
+这里的结果是: pluginConfig.Type testcni 
+这里的结果是: pluginConfig.Mode ipip 
+即将注册 vxlan 模式 cni 
+注册 vxlan 模式 cni 成功 
+进入到了 pluginMain 并且没有 err, cmd 是:  DEL 
+进入到 cmdDel 
+这里的 CmdArgs 是:  ContainerID:  509ab9989d13e1c74610eeb0fe97dd6d70fd2cb447be20b0848f0a343cde7b69 Netns:   IfName:  eth0 Args:  IgnoreUnknown=1;K8S_POD_NAMESPACE=default;K8S_POD_NAME=busybox-765df4b8d8-c8zbc;K8S_POD_INFRA_CONTAINER_ID=509ab9989d13e1c74610eeb0fe97dd6d70fd2cb447be20b0848f0a343cde7b69;K8S_POD_UID=ed0fb93f-a3b3-4ab7-97c3-201913195d7d Path:  /opt/cni/bin StdinData:  {"cniVersion":"0.3.0","mode":"ipip","name":"testcni","subnet":"10.244.0.0/16","type":"testcni"} 
+这里的结果是: pluginConfig.Bridge  
+这里的结果是: pluginConfig.CNIVersion 0.3.0 
+这里的结果是: pluginConfig.Name testcni 
+这里的结果是: pluginConfig.Subnet 10.244.0.0/16 
+这里的结果是: pluginConfig.Type testcni 
+这里的结果是: pluginConfig.Mode ipip 
+即将注册 vxlan 模式 cni 
+注册 vxlan 模式 cni 成功 
+进入到了 pluginMain 并且没有 err, cmd 是:  DEL 
+进入到 cmdDel 
+这里的 CmdArgs 是:  ContainerID:  509ab9989d13e1c74610eeb0fe97dd6d70fd2cb447be20b0848f0a343cde7b69 Netns:   IfName:  eth0 Args:  K8S_POD_INFRA_CONTAINER_ID=509ab9989d13e1c74610eeb0fe97dd6d70fd2cb447be20b0848f0a343cde7b69;K8S_POD_UID=ed0fb93f-a3b3-4ab7-97c3-201913195d7d;IgnoreUnknown=1;K8S_POD_NAMESPACE=default;K8S_POD_NAME=busybox-765df4b8d8-c8zbc Path:  /opt/cni/bin StdinData:  {"cniVersion":"0.3.0","mode":"ipip","name":"testcni","subnet":"10.244.0.0/16","type":"testcni"} 
+这里的结果是: pluginConfig.Bridge  
+这里的结果是: pluginConfig.CNIVersion 0.3.0 
+这里的结果是: pluginConfig.Name testcni 
+这里的结果是: pluginConfig.Subnet 10.244.0.0/16 
+这里的结果是: pluginConfig.Type testcni 
+这里的结果是: pluginConfig.Mode ipip 
+即将注册 vxlan 模式 cni 
+注册 vxlan 模式 cni 成功 
+进入到了 pluginMain 并且没有 err, cmd 是:  DEL 
+进入到 cmdDel 
+这里的 CmdArgs 是:  ContainerID:  509ab9989d13e1c74610eeb0fe97dd6d70fd2cb447be20b0848f0a343cde7b69 Netns:   IfName:  eth0 Args:  K8S_POD_UID=ed0fb93f-a3b3-4ab7-97c3-201913195d7d;IgnoreUnknown=1;K8S_POD_NAMESPACE=default;K8S_POD_NAME=busybox-765df4b8d8-c8zbc;K8S_POD_INFRA_CONTAINER_ID=509ab9989d13e1c74610eeb0fe97dd6d70fd2cb447be20b0848f0a343cde7b69 Path:  /opt/cni/bin StdinData:  {"cniVersion":"0.3.0","mode":"ipip","name":"testcni","subnet":"10.244.0.0/16","type":"testcni"} 
+这里的结果是: pluginConfig.Bridge  
+这里的结果是: pluginConfig.CNIVersion 0.3.0 
+这里的结果是: pluginConfig.Name testcni 
+这里的结果是: pluginConfig.Subnet 10.244.0.0/16 
+这里的结果是: pluginConfig.Type testcni 
+这里的结果是: pluginConfig.Mode ipip 
+即将注册 vxlan 模式 cni 
+注册 vxlan 模式 cni 成功 
+进入到了 pluginMain 并且没有 err, cmd 是:  DEL 
+进入到 cmdDel 
+这里的 CmdArgs 是:  ContainerID:  509ab9989d13e1c74610eeb0fe97dd6d70fd2cb447be20b0848f0a343cde7b69 Netns:   IfName:  eth0 Args:  K8S_POD_NAMESPACE=default;K8S_POD_NAME=busybox-765df4b8d8-c8zbc;K8S_POD_INFRA_CONTAINER_ID=509ab9989d13e1c74610eeb0fe97dd6d70fd2cb447be20b0848f0a343cde7b69;K8S_POD_UID=ed0fb93f-a3b3-4ab7-97c3-201913195d7d;IgnoreUnknown=1 Path:  /opt/cni/bin StdinData:  {"cniVersion":"0.3.0","mode":"ipip","name":"testcni","subnet":"10.244.0.0/16","type":"testcni"} 
+这里的结果是: pluginConfig.Bridge  
+这里的结果是: pluginConfig.CNIVersion 0.3.0 
+这里的结果是: pluginConfig.Name testcni 
+这里的结果是: pluginConfig.Subnet 10.244.0.0/16 
+这里的结果是: pluginConfig.Type testcni 
+这里的结果是: pluginConfig.Mode ipip 
+即将注册 vxlan 模式 cni 
+注册 vxlan 模式 cni 成功 
+进入到了 pluginMain 并且没有 err, cmd 是:  DEL 
+进入到 cmdDel 
+这里的 CmdArgs 是:  ContainerID:  509ab9989d13e1c74610eeb0fe97dd6d70fd2cb447be20b0848f0a343cde7b69 Netns:   IfName:  eth0 Args:  K8S_POD_NAMESPACE=default;K8S_POD_NAME=busybox-765df4b8d8-c8zbc;K8S_POD_INFRA_CONTAINER_ID=509ab9989d13e1c74610eeb0fe97dd6d70fd2cb447be20b0848f0a343cde7b69;K8S_POD_UID=ed0fb93f-a3b3-4ab7-97c3-201913195d7d;IgnoreUnknown=1 Path:  /opt/cni/bin StdinData:  {"cniVersion":"0.3.0","mode":"ipip","name":"testcni","subnet":"10.244.0.0/16","type":"testcni"} 
+这里的结果是: pluginConfig.Bridge  
+这里的结果是: pluginConfig.CNIVersion 0.3.0 
+这里的结果是: pluginConfig.Name testcni 
+这里的结果是: pluginConfig.Subnet 10.244.0.0/16 
+这里的结果是: pluginConfig.Type testcni 
+这里的结果是: pluginConfig.Mode ipip 
+即将注册 vxlan 模式 cni 
+注册 vxlan 模式 cni 成功 
+进入到了 pluginMain 并且没有 err, cmd 是:  DEL 
+进入到 cmdDel 
+这里的 CmdArgs 是:  ContainerID:  509ab9989d13e1c74610eeb0fe97dd6d70fd2cb447be20b0848f0a343cde7b69 Netns:   IfName:  eth0 Args:  K8S_POD_NAME=busybox-765df4b8d8-c8zbc;K8S_POD_INFRA_CONTAINER_ID=509ab9989d13e1c74610eeb0fe97dd6d70fd2cb447be20b0848f0a343cde7b69;K8S_POD_UID=ed0fb93f-a3b3-4ab7-97c3-201913195d7d;IgnoreUnknown=1;K8S_POD_NAMESPACE=default Path:  /opt/cni/bin StdinData:  {"cniVersion":"0.3.0","mode":"ipip","name":"testcni","subnet":"10.244.0.0/16","type":"testcni"} 
+这里的结果是: pluginConfig.Bridge  
+这里的结果是: pluginConfig.CNIVersion 0.3.0 
+这里的结果是: pluginConfig.Name testcni 
+这里的结果是: pluginConfig.Subnet 10.244.0.0/16 
+这里的结果是: pluginConfig.Type testcni 
+这里的结果是: pluginConfig.Mode ipip 
+即将注册 vxlan 模式 cni 
+注册 vxlan 模式 cni 成功 
+进入到了 pluginMain 并且没有 err, cmd 是:  DEL 
+进入到 cmdDel 
+这里的 CmdArgs 是:  ContainerID:  509ab9989d13e1c74610eeb0fe97dd6d70fd2cb447be20b0848f0a343cde7b69 Netns:   IfName:  eth0 Args:  IgnoreUnknown=1;K8S_POD_NAMESPACE=default;K8S_POD_NAME=busybox-765df4b8d8-c8zbc;K8S_POD_INFRA_CONTAINER_ID=509ab9989d13e1c74610eeb0fe97dd6d70fd2cb447be20b0848f0a343cde7b69;K8S_POD_UID=ed0fb93f-a3b3-4ab7-97c3-201913195d7d Path:  /opt/cni/bin StdinData:  {"cniVersion":"0.3.0","mode":"ipip","name":"testcni","subnet":"10.244.0.0/16","type":"testcni"} 
+这里的结果是: pluginConfig.Bridge  
+这里的结果是: pluginConfig.CNIVersion 0.3.0 
+这里的结果是: pluginConfig.Name testcni 
+这里的结果是: pluginConfig.Subnet 10.244.0.0/16 
+这里的结果是: pluginConfig.Type testcni 
+这里的结果是: pluginConfig.Mode ipip 
+即将注册 vxlan 模式 cni 
+注册 vxlan 模式 cni 成功 
+进入到了 pluginMain 并且没有 err, cmd 是:  DEL 
+进入到 cmdDel 
+这里的 CmdArgs 是:  ContainerID:  509ab9989d13e1c74610eeb0fe97dd6d70fd2cb447be20b0848f0a343cde7b69 Netns:   IfName:  eth0 Args:  K8S_POD_NAME=busybox-765df4b8d8-c8zbc;K8S_POD_INFRA_CONTAINER_ID=509ab9989d13e1c74610eeb0fe97dd6d70fd2cb447be20b0848f0a343cde7b69;K8S_POD_UID=ed0fb93f-a3b3-4ab7-97c3-201913195d7d;IgnoreUnknown=1;K8S_POD_NAMESPACE=default Path:  /opt/cni/bin StdinData:  {"cniVersion":"0.3.0","mode":"ipip","name":"testcni","subnet":"10.244.0.0/16","type":"testcni"} 
+这里的结果是: pluginConfig.Bridge  
+这里的结果是: pluginConfig.CNIVersion 0.3.0 
+这里的结果是: pluginConfig.Name testcni 
+这里的结果是: pluginConfig.Subnet 10.244.0.0/16 
+这里的结果是: pluginConfig.Type testcni 
+这里的结果是: pluginConfig.Mode ipip 
+即将注册 vxlan 模式 cni 
+注册 vxlan 模式 cni 成功 
+进入到了 pluginMain 并且没有 err, cmd 是:  DEL 
+进入到 cmdDel 
+这里的 CmdArgs 是:  ContainerID:  509ab9989d13e1c74610eeb0fe97dd6d70fd2cb447be20b0848f0a343cde7b69 Netns:   IfName:  eth0 Args:  K8S_POD_NAMESPACE=default;K8S_POD_NAME=busybox-765df4b8d8-c8zbc;K8S_POD_INFRA_CONTAINER_ID=509ab9989d13e1c74610eeb0fe97dd6d70fd2cb447be20b0848f0a343cde7b69;K8S_POD_UID=ed0fb93f-a3b3-4ab7-97c3-201913195d7d;IgnoreUnknown=1 Path:  /opt/cni/bin StdinData:  {"cniVersion":"0.3.0","mode":"ipip","name":"testcni","subnet":"10.244.0.0/16","type":"testcni"} 
+这里的结果是: pluginConfig.Bridge  
+这里的结果是: pluginConfig.CNIVersion 0.3.0 
+这里的结果是: pluginConfig.Name testcni 
+这里的结果是: pluginConfig.Subnet 10.244.0.0/16 
+这里的结果是: pluginConfig.Type testcni 
+这里的结果是: pluginConfig.Mode ipip 
+即将注册 vxlan 模式 cni 
+注册 vxlan 模式 cni 成功 
+进入到了 pluginMain 并且没有 err, cmd 是:  DEL 
+进入到 cmdDel 
+这里的 CmdArgs 是:  ContainerID:  509ab9989d13e1c74610eeb0fe97dd6d70fd2cb447be20b0848f0a343cde7b69 Netns:   IfName:  eth0 Args:  K8S_POD_INFRA_CONTAINER_ID=509ab9989d13e1c74610eeb0fe97dd6d70fd2cb447be20b0848f0a343cde7b69;K8S_POD_UID=ed0fb93f-a3b3-4ab7-97c3-201913195d7d;IgnoreUnknown=1;K8S_POD_NAMESPACE=default;K8S_POD_NAME=busybox-765df4b8d8-c8zbc Path:  /opt/cni/bin StdinData:  {"cniVersion":"0.3.0","mode":"ipip","name":"testcni","subnet":"10.244.0.0/16","type":"testcni"} 
+这里的结果是: pluginConfig.Bridge  
+这里的结果是: pluginConfig.CNIVersion 0.3.0 
+这里的结果是: pluginConfig.Name testcni 
+这里的结果是: pluginConfig.Subnet 10.244.0.0/16 
+这里的结果是: pluginConfig.Type testcni 
+这里的结果是: pluginConfig.Mode ipip 
+即将注册 vxlan 模式 cni 
+注册 vxlan 模式 cni 成功 
+进入到了 pluginMain 并且没有 err, cmd 是:  DEL 
+进入到 cmdDel 
+这里的 CmdArgs 是:  ContainerID:  509ab9989d13e1c74610eeb0fe97dd6d70fd2cb447be20b0848f0a343cde7b69 Netns:   IfName:  eth0 Args:  K8S_POD_INFRA_CONTAINER_ID=509ab9989d13e1c74610eeb0fe97dd6d70fd2cb447be20b0848f0a343cde7b69;K8S_POD_UID=ed0fb93f-a3b3-4ab7-97c3-201913195d7d;IgnoreUnknown=1;K8S_POD_NAMESPACE=default;K8S_POD_NAME=busybox-765df4b8d8-c8zbc Path:  /opt/cni/bin StdinData:  {"cniVersion":"0.3.0","mode":"ipip","name":"testcni","subnet":"10.244.0.0/16","type":"testcni"} 
+这里的结果是: pluginConfig.Bridge  
+这里的结果是: pluginConfig.CNIVersion 0.3.0 
+这里的结果是: pluginConfig.Name testcni 
+这里的结果是: pluginConfig.Subnet 10.244.0.0/16 
+这里的结果是: pluginConfig.Type testcni 
+这里的结果是: pluginConfig.Mode ipip 
+即将注册 vxlan 模式 cni 
+注册 vxlan 模式 cni 成功 
+进入到了 pluginMain 并且没有 err, cmd 是:  DEL 
+进入到 cmdDel 
+这里的 CmdArgs 是:  ContainerID:  509ab9989d13e1c74610eeb0fe97dd6d70fd2cb447be20b0848f0a343cde7b69 Netns:   IfName:  eth0 Args:  K8S_POD_NAME=busybox-765df4b8d8-c8zbc;K8S_POD_INFRA_CONTAINER_ID=509ab9989d13e1c74610eeb0fe97dd6d70fd2cb447be20b0848f0a343cde7b69;K8S_POD_UID=ed0fb93f-a3b3-4ab7-97c3-201913195d7d;IgnoreUnknown=1;K8S_POD_NAMESPACE=default Path:  /opt/cni/bin StdinData:  {"cniVersion":"0.3.0","mode":"ipip","name":"testcni","subnet":"10.244.0.0/16","type":"testcni"} 
+这里的结果是: pluginConfig.Bridge  
+这里的结果是: pluginConfig.CNIVersion 0.3.0 
+这里的结果是: pluginConfig.Name testcni 
+这里的结果是: pluginConfig.Subnet 10.244.0.0/16 
+这里的结果是: pluginConfig.Type testcni 
+这里的结果是: pluginConfig.Mode ipip 
+即将注册 vxlan 模式 cni 
+注册 vxlan 模式 cni 成功 
+进入到了 pluginMain 并且没有 err, cmd 是:  DEL 
+进入到 cmdDel 
+这里的 CmdArgs 是:  ContainerID:  509ab9989d13e1c74610eeb0fe97dd6d70fd2cb447be20b0848f0a343cde7b69 Netns:   IfName:  eth0 Args:  K8S_POD_UID=ed0fb93f-a3b3-4ab7-97c3-201913195d7d;IgnoreUnknown=1;K8S_POD_NAMESPACE=default;K8S_POD_NAME=busybox-765df4b8d8-c8zbc;K8S_POD_INFRA_CONTAINER_ID=509ab9989d13e1c74610eeb0fe97dd6d70fd2cb447be20b0848f0a343cde7b69 Path:  /opt/cni/bin StdinData:  {"cniVersion":"0.3.0","mode":"ipip","name":"testcni","subnet":"10.244.0.0/16","type":"testcni"} 
+这里的结果是: pluginConfig.Bridge  
+这里的结果是: pluginConfig.CNIVersion 0.3.0 
+这里的结果是: pluginConfig.Name testcni 
+这里的结果是: pluginConfig.Subnet 10.244.0.0/16 
+这里的结果是: pluginConfig.Type testcni 
+这里的结果是: pluginConfig.Mode ipip 
+即将注册 vxlan 模式 cni 
+注册 vxlan 模式 cni 成功 
+进入到了 pluginMain 并且没有 err, cmd 是:  DEL 
+进入到 cmdDel 
+这里的 CmdArgs 是:  ContainerID:  fdd0f29f791c5357fba9bc201262821220a193542fd883cb4b7d89f7930c83ff Netns:   IfName:  eth0 Args:  IgnoreUnknown=1;K8S_POD_NAMESPACE=kube-system;K8S_POD_NAME=coredns-c676cc86f-x8xdr;K8S_POD_INFRA_CONTAINER_ID=fdd0f29f791c5357fba9bc201262821220a193542fd883cb4b7d89f7930c83ff;K8S_POD_UID=3857259c-c684-4d12-a2cc-39d76f28cdc9 Path:  /opt/cni/bin StdinData:  {"cniVersion":"0.3.0","mode":"ipip","name":"testcni","subnet":"10.244.0.0/16","type":"testcni"} 
+这里的结果是: pluginConfig.Bridge  
+这里的结果是: pluginConfig.CNIVersion 0.3.0 
+这里的结果是: pluginConfig.Name testcni 
+这里的结果是: pluginConfig.Subnet 10.244.0.0/16 
+这里的结果是: pluginConfig.Type testcni 
+这里的结果是: pluginConfig.Mode ipip 
+即将注册 vxlan 模式 cni 
+注册 vxlan 模式 cni 成功 
+进入到了 pluginMain 并且没有 err, cmd 是:  DEL 
+进入到 cmdDel 
+这里的 CmdArgs 是:  ContainerID:  1818b8807cb795d12192a8ef08bd156ad23afb3327785f40f427b8cef0d2e0bd Netns:   IfName:  eth0 Args:  IgnoreUnknown=1;K8S_POD_NAMESPACE=kube-system;K8S_POD_NAME=coredns-c676cc86f-x8xdr;K8S_POD_INFRA_CONTAINER_ID=1818b8807cb795d12192a8ef08bd156ad23afb3327785f40f427b8cef0d2e0bd;K8S_POD_UID=3857259c-c684-4d12-a2cc-39d76f28cdc9 Path:  /opt/cni/bin StdinData:  {"cniVersion":"0.3.0","mode":"ipip","name":"testcni","subnet":"10.244.0.0/16","type":"testcni"} 
+这里的结果是: pluginConfig.Bridge  
+这里的结果是: pluginConfig.CNIVersion 0.3.0 
+这里的结果是: pluginConfig.Name testcni 
+这里的结果是: pluginConfig.Subnet 10.244.0.0/16 
+这里的结果是: pluginConfig.Type testcni 
+这里的结果是: pluginConfig.Mode ipip 
+即将注册 vxlan 模式 cni 
+注册 vxlan 模式 cni 成功 
+进入到了 pluginMain 并且没有 err, cmd 是:  ADD 
+进入到 cmdAdd 
+这里的 CmdArgs 是:  ContainerID:  701776e8d48793dda2967312c8a793d426730c6b7316d681c2336b8f38604b49 Netns:  /var/run/netns/cni-89a8726b-48e6-4544-b6e0-fe368de51d5a IfName:  eth0 Args:  K8S_POD_INFRA_CONTAINER_ID=701776e8d48793dda2967312c8a793d426730c6b7316d681c2336b8f38604b49;K8S_POD_UID=3857259c-c684-4d12-a2cc-39d76f28cdc9;IgnoreUnknown=1;K8S_POD_NAMESPACE=kube-system;K8S_POD_NAME=coredns-c676cc86f-x8xdr Path:  /opt/cni/bin StdinData:  {"cniVersion":"0.3.0","mode":"ipip","name":"testcni","subnet":"10.244.0.0/16","type":"testcni"} 
+这里的结果是: pluginConfig.Bridge  
+这里的结果是: pluginConfig.CNIVersion 0.3.0 
+这里的结果是: pluginConfig.Name testcni 
+这里的结果是: pluginConfig.Subnet 10.244.0.0/16 
+这里的结果是: pluginConfig.Type testcni 
+这里的结果是: pluginConfig.Mode ipip 
+即将注册 vxlan 模式 cni 
+注册 vxlan 模式 cni 成功 
+进入到了 pluginMain 并且没有 err, cmd 是:  DEL 
+进入到 cmdDel 
+这里的 CmdArgs 是:  ContainerID:  509ab9989d13e1c74610eeb0fe97dd6d70fd2cb447be20b0848f0a343cde7b69 Netns:   IfName:  eth0 Args:  IgnoreUnknown=1;K8S_POD_NAMESPACE=default;K8S_POD_NAME=busybox-765df4b8d8-c8zbc;K8S_POD_INFRA_CONTAINER_ID=509ab9989d13e1c74610eeb0fe97dd6d70fd2cb447be20b0848f0a343cde7b69;K8S_POD_UID=ed0fb93f-a3b3-4ab7-97c3-201913195d7d Path:  /opt/cni/bin StdinData:  {"cniVersion":"0.3.0","mode":"ipip","name":"testcni","subnet":"10.244.0.0/16","type":"testcni"} 
+这里的结果是: pluginConfig.Bridge  
+这里的结果是: pluginConfig.CNIVersion 0.3.0 
+这里的结果是: pluginConfig.Name testcni 
+这里的结果是: pluginConfig.Subnet 10.244.0.0/16 
+这里的结果是: pluginConfig.Type testcni 
+这里的结果是: pluginConfig.Mode ipip 
+即将注册 vxlan 模式 cni 
+注册 vxlan 模式 cni 成功 
+进入到了 pluginMain 并且没有 err, cmd 是:  ADD 
+进入到 cmdAdd 
+这里的 CmdArgs 是:  ContainerID:  58da8b5503a4bae3aebd9791ed3d36f93c250c62ad116756f84bed05af2e4438 Netns:  /var/run/netns/cni-d35bf267-4dc0-ec8e-5197-4f2b009cee61 IfName:  eth0 Args:  K8S_POD_NAMESPACE=default;K8S_POD_NAME=busybox-765df4b8d8-c8zbc;K8S_POD_INFRA_CONTAINER_ID=58da8b5503a4bae3aebd9791ed3d36f93c250c62ad116756f84bed05af2e4438;K8S_POD_UID=ed0fb93f-a3b3-4ab7-97c3-201913195d7d;IgnoreUnknown=1 Path:  /opt/cni/bin StdinData:  {"cniVersion":"0.3.0","mode":"ipip","name":"testcni","subnet":"10.244.0.0/16","type":"testcni"} 
+这里的结果是: pluginConfig.Bridge  
+这里的结果是: pluginConfig.CNIVersion 0.3.0 
+这里的结果是: pluginConfig.Name testcni 
+这里的结果是: pluginConfig.Subnet 10.244.0.0/16 
+这里的结果是: pluginConfig.Type testcni 
+这里的结果是: pluginConfig.Mode ipip 
+给 veth 添加 podIP 失败, podIP 是:  10.244.37.0/24  err:  file exists 
+出错的位置在 cni.Bootstrap 
+设置 cni 失败:  file exists 
+即将注册 vxlan 模式 cni 
+注册 vxlan 模式 cni 成功 
+进入到了 pluginMain 并且没有 err, cmd 是:  DEL 
+进入到 cmdDel 
+这里的 CmdArgs 是:  ContainerID:  701776e8d48793dda2967312c8a793d426730c6b7316d681c2336b8f38604b49 Netns:  /var/run/netns/cni-89a8726b-48e6-4544-b6e0-fe368de51d5a IfName:  eth0 Args:  K8S_POD_INFRA_CONTAINER_ID=701776e8d48793dda2967312c8a793d426730c6b7316d681c2336b8f38604b49;K8S_POD_UID=3857259c-c684-4d12-a2cc-39d76f28cdc9;IgnoreUnknown=1;K8S_POD_NAMESPACE=kube-system;K8S_POD_NAME=coredns-c676cc86f-x8xdr Path:  /opt/cni/bin StdinData:  {"cniVersion":"0.3.0","mode":"ipip","name":"testcni","subnet":"10.244.0.0/16","type":"testcni"} 
+这里的结果是: pluginConfig.Bridge  
+这里的结果是: pluginConfig.CNIVersion 0.3.0 
+这里的结果是: pluginConfig.Name testcni 
+这里的结果是: pluginConfig.Subnet 10.244.0.0/16 
+这里的结果是: pluginConfig.Type testcni 
+这里的结果是: pluginConfig.Mode ipip 
+即将注册 vxlan 模式 cni 
+注册 vxlan 模式 cni 成功 
+进入到了 pluginMain 并且没有 err, cmd 是:  DEL 
+进入到 cmdDel 
+这里的 CmdArgs 是:  ContainerID:  1818b8807cb795d12192a8ef08bd156ad23afb3327785f40f427b8cef0d2e0bd Netns:   IfName:  eth0 Args:  K8S_POD_INFRA_CONTAINER_ID=1818b8807cb795d12192a8ef08bd156ad23afb3327785f40f427b8cef0d2e0bd;K8S_POD_UID=3857259c-c684-4d12-a2cc-39d76f28cdc9;IgnoreUnknown=1;K8S_POD_NAMESPACE=kube-system;K8S_POD_NAME=coredns-c676cc86f-x8xdr Path:  /opt/cni/bin StdinData:  {"cniVersion":"0.3.0","mode":"ipip","name":"testcni","subnet":"10.244.0.0/16","type":"testcni"} 
+这里的结果是: pluginConfig.Bridge  
+这里的结果是: pluginConfig.CNIVersion 0.3.0 
+这里的结果是: pluginConfig.Name testcni 
+这里的结果是: pluginConfig.Subnet 10.244.0.0/16 
+这里的结果是: pluginConfig.Type testcni 
+这里的结果是: pluginConfig.Mode ipip 
+即将注册 vxlan 模式 cni 
+注册 vxlan 模式 cni 成功 
+进入到了 pluginMain 并且没有 err, cmd 是:  ADD 
+进入到 cmdAdd 
+这里的 CmdArgs 是:  ContainerID:  f7dc587c8a87a28c2ed850e5cf7b09425df52cbc50b7a43d156d5e3cece94e77 Netns:  /var/run/netns/cni-81193e97-cc98-e2ba-83bd-17d2b202ea75 IfName:  eth0 Args:  K8S_POD_INFRA_CONTAINER_ID=f7dc587c8a87a28c2ed850e5cf7b09425df52cbc50b7a43d156d5e3cece94e77;K8S_POD_UID=3857259c-c684-4d12-a2cc-39d76f28cdc9;IgnoreUnknown=1;K8S_POD_NAMESPACE=kube-system;K8S_POD_NAME=coredns-c676cc86f-x8xdr Path:  /opt/cni/bin StdinData:  {"cniVersion":"0.3.0","mode":"ipip","name":"testcni","subnet":"10.244.0.0/16","type":"testcni"} 
+这里的结果是: pluginConfig.Bridge  
+这里的结果是: pluginConfig.CNIVersion 0.3.0 
+这里的结果是: pluginConfig.Name testcni 
+这里的结果是: pluginConfig.Subnet 10.244.0.0/16 
+这里的结果是: pluginConfig.Type testcni 
+这里的结果是: pluginConfig.Mode ipip 
