@@ -48,17 +48,17 @@ func SetXVlanDevice(
 	mode xvlan_mode,
 	args *skel.CmdArgs,
 	pluginConfig *cni.PluginConf,
-) error {
+) (string, string, error) {
 	// 初始化 ipam
 	ipamClient, err := initEveryClient(args, pluginConfig)
 	if err != nil {
-		return err
+		return "", "", err
 	}
 
 	// 获取本机网卡信息
 	currentNetwork, err := ipamClient.Get().HostNetwork()
 	if err != nil {
-		return err
+		return "", "", err
 	}
 
 	// 创建一个 ipvlan 设备
@@ -73,38 +73,43 @@ func SetXVlanDevice(
 	if mode == MODE_IPVLAN {
 		device, err = nettools.CreateIPVlan(ifname, currentNetwork.Name)
 		if err != nil {
-			return err
+			return "", "", err
 		}
 	} else {
 		device, err = nettools.CreateMacVlan(ifname, currentNetwork.Name)
 		if err != nil {
-			return err
+			return "", "", err
 		}
 	}
 
 	// 获取到 netns
 	netns, err := ns.GetNS(args.Netns)
 	if err != nil {
-		return err
+		return "", "", err
 	}
 
 	// 把这个 ipvlan 设备塞到 netns 中
 	err = nettools.SetDeviceToNS(device, netns)
 	if err != nil {
-		return err
+		return "", "", err
 	}
 
-	return netns.Do(func(hostNs ns.NetNS) error {
+	// 获取一个未使用的 ip 地址
+	ip, err := ipamClient.Get().UnusedIP()
+	if err != nil {
+		return "", "", err
+	}
+
+	subnet, err := ipamClient.Get().Subnet()
+	if err != nil {
+		return "", "", err
+	}
+	return ip, subnet, netns.Do(func(hostNs ns.NetNS) error {
 		_device, err := netlink.LinkByName(device.Attrs().Name)
 		if err != nil {
 			return err
 		}
 
-		// 获取一个未使用的 ip 地址
-		ip, err := ipamClient.Get().UnusedIP()
-		if err != nil {
-			return err
-		}
 		mask, err := ipamClient.Get().MaskSegment()
 		if err != nil {
 			return err

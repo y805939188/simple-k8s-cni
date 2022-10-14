@@ -1,7 +1,7 @@
 package ipvlan
 
 import (
-	"errors"
+	"net"
 	"testcni/cni"
 	"testcni/consts"
 	base "testcni/plugins/xvlan/base"
@@ -19,26 +19,24 @@ func (ipvlan *IPVlanCNI) Bootstrap(
 	args *skel.CmdArgs,
 	pluginConfig *cni.PluginConf,
 ) (*types.Result, error) {
-	err := base.SetXVlanDevice(base.MODE_IPVLAN, args, pluginConfig)
+	podIP, gw, err := base.SetXVlanDevice(base.MODE_IPVLAN, args, pluginConfig)
 	if err != nil {
 		return nil, err
 	}
-	return nil, errors.New("tmp error")
 
-	// // 获取网关地址和 podIP 准备返回给外边
-	// tunlIP := strings.Split(tunlCIDR, "/")[0]
-	// _gw := net.ParseIP(tunlIP)
-	// _, _podIP, _ := net.ParseCIDR(podIP)
-	// result := &types.Result{
-	// 	CNIVersion: pluginConfig.CNIVersion,
-	// 	IPs: []*types.IPConfig{
-	// 		{
-	// 			Address: *_podIP,
-	// 			Gateway: _gw,
-	// 		},
-	// 	},
-	// }
-	// return result, nil
+	// 获取网关地址和 podIP 准备返回给外边
+	_gw := net.ParseIP(gw)
+	_, _podIP, _ := net.ParseCIDR(podIP)
+	result := &types.Result{
+		CNIVersion: pluginConfig.CNIVersion,
+		IPs: []*types.IPConfig{
+			{
+				Address: *_podIP,
+				Gateway: _gw,
+			},
+		},
+	}
+	return result, nil
 }
 
 func (ipvlan *IPVlanCNI) Unmount(

@@ -61,8 +61,8 @@ func TestMacVlan(t *testing.T) {
 	macvlan := MacVlanCNI{}
 	_, err = macvlan.Bootstrap(args, pluginConfig)
 	test.Nil(err)
-	// err = TmpDeleteNS("ns1")
-	// test.Nil(err)
-	// nsexist = utils.FileIsExisted("/var/run/netns/ns3")
-	// test.False(nsexist)
+	err = TmpDeleteNS("ns1")
+	test.Nil(err)
+	nsexist = utils.FileIsExisted("/var/run/netns/ns1")
+	test.False(nsexist)
 }

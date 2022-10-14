@@ -157,6 +157,14 @@ func (g *Get) MaskSegment() (string, error) {
 	return ipam.MaskSegment, nil
 }
 
+func (g *Get) Subnet() (string, error) {
+	ipam, err := GetIpamService()
+	if err != nil {
+		return "", err
+	}
+	return ipam.Subnet, nil
+}
+
 func (g *Get) HostSubnetMapPath() (string, error) {
 	ipam, err := GetIpamService()
 	if err != nil {

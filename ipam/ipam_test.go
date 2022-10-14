@@ -20,6 +20,9 @@ func TestIpam(t *testing.T) {
 
 	is2, err := GetIpamService()
 	test.Nil(err)
+	s, err := is2.Get().Subnet()
+	test.Nil(err)
+	fmt.Println(99999, s)
 	ip1, err := is2.Get().UnusedIP()
 	test.Nil(err)
 	ip2, err := is2.Get().UnusedIP()
