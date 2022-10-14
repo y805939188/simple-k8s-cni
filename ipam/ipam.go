@@ -736,8 +736,7 @@ func (g *Get) nextUnusedIP() (string, error) {
 	for _, ip := range ips {
 		ipsMap[ip] = true
 	}
-	a := getIpRangesPath(currentNetwork)
-	fmt.Println(a)
+
 	if rangesPathExist, err := g.etcdClient.GetKey(getIpRangesPath(currentNetwork)); rangesPathExist != "" && err == nil {
 		if rangesIPs, err := g.etcdClient.Get(getIpRangesPath(currentNetwork)); err == nil {
 			rangeIpsArr := strings.Split(rangesIPs, ";")
@@ -746,6 +745,9 @@ func (g *Get) nextUnusedIP() (string, error) {
 			}
 			nextIp := ""
 			for {
+				if len(ipsMap) == len(rangeIpsArr) {
+					return "", errors.New("all of the ips are used")
+				}
 				nextIp = ""
 				for i, ip := range rangeIpsArr {
 					if utils.GetRandomNumber(i+1) == 0 {

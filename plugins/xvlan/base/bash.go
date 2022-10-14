@@ -38,7 +38,7 @@ func initEveryClient(args *skel.CmdArgs, pluginConfig *cni.PluginConf) (*ipam.Ip
 	})
 	ipam, err := ipam.GetIpamService()
 	if err != nil {
-		return nil, fmt.Errorf("初始化 ipam 客户端失败: %s", err.Error())
+		return nil, fmt.Errorf("failed to init ipam client: %s", err.Error())
 	}
 
 	return ipam, nil
@@ -104,7 +104,7 @@ func SetXVlanDevice(
 	if err != nil {
 		return "", "", err
 	}
-	return ip, subnet, netns.Do(func(hostNs ns.NetNS) error {
+	err = netns.Do(func(hostNs ns.NetNS) error {
 		_device, err := netlink.LinkByName(device.Attrs().Name)
 		if err != nil {
 			return err
@@ -123,4 +123,6 @@ func SetXVlanDevice(
 		// 启动这个 ipvlan 设备
 		return nettools.SetUpIPVlan(_device.Attrs().Name)
 	})
+
+	return ip, subnet, err
 }
