@@ -7,6 +7,7 @@
 [基于 ebpf 和 vxlan 实现一个 k8s 网络插件（一）](https://zhuanlan.zhihu.com/p/565254116)</br>
 [基于 ebpf 和 vxlan 实现一个 k8s 网络插件（二）](https://zhuanlan.zhihu.com/p/565420113))</br>
 [基于 BGP 协议实现 Calico 的 IPIP 网络](https://zhuanlan.zhihu.com/p/571966611)
+[基于 IPVlan & MACVlan 实现 CNI 网络插件](https://zhuanlan.zhihu.com/p/573914523)
 
 ## IPIP 模式测试方法
 0. 最好有个干净的，没有安装任何网络插件的 k8s 环境
@@ -76,6 +77,44 @@ make build
 3. 此时会生成一个名为 testcni 的二进制文件。同时会产生三个 ebpf 文件。这三个 ebpf 文件会被自动拷贝到 “/opt/testcni/” 目录下。如果不存在这个目录的话可以手动创建一下
 
 4. 把上一步生成的 testcni 拷贝到 “/opt/cni/bin” 目录下
+</br>
+</br>
+</br>
+
+---
+</br>
+
+## IPIP 模式测试方法
+0. 最好有个干净的，没有安装任何网络插件的 k8s 环境
+
+1.
+```js
+// 在每个节点的 /etc/cni/net.d/ 目录下新建个 .conf 结尾的文件, 输入以下配置项
+// 注意其中的 “subnet” 和 “ipam” 中的 range 需要自己手动改成自己环境的，另外 range 的范围每个节点应该配置成不同的范围
+{
+  "cniVersion": "0.3.0",
+  "name": "testcni",
+  "type": "testcni",
+  "mode": "ipvlan",
+  "subnet": "192.168.64.0/24",
+  "ipam": {
+    "rangeStart": "192.168.64.90",
+    "rangeEnd": "192.168.64.100"
+  }
+}
+```
+
+2. 
+```bash
+# 在项目根目录执行
+make build_main
+```
+
+3. 此时会生成一个 main 二进制，把该二进制拷贝到 /opt/cni/bin/testcni
+
+```bash
+mv main /opt/cni/bin/testcni
+```
 </br>
 </br>
 </br>
