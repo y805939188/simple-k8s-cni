@@ -84,7 +84,7 @@ make build
 ---
 </br>
 
-## IPIP 模式测试方法
+## IPVlan & MACVlan 模式测试方法
 0. 最好有个干净的，没有安装任何网络插件的 k8s 环境
 
 1.
