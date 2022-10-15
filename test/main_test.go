@@ -73,7 +73,7 @@ func TestMain(t *testing.T) {
 	fmt.Println("这里的结果是: pluginConfig.Type", pluginConfig.Type)
 
 	// 使用 kubelet(containerd) 传过来的 subnet 地址初始化 ipam
-	ipam.Init(pluginConfig.Subnet)
+	ipam.Init(pluginConfig.Subnet, nil)
 	ipamClient, err := ipam.GetIpamService()
 	if err != nil {
 		fmt.Println("创建 ipam 客户端出错, err: ", err.Error())

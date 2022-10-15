@@ -14,12 +14,12 @@ func GetConfigs(args *skel.CmdArgs) *cni.PluginConf {
 		utils.WriteLog("args.StdinData 转 pluginConfig 失败")
 		return nil
 	}
-	utils.WriteLog("这里的结果是: pluginConfig.Bridge", pluginConfig.Bridge)
-	utils.WriteLog("这里的结果是: pluginConfig.CNIVersion", pluginConfig.CNIVersion)
-	utils.WriteLog("这里的结果是: pluginConfig.Name", pluginConfig.Name)
-	utils.WriteLog("这里的结果是: pluginConfig.Subnet", pluginConfig.Subnet)
-	utils.WriteLog("这里的结果是: pluginConfig.Type", pluginConfig.Type)
-	utils.WriteLog("这里的结果是: pluginConfig.Mode", pluginConfig.Mode)
+	// utils.WriteLog("这里的结果是: pluginConfig.Bridge", pluginConfig.Bridge)
+	// utils.WriteLog("这里的结果是: pluginConfig.CNIVersion", pluginConfig.CNIVersion)
+	// utils.WriteLog("这里的结果是: pluginConfig.Name", pluginConfig.Name)
+	// utils.WriteLog("这里的结果是: pluginConfig.Subnet", pluginConfig.Subnet)
+	// utils.WriteLog("这里的结果是: pluginConfig.Type", pluginConfig.Type)
+	// utils.WriteLog("这里的结果是: pluginConfig.Mode", pluginConfig.Mode)
 	return pluginConfig
 }
 

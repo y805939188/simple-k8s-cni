@@ -4,6 +4,8 @@ const (
 	MODE_HOST_GW = "host-gw"
 	MODE_VXLAN   = "vxlan"
 	MODE_IPIP    = "ipip"
+	MODE_IPVLAN  = "ipvlan"
+	MODE_MACVLAN = "macvlan"
 )
 
 const (

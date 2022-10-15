@@ -9,6 +9,8 @@ import (
 	_ "testcni/plugins/hostgw"
 	_ "testcni/plugins/ipip"
 	_ "testcni/plugins/vxlan/vxlan"
+	_ "testcni/plugins/xvlan/ipvlan"
+	_ "testcni/plugins/xvlan/macvlan"
 	"testcni/skel"
 	"testcni/utils"
 

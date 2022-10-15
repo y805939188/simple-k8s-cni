@@ -38,7 +38,7 @@ func _nettools(brName, gw, ifName, podIP string, mtu int, netns ns.NetNS) {
 		}
 
 		// 然后把要被放到 pod 中的塞上 podIP
-		err = SetIpForVeth(containerVeth, podIP)
+		err = SetIpForVeth(containerVeth.Name, podIP)
 		if err != nil {
 			fmt.Println("给 veth 设置 ip 失败, err: ", err.Error())
 			return err
@@ -108,12 +108,27 @@ func _nettools(brName, gw, ifName, podIP string, mtu int, netns ns.NetNS) {
 func TestNettools(t *testing.T) {
 	test := assert.New(t)
 
-	ipam.Init("10.244.0.0")
+	clear := ipam.Init("10.244.0.0", nil)
 	is, err := ipam.GetIpamService()
 	if err != nil {
 		fmt.Println("ipam 初始化失败: ", err.Error())
 		return
 	}
+
+	currentNetwork, err := is.Get().HostNetwork()
+	test.Nil(err)
+
+	dev, err := CreateIPVlan("ipvlan", currentNetwork.Name)
+	test.Nil(err)
+	fmt.Println(dev)
+
+	err = SetIpForIPVlan("ding-ipvlan", "192.168.64.66/24")
+	test.Nil(err)
+
+	err = SetUpIPVlan("ding-ipvlan")
+	test.Nil(err)
+	err = DelIPVlan(dev.Name)
+	test.Nil(err)
 
 	vxlan, err := CreateVxlanAndUp("ding_vxlan", 1500)
 	test.Nil(err)
@@ -199,5 +214,5 @@ func TestNettools(t *testing.T) {
 		}
 		fmt.Println("这里的 ip 是: ", ip)
 	}
-
+	clear()
 }

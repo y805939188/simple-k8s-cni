@@ -5,6 +5,7 @@ import (
 	"net"
 	"os"
 	"strings"
+	"testcni/utils"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -12,9 +13,38 @@ import (
 
 func TestIpam(t *testing.T) {
 	test := assert.New(t)
+	clear := Init("192.168.64.0/24", &IPAMOptions{
+		RangeStart: "192.168.64.10",
+		RangeEnd:   "192.168.64.20",
+	})
 
-	// clear := Init("10.244.0.0", "16", "32")
-	Init("10.244.0.0", "16", "32")
+	is2, err := GetIpamService()
+	test.Nil(err)
+	s, err := is2.Get().Subnet()
+	test.Nil(err)
+	fmt.Println(99999, s)
+	ip1, err := is2.Get().UnusedIP()
+	test.Nil(err)
+	ip2, err := is2.Get().UnusedIP()
+	test.Nil(err)
+	ip3, err := is2.Get().UnusedIP()
+	test.Nil(err)
+	test.True(utils.InetIP2Int(ip1) <= int64(utils.InetIpToUInt32("192.168.64.20")))
+	test.True(utils.InetIP2Int(ip1) >= int64(utils.InetIpToUInt32("192.168.64.10")))
+	test.True(utils.InetIP2Int(ip2) <= int64(utils.InetIpToUInt32("192.168.64.20")))
+	test.True(utils.InetIP2Int(ip2) >= int64(utils.InetIpToUInt32("192.168.64.10")))
+	test.True(utils.InetIP2Int(ip3) <= int64(utils.InetIpToUInt32("192.168.64.20")))
+	test.True(utils.InetIP2Int(ip3) >= int64(utils.InetIpToUInt32("192.168.64.10")))
+	usedIPs, err := is2.Get().AllUsedIPs()
+	test.Nil(err)
+	test.Len(usedIPs, 3)
+	test.Contains(usedIPs, ip1, ip2, ip3)
+	clear()
+
+	Init("10.244.0.0", &IPAMOptions{
+		MaskSegment:      "16",
+		PodIpMaskSegment: "32",
+	})
 
 	is, err := GetIpamService()
 	test.Nil(err)
@@ -22,22 +52,12 @@ func TestIpam(t *testing.T) {
 	test.Nil(err)
 	fmt.Println("其他节点的 ip 们是: ", otherIps)
 
-	// record, err := is.Get().RecordPathByHost("cni-test-1")
-	// test.Nil(err)
-	// test.Equal(record, "/testcni/ipam/10.244.0.0/16/cni-test-1/10.244.215.0")
-	// return
-	// gw, err := is.Get().Gateway()
-	// test.Nil(err)
-	// fmt.Println(is.CurrentHostNetwork)
-	// fmt.Println(gw)
-	// return
 	gw, err := is.Get().GatewayWithMaskSegment()
 	test.Nil(err)
 	fmt.Println(gw)
 	gwNetIP, _, err := net.ParseCIDR(gw)
 	test.Nil(err)
 	fmt.Println(gwNetIP)
-	return
 
 	test.Equal(is.Subnet, "10.244.0.0")
 	test.Equal(is.MaskSegment, "16")
@@ -107,6 +127,6 @@ func TestIpam(t *testing.T) {
 	test.Nil(err)
 	test.Len(ips, 1)
 
-	// err = clear()
-	// test.Nil(err)
+	err = clear()
+	test.Nil(err)
 }

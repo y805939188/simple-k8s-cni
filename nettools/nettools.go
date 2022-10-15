@@ -7,6 +7,7 @@ import (
 	"net"
 	"os"
 	"os/exec"
+	"strconv"
 	"strings"
 	"syscall"
 	"testcni/ipam"
@@ -88,6 +89,10 @@ func CreateIPIPDeviceAndUp(name string, mtus ...int) (*netlink.Iptun, error) {
 	return ipip, nil
 }
 
+func SetIpForIPIPDeivce(name string, ip string) error {
+	return setIpForDevice(name, ip, "ipip")
+}
+
 // TODO: trick now!
 func CreateArpEntry(ip, mac, dev string) error {
 	processInfo := exec.Command(
@@ -150,6 +155,10 @@ func CreateVxlanAndUp(name string, mtu int) (*netlink.Vxlan, error) {
 	return vxlan, nil
 }
 
+func SetIpForVxlan(name string, ip string) error {
+	return setIpForDevice(name, ip, "vxlan")
+}
+
 // TODO: golang 的 netlink 包在创建 vxlan 设备时不支持传入 external 模式
 func CreateVxlanAndUp2(name string, mtu int) (*netlink.Vxlan, error) {
 	l, _ := netlink.LinkByName(name)
@@ -191,6 +200,112 @@ func CreateVxlanAndUp2(name string, mtu int) (*netlink.Vxlan, error) {
 }
 
 func DelVxlan(name string) error {
+	return delInterfaceByName(name)
+}
+
+func CreateMacVlan(ifname, parentName string) (*netlink.Macvlan, error) {
+	// macvlan 多一步, 要先把网卡给开启混杂模式
+	link, err := netlink.LinkByName(parentName)
+	if err != nil {
+		return nil, err
+	}
+
+	// TODO: 这里应该先把 parent 网卡的当前状态记录下来
+	// 然后等删除这个 macvlan 设备的时候再给恢复
+	// 这里暂时先直接开启
+	err = netlink.SetPromiscOn(link)
+	if err != nil {
+		return nil, err
+	}
+
+	for {
+		rangeNum := utils.GetRandomNumber(9999)
+		ifname = ifname + "." + strconv.Itoa(rangeNum)
+		_, err := netlink.LinkByName(ifname)
+		if err != nil {
+			break
+		}
+	}
+
+	macvlan := &netlink.Macvlan{
+		LinkAttrs: netlink.LinkAttrs{
+			ParentIndex: link.Attrs().Index,
+			Name:        ifname,
+		},
+		Mode: netlink.MACVLAN_MODE_BRIDGE,
+	}
+
+	err = netlink.LinkAdd(macvlan)
+	if err != nil {
+		return nil, err
+	}
+
+	return macvlan, nil
+}
+
+func SetIpForMacVlan(ifname, ip string) error {
+	return setIpForDevice(ifname, ip, "macvlan")
+}
+
+func SetUpMacVlan(ifname string) error {
+	macvlan, err := netlink.LinkByName(ifname)
+	if err != nil {
+		return err
+	}
+	if err = netlink.LinkSetUp(macvlan); err != nil {
+		return fmt.Errorf("failed to set macvlan %q up, err: %v", ifname, err)
+	}
+	return nil
+}
+
+func CreateIPVlan(ifname, parentName string) (*netlink.IPVlan, error) {
+	for {
+		rangeNum := utils.GetRandomNumber(9999)
+		ifname = ifname + "." + strconv.Itoa(rangeNum)
+		_, err := netlink.LinkByName(ifname)
+		if err != nil {
+			break
+		}
+	}
+
+	link, err := netlink.LinkByName(parentName)
+	if err != nil {
+		return nil, err
+	}
+
+	ipvlan := &netlink.IPVlan{
+		LinkAttrs: netlink.LinkAttrs{
+			ParentIndex: link.Attrs().Index,
+			Name:        ifname,
+		},
+		Mode: netlink.IPVLAN_MODE_L2,
+		// Flag: netlink.IPVLAN_FLAG_BRIDGE,
+	}
+
+	err = netlink.LinkAdd(ipvlan)
+	if err != nil {
+		return nil, err
+	}
+
+	return ipvlan, nil
+}
+
+func SetIpForIPVlan(ifname, ip string) error {
+	return setIpForDevice(ifname, ip, "ipvlan")
+}
+
+func SetUpIPVlan(ifname string) error {
+	ipvlan, err := netlink.LinkByName(ifname)
+	if err != nil {
+		return err
+	}
+	if err = netlink.LinkSetUp(ipvlan); err != nil {
+		return fmt.Errorf("failed to set ipvlan %q up, err: %v", ifname, err)
+	}
+	return nil
+}
+
+func DelIPVlan(name string) error {
 	return delInterfaceByName(name)
 }
 
@@ -369,17 +484,24 @@ func DelVethPair(ifName string) error {
 	return delInterfaceByName(ifName)
 }
 
-func SetIpForDevice(link netlink.Link, ip string) error {
+func setIpForDevice(name string, ip string, mode ...string) error {
+	deviceType := ""
+	if len(mode) != 0 {
+		deviceType = mode[0]
+	}
+	link, err := netlink.LinkByName(name)
+	if err != nil {
+		return fmt.Errorf("failed to get %s device by name %q, error: %v", deviceType, name, err)
+	}
+
 	ipaddr, ipnet, err := net.ParseCIDR(ip)
 	if err != nil {
-		utils.WriteLog("转换 podIP 为 net 类型失败: ", ip, " err: ", err.Error())
-		return err
+		return fmt.Errorf("failed to transform the ip %q, error : %v", ip, err)
 	}
 	ipnet.IP = ipaddr
 	err = netlink.AddrAdd(link, &netlink.Addr{IPNet: ipnet})
 	if err != nil {
-		utils.WriteLog("给 veth 添加 podIP 失败, podIP 是: ", ip, " err: ", err.Error())
-		return err
+		return fmt.Errorf("can not add the ip %q to %s device %q, error: %v", ip, deviceType, name, err)
 	}
 	return nil
 }
@@ -399,8 +521,8 @@ func DeviceExistIp(link netlink.Link) (string, error) {
 	return "", nil
 }
 
-func SetIpForVeth(veth *netlink.Veth, podIP string) error {
-	return SetIpForDevice(veth, podIP)
+func SetIpForVeth(name string, podIP string) error {
+	return setIpForDevice(name, podIP, "veth")
 }
 
 func SetVethToBridge(veth *netlink.Veth, br *netlink.Bridge) error {
@@ -413,13 +535,16 @@ func SetVethToBridge(veth *netlink.Veth, br *netlink.Bridge) error {
 	return nil
 }
 
-func SetVethNsFd(veth *netlink.Veth, ns ns.NetNS) error {
-	err := netlink.LinkSetNsFd(veth, int(ns.Fd()))
+func SetDeviceToNS(device netlink.Link, ns ns.NetNS) error {
+	err := netlink.LinkSetNsFd(device, int(ns.Fd()))
 	if err != nil {
-		utils.WriteLog(fmt.Sprintf("把 veth %q 干到 ns 上失败: %v", veth.Attrs().Name, err))
-		return fmt.Errorf("add veth %q to ns error: %v", veth.Attrs().Name, err)
+		return fmt.Errorf("failed to add the device %q to ns: %v", device.Attrs().Name, err)
 	}
 	return nil
+}
+
+func SetVethNsFd(veth *netlink.Veth, ns ns.NetNS) error {
+	return SetDeviceToNS(veth, ns)
 }
 
 func SetVethMaster(veth *netlink.Veth, br *netlink.Bridge) error {
@@ -616,7 +741,7 @@ func CreateBridgeAndCreateVethAndSetNetworkDeviceStatusAndSetVethMaster(
 		}
 
 		// 然后把要被放到 pod 中的那头 veth 塞上 podIP
-		err = SetIpForVeth(containerVeth, podIP)
+		err = SetIpForVeth(containerVeth.Name, podIP)
 		if err != nil {
 			utils.WriteLog("给 veth 设置 ip 失败, err: ", err.Error())
 			return err

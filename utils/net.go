@@ -9,6 +9,11 @@ import (
 	"strings"
 )
 
+func CheckIP(ip string) bool {
+	address := net.ParseIP(ip)
+	return address != nil
+}
+
 func InetUint32ToIp(intIP uint32) string {
 	var bytes [4]byte
 	bytes[0] = byte(intIP & 0xFF)
@@ -41,6 +46,19 @@ func InetIP2Int(ip string) int64 {
 	ret := big.NewInt(0)
 	ret.SetBytes(net.ParseIP(ip).To4())
 	return ret.Int64()
+}
+
+func GenIpRange(start, end string) []string {
+	startInt, endInt := InetIpToUInt32(start), InetIpToUInt32(end)
+	if startInt >= endInt {
+		return nil
+	}
+	res := make([]string, endInt-startInt+1)
+	for index := range res {
+		_tmp := startInt + uint32(index)
+		res[index] = InetUint32ToIp(_tmp)
+	}
+	return res
 }
 
 func GetMaxIP(ips []string) string {
